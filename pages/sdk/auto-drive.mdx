@@ -1,0 +1,286 @@
+## Auto-Drive Package Documentation
+
+### Introduction
+
+The `@autonomys/auto-drive` package provides utilities for creating and managing IPLD DAGs (InterPlanetary Linked Data Directed Acyclic Graphs) for files and folders. It facilitates chunking large files, handling metadata, and creating folder structures suitable for distributed storage systems like IPFS.
+
+### Features
+
+- **File Chunking and DAG Creation**: Efficiently split large files into smaller chunks and create IPLD DAGs.
+- **Folder Structure Creation**: Generate IPLD DAGs for directory structures.
+- **Metadata Handling**: Add and manage metadata for files and folders.
+- **CID Management**: Utilities for working with Content Identifiers (CIDs).
+- **TypeScript Support**: Fully typed for enhanced developer experience.
+
+---
+
+## Auto Drive Dashboard
+
+Logging in to Auto Drive will allow you to view your upload and download limits, access files uploaded by other users, and manage and share your submissions.
+
+1. Log in to [Auto Drive](https://ai3.storage/)
+2. Sign in via Google or Discord  
+
+   ![Auto-Drive-1](/developers/Auto-Drive-1.png)
+
+3. On the landing page (dashboard) you will see:  
+
+   - Your upload limit (currently **100MB** per month)  
+   - Your download limit (currently **5GB** per month)  
+   - A list of **uploaded files** and their **CIDs**
+   - Options to **Download**, **Share**, or **Remove** each file
+
+  ![Auto-Drive-2](/developers/Auto-Drive-2.png)
+
+> **Tip:** Removing a file does not delete it from the DSN, as it is permanent storage. It only removes the file from your dashboard.
+
+You can use the in-browser environment to upload, download, or share files, or you can use the SDK functions (described later on this page) to upload files or folders via the CLI.
+
+  ![Auto-Drive-3](/developers/Auto-Drive-3.png)
+
+
+### Getting an API Key
+
+Click on `Profile` to create your `API` key. You can then use this API key in the CLI to upload files or folders.
+
+  ![Auto-Drive-4](/developers/Auto-Drive-4.png)
+
+### Sharing Files
+
+To share a file, click the `Share` button next to the file. You can share it using a link, or by providing the user’s public ID. Each user’s public ID is visible on their `Profile` page.
+
+  ![Auto-Drive-5](/developers/Auto-Drive-5.png)
+
+---
+### Installation
+
+Install the package via npm or yarn:
+
+```bash
+# Using npm
+npm install @autonomys/auto-drive
+
+# Using yarn
+yarn add @autonomys/auto-drive
+```
+
+### Importing the Package
+
+Before using the functions provided by the `auto-drive` package, you need to import them into your project:
+
+```typescript
+// Import specific functions
+import { createFileIPLDDag, createFolderIPLDDag } from '@autonomys/auto-drive';
+
+// Or import everything
+import * as drive from '@autonomys/auto-drive';
+```
+
+---
+
+## Available Functions
+
+### Upload and Download Operations
+
+- **`uploadFile(api, file, options): Promise<string>`**: Uploads a file (using a buffer, `File`, or a custom interface) with optional encryption and compression. Returns the resulting CID as a string.
+- **`uploadFileFromFilepath(api, filepath, options): Promise<string>`**: Uploads a file from a filesystem path.
+- **`uploadFileFromInput(api, file, options): Promise<string>`**: Uploads a file obtained from a browser's `File` API.
+- **`uploadFolderFromFolderPath(api, folderPath, options): Promise<string>`**: Uploads a folder from a filesystem path.
+- **`uploadFolderFromInput(api, fileList, options): Promise<string>`**: Uploads a folder from a browser's `FileList`.
+- **`uploadFileWithinFolderUpload(api, uploadId, file, options): Promise<string>`**: Uploads a file within an existing folder upload session.
+- **`downloadFile(api, cid, password?): AsyncIterable<Buffer>`**: Downloads a file from its CID, with optional decryption using a password.
+- **`downloadObject(api, params): AsyncIterable<Buffer>`**: Downloads an object by its CID. *(Likely implemented as `apiCalls.downloadObject`.)*
+
+
+### Utility Functions
+
+- **`uploadFileChunks(api, fileUploadId, asyncIterable, uploadChunkSize, onProgress): Promise<void>`**: Handles the chunked upload of files to the server.
+- **`constructZipBlobFromTreeAndPaths(tree, filesMap): Promise<Blob>`**: Creates a zip archive from a file tree and corresponding file paths.
+- **`constructFromInput(files): FolderTree`**: Constructs a folder tree from an array of files.
+- **`fileToIterable(file): AsyncIterable<Buffer>`**: Converts a file into an async iterable of buffers.
+
+### CID Utilities
+
+- **`cidOfNode(node): CID`**: Generates a CID from an IPLD node.
+- **`cidToString(cid): string`**: Converts a CID to its string representation.
+- **`stringToCid(cidString): CID`**: Parses a CID string back into a CID object.
+
+### Node Encoding and Decoding
+
+- **`encodeNode(node): Uint8Array`**: Encodes an IPLD node into a byte array.
+- **`decodeNode(encodedNode): any`**: Decodes a byte array back into an IPLD node.
+
+---
+
+*Note:* All asynchronous functions return a `Promise` (or an async iterable in the case of `downloadObject`), and should be used with `await` for proper execution flow.
+
+---
+
+## Usage Examples
+
+### 1. Uploading a File from Filepath
+
+```typescript
+import { uploadFileFromFilepath,createAutoDriveApi } from '@autonomys/auto-drive'
+
+const api = createAutoDriveApi({ apiKey: 'your-api-key' }) // Initialize your API instance with API key
+const filePath = 'path/to/your/file.txt' // Specify the path to your file
+const options = {
+  password: 'your-encryption-password', // Optional: specify a password for encryption
+  compression: true,
+  // an optional callback useful for large file uploads
+  onProgress?: (progress: number) => {
+    console.log(`The upload is completed is ${progress}% completed`)
+  }
+}
+
+const cid = await uploadFileFromFilepath(api, filePath, options)
+
+console.log(`The file is uploaded and its cid is ${cid}`)
+```
+
+### 2. Uploading a File from Input (Interface)
+
+```typescript
+import { uploadFileFromInput, createAutoDriveApi } from '@autonomys/auto-drive'
+
+const api = createAutoDriveApi({ apiKey: 'your-api-key' }) // Initialize your API instance with API key
+
+// e.g Get File from object from HTML event
+const file: File = e.target.value // Substitute with your file
+const options = {
+  password: 'your-encryption-password', // Optional: specify a password for encryption
+  compression: true,
+}
+const cid = await uploadFileFromInput(api, file, options)
+
+console.log(`The file is uploaded and its cid is ${cid}`)
+
+```
+
+### 3. Uploading a file from Custom Interface
+
+Some times you might have a custom interface that doesn't fit either File or filepath. For those cases exists the interface GenericFile:
+
+
+
+```typescript
+export interface GenericFile {
+  read(): AsyncIterable<Buffer> // A buffer generator function that will output the bytes of the file
+  name: string
+  mimeType?: string
+  size: number
+  path: string // Could be ignored in file upload
+}
+```
+
+You could upload any file that could be represented in that way. For example, uploading a file as a Buffer
+
+```typescript
+import { createAutoDriveApi, uploadFile } from '@autonomys/auto-drive'
+
+const api = createAutoDriveApi({ apiKey: 'your-api-key' }) // Initialize your API instance with API key
+const buffer = Buffer.from(...);
+const genericFile = {
+  read: async function *() {
+    yield buffer
+  },
+  name: "autonomys-whitepaper.pdf",
+  mimeType: "application/pdf",
+  size: 1234556,
+  path: "autonomys-whitepaper.pdf"
+}
+
+const options = {
+  password: 'your-encryption-password', // Optional: specify a password for encryption
+  compression: true,
+  // an optional callback useful for large file uploads
+  onProgress?: (progress: number) => {
+    console.log(`The upload is completed is ${progress}% completed`)
+  }
+}
+
+const cid = uploadFile(api, genericFile, options)
+
+console.log(`The file is uploaded and its cid is ${cid}`)
+```
+
+
+### 4. Uploading a folder
+
+```typescript
+import { createAutoDriveApi, uploadFolderFromFolderPath } from '@autonomys/auto-drive'
+
+const api = createAutoDriveApi({ apiKey: 'your-api-key' }) // Initialize your API instance with API key
+const folderPath = 'path/to/your/folder' // Specify the path to your folder
+
+const options = {
+  uploadChunkSize: 1024 * 1024, // Optional: specify the chunk size for uploads
+  password: 'your-encryption-password', // Optional: If folder is encrypted
+  // an optional callback useful for large file uploads
+  onProgress: (progress: number) => {
+    console.log(`The upload is completed is ${progress}% completed`)
+  },
+}
+
+const folderCID = await uploadFolderFromFolderPath(api, folderPath, options)
+
+console.log(`The folder is uploaded and its cid is ${folderCID}`)
+
+```
+
+> **Note:** When the folder is encrypted, a zip file would be generated first, and then that file would be encrypted and uploaded.
+
+### 5. Downloading files
+
+```typescript
+import { createAutoDriveApi, downloadFile } from '@autonomys/auto-drive'
+
+const api = createAutoDriveApi({ apiKey: 'your-api-key' }) // Initialize your API instance with API key
+
+try {
+  const cid = '..'
+  const stream = await downloadFile(api, cid)
+  let file = Buffer.alloc(0)
+  for await (const chunk of stream) {
+    file = Buffer.concat([file, chunk])
+  }
+  console.log('File downloaded successfully:', stream)
+} catch (error) {
+  console.error('Error downloading file:', error)
+}
+```
+
+### 6. Usage example of `getRoots` (retrieve the root directories)
+
+
+```typescript
+import { createAutoDriveApi, apiCalls, Scope } from '@autonomys/auto-drive'
+
+const api = createAutoDriveApi({ apiKey: 'your-api-key' }) // Initialize your API instance with API key
+
+try {
+  const myFiles = await apiCalls.getRoots(api, {
+    scope: Scope.User,
+    limit: 100,
+    offset: 0,
+  })
+
+  console.log(`Retrieved ${myFiles.rows.length} files of ${myFiles.totalCount} total`)
+  for (const file of myFiles.rows) {
+    console.log(`${file.name} - ${file.headCid}: ${file.size}`)
+  }
+} catch (error) {
+  console.error('Error downloading file:', error)
+}
+```
+
+---
+
+## Notes
+
+- **Asynchronous Functions**: Use `await` with all promises for proper execution flow.
+- **Error Handling**: Wrap asynchronous calls in `try...catch` blocks to handle potential errors gracefully.
+- **File System Operations**: Ensure that file paths are correct and accessible when reading from or writing to the file system.
+
+---
