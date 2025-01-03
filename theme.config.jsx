@@ -3,9 +3,19 @@ import { useTheme } from 'next-themes';
 
 export default {
   project: {
-    link: 'https://www.autonomys.xyz/',
+    link: 'https://autonomys.xyz',
+    icon: (
+      <img
+        src="/logo-black.png"
+        alt="Autonomys Network Logo"
+        style={{
+          height: '32px',
+          marginRight: '0.5rem',
+        }}
+      />
+    )
   },
-  docsRepositoryBase: 'https://github.com/autonomys-network/docs/blob/main', // Adjust when pushed
+  docsRepositoryBase: 'https://github.com/autonomys/developer_docs',
   useNextSeoProps() {
     return {
       titleTemplate: '%s - Autonomys Network Developer Documentation',
@@ -22,7 +32,7 @@ export default {
           marginRight: '0.5rem',
         }}
       />
-      <span>Autonomys Network Developer Documentation</span>
+      <span>Developer Documentation</span>
     </>
   ),
   darkMode: true,
@@ -32,29 +42,77 @@ export default {
     forcedTheme: undefined,
   },
   primaryHue: {
-    light: 220, // Adjust for the hue in light mode if needed
-    dark: 220,  // Matches your #163787
+    light: 220,
+    dark: 220,  
   },
   themeSwitch: {
     useToggleTheme: true,
   },
   navbar: {
-    items: [
-      { title: 'Auto SDK', href: '/auto-sdk' },
-      { title: 'Auto EVM', href: '/auto-evm' },
-    ],
+    extraContent: (
+      <>
+        <a 
+          href="https://github.com/autonomys/developer_docs" 
+          target="_blank" 
+          rel="noopener noreferrer" 
+          className="nx-mr-4 nx-flex nx-items-center"
+        >
+          <img 
+            src="/github-logo.png" 
+            alt="GitHub" 
+            className="nx-h-5 nx-w-5"
+            style={{
+              height: '32px',
+              marginRight: '0.5rem',
+            }}
+          />
+        </a>
+        <a 
+          href="https://discord.com/invite/subspace-network" 
+          target="_blank" 
+          rel="noopener noreferrer" 
+          className="nx-flex nx-items-center"
+        >
+          <img 
+            src="/discord-logo.png" 
+            alt="Discord" 
+            className="nx-h-5 nx-w-5"
+            style={{
+              height: '32px',
+              marginRight: '0.5rem',
+            }}
+          />
+        </a>
+        <a 
+          href="https://x.com/AutonomysNet" 
+          target="_blank" 
+          rel="noopener noreferrer" 
+          className="nx-flex nx-items-center"
+        >
+          <img 
+            src="/twitter-logo.png" 
+            alt="Discord" 
+            className="nx-h-5 nx-w-5"
+            style={{
+              height: '32px',
+              marginRight: '0.5rem',
+            }}
+          />
+        </a>
+      </>
+    )
   },
   footer: {
     text: '© 2025 Autonomys Network. All rights reserved.',
   },
   components: {
     h1: ({ children }) => (
-      <h1 style={{ color: '#021955', fontWeight: 'bold' }}>{children}</h1>
+      <h1 style={{ color: '#5f77b7', fontWeight: 'bold' }}>{children}</h1>
     ),
     a: ({ href, children }) => (
       <a
         href={href}
-        style={{ color: '#021955', textDecoration: 'underline' }}
+        style={{ color: '#5f77b7', textDecoration: 'underline' }}
         target="_blank"
         rel="noopener noreferrer"
       >
@@ -64,7 +122,7 @@ export default {
   },
   css: {
     ':root': {
-      '--primary-color': '#021955',
+      '--primary-color': '#5f77b7',
       '--background-light': '#ffffff',
       '--background-dark': '#121212',
       '--text-color-light': '#000000',
