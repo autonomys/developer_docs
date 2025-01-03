@@ -15,6 +15,10 @@ export default {
       />
     )
   },
+  sidebar: {
+    defaultMenuCollapsed: false,
+    hiddenPages: ['/'], // Hide the sidebar only on the landing page
+  },
   docsRepositoryBase: 'https://github.com/autonomys/developer_docs',
   useNextSeoProps() {
     return {

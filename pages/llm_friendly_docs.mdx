@@ -1,0 +1,2571 @@
+---
+title: LLM-Friendly Documentation
+---
+
+import { CopyButton } from '../components/CopyButton'
+
+<div className="raw-content">
+
+<CopyButton />
+
+```text
+### File: evm/block_explorer.mdx
+
+### EVM Domain Auto EVM Block Explorer
+
+**[Auto EVM Block Explorer](https://nova.subspace.network)**
+
+This early version provides a clear and user-friendly visualization of Autonomys-specific statistics that cater to the needs of our farmers and developers.
+
+On the top of the page, you can easily toggle between **all available networks** and **EVM**. 
+
+ ![BlockExplorer-1](/developers/BlockExplorer-1.png)
+
+
+---
+
+### File: evm/faucet.mdx
+
+### How to get some test tokens
+
+**The Faucet** is available on our [**Discord server**](https://autonomys.xyz/discord).
+
+
+In order to get access to the role-gated developer chat and faucet channel:
+1. Join our [Discord](https://autonomys.xyz/discord)
+2. Click on Autonomys Network at the top left corner and choose **Linked Roles**.
+
+   ![Discord-1](/developers/Discord-1.png)
+
+3. Link your GitHub account to get a developer role and gain access to **developer-chat**. 
+   ![Discord-2](/developers/Discord-2.png)
+
+4. As soon as you get a **Developer** role, the [**Faucet**](https://discord.com/channels/864285291518361610/1133496871499862077) channel will become available to you. 
+
+5. You can use a slash command \`/faucet your_EVM_wallet_address_here\` to request tokens. 
+  ![Faucet-1](/developers/Faucet-1.png)
+
+6. In case of a successful request, you will see the confirmation and link to the blockscout explorer shortly.
+  ![Faucet-2](/developers/Faucet-2.png)
+
+7. You can request tokens once every 24 hours.
+
+---
+
+### File: evm/foundry.mdx
+
+### Testing and deploying smart contracts using [Foundry](https://book.getfoundry.sh/)
+---
+
+1. Use \`foundryup\` toolchain installer
+ \`\`\`bash
+ curl -L https://foundry.paradigm.xyz | bash
+ \`\`\`
+ This will install \`foundryup\`, then simply follow the instructions on-screen, which will make the foundryup command available in your CLI.
+ Running \`foundryup\` by itself will install the latest precompiled binaries: \`forge\`, \`cast\`, \`anvil\`, and \`chisel\`. See \`foundryup --help\` for more options.
+
+ > **Note:**If you're on Windows, you will need to install and use [Git BASH](https://gitforwindows.org/) or [WSL](https://learn.microsoft.com/en-us/windows/wsl/install), as your terminal, since Foundryup does not currently support \`PowerShell\` or \`Cmd\`.
+
+2.  Once installed, create a project. Let’s name it \`hello_subspace\`.
+
+    To initialize the project, run 
+    \`\`\`bash
+    forge init hello_subspace
+    \`\`\`
+    cd into \`hello_subspace\` directory and let’s have a look at the project’s structure.
+
+    ![Foundry-1](/developers/Foundry-1.png)
+
+3. All the necessary repo structure was created automatically, so we can start writing and testing our smart contracts right away. As you can see, there are separate directories for storing smart contracts (src) and testing smart contracts (test).
+    Let’s have a look at the \`Counter.sol\` smart contract and add a few more functions to the standard behavior. Our smart contract will have three functions: \`setNumber()\` that sets the uint256 number to the provided value, \`increment()\` which increases the value by 1 and \`decrement()\` which decreases the value by 1.
+
+    \`\`\`
+    // SPDX-License-Identifier: UNLICENSED
+    pragma solidity ^0.8.13;
+
+    contract Counter \{
+        uint256 public number;
+
+        function setNumber(uint256 newNumber) public \{
+            number = newNumber;
+        \}
+
+        function increment() public \{
+            number++;
+        \}
+
+        function decrement() public \{
+            number--;
+        \}
+    \}
+    \`\`\`
+
+4. Let’s make sure that all functions are working properly by adding a couple of tests to the \`Counter.t.sol\` test file and check if they pass.
+
+    \`\`\`
+    // SPDX-License-Identifier: UNLICENSED
+    pragma solidity ^0.8.13;
+
+    import "forge-std/Test.sol";
+    import "../src/Counter.sol";
+
+    contract CounterTest is Test \{
+        Counter public counter;
+
+        function setUp() public \{
+            counter = new Counter();
+            counter.setNumber(2);
+        \}
+
+        function testIncrement() public \{
+            counter.increment();
+            assertEq(counter.number(), 3);
+        \}
+
+        function testSetNumber(uint256 x) public \{
+            counter.setNumber(x);
+            assertEq(counter.number(), x);
+        \}
+
+        function testDecrement() public \{
+            counter.decrement();
+            assertEq(counter.number(), 1);
+        \}
+    \}
+    \`\`\`
+
+
+5. In our tests, we first set the initial value of number to two, then check if function \`increment()\` increases the value by 1 and if \`decrement()\` decreases the value by 1.
+    Let’s build a project by running: 
+
+    \`\`\`bash
+    forge build
+    \`\`\`
+
+    and ensure that tests are working as expected by running 
+
+    \`\`\`bash
+    forge test
+    \`\`\`
+
+    ![Foundry-2](/developers/Foundry-2.png)
+
+    Nice, all tests are passing, meaning the smart contract is working as expected.
+
+6. Next, there are **two things** we need to set, in order to **deploy our smart contract**:
+    - We need to connect a wallet that has sufficient balance of tAI3 to cover the gas fees.
+    - We need to set an environment variable we will use later.
+
+    In order to make our lives easier, let’s create a new \`Makefile\` as well as \`.env\` file at the root of our project.
+    \`.env\` files are typically used to store environment variables for your application. They are particularly useful for managing settings that change between deployment environments (e.g., development, testing, staging, and production), and for storing sensitive information.
+
+    Environment variables can include database connection details, API keys, external resource URIs, or other configuration variables that might change depending on the environment in which the application is running. In our case, we would use it to point to our Core-EVM RPC url by setting
+
+    \`\`\`bash
+    RPC_URL=https://nova-0.gemini-3h.subspace.network/ws
+    \`\`\`
+
+    And then set a private key for the EVM-compatible wallet
+
+    \`\`\`bash
+    PRIVATE_KEY=”your_private_key_value”
+    \`\`\`
+    
+    > **Tip:** It's important to note that .env files should not be committed to your source control (like Git), especially when they contain sensitive data, like your private key. To prevent this, add .env to your .gitignore file. This helps to keep sensitive keys secure and avoids the risk of exposing them in the application's code or version control history.
+
+
+    In the Makefile, let’s create shortcuts to the main features of the application
+
+    \`\`\`bash
+    # include .env file and export its env vars
+    -include .env
+
+    # Builds
+    build:
+	    @forge clean && forge build --optimize --optimizer-runs 1000000
+
+    # Deployment
+    deploy:
+	    @forge create Counter --private-key \$\{PRIVATE_KEY\} --rpc-url \$\{RPC_URL\}
+    \`\`\`
+
+    We're importing the values for a \`PRIVATE_KEY\` and \`RPC_URL\` from the \`.env\` file.
+
+    This allows us to run \`make build\` for building the project and \`make deploy\` for deploying the project pointing to the provided RPC and using the provided private_key.
+
+    Let’s run 
+
+    \`\`\`
+    make build
+    \`\`\`
+
+    to make sure it’s working properly.
+
+    ![Foundry-3](/developers/Foundry-3.png)
+
+7. In order to deploy your contract using the specified **\`RPC\`** and **\`PRIVATE_KEY\`** just run
+
+    \`\`\`
+    make deploy
+    \`\`\`
+    
+    > **Caution:** Do not attempt to speed up a transaction (do not include a tip on top of the gas fees). To read more about this, please refer to [this section](/develop/auto-evm/introduction#important-note-about-submitting-a-transaction).
+  
+
+    > **Caution:** In some cases when deploying the script, you may experience **"No manual gas limit set"** or **"Gas estimation failed"** issues. Please refer to [this section](/develop/auto-evm/introduction#gas-estimation-issue) for the solution. 
+
+
+8. **Congratulations**, you've successfully deployed your smart contract on Autonomys EVM! 
+
+---
+
+### File: evm/general_information.mdx
+
+### What tools are available for developers?
+---
+Developing smart contracts involves a suite of tools that aid in writing, testing and deploying code on the blockchain. **Autonomys utilizes an instance of the Ethereum Virtual Machine. Therefore, every tool used to build, test, and deploy smart contracts on Ethereum is also available for Autonomys!**
+
+First, Solidity is the primary programming language for writing smart contracts. It is statically typed, supports inheritance, libraries, and complex user-defined types, making it familiar for developers with a background in other statically typed languages such as C++, Java, or JavaScript.
+
+Integrated Development Environments (IDEs) such as the [Remix IDE](https://remix.ethereum.org/) are often used to aid in writing smart contracts. Remix IDE is a browser-based IDE that enables you to write, deploy, and interact with Solidity smart contracts. It features a built-in static analysis tool that checks your code for common errors.
+
+For local development and testing, you have multiple options. You can spin up your own version of an Autonomys Developer Node and farmer to deploy contracts, develop applications, and run tests. Alternatively, you can use Ethereum development tools like [Hardhat](https://hardhat.org/hardhat-network/docs/overview) or [Anvil](https://book.getfoundry.sh/anvil/), which are fully compatible with Autonomys due to their EVM compatibility.
+
+For deploying and interacting with smart contracts, a JavaScript provider like the one injected by the [MetaMask](https://metamask.io/) browser extension is used. This provider enables JavaScript applications to communicate with the Autonomys network or any Ethereum-compatible network. It's compatible with both [ethers.js](https://docs.ethers.org/v5/), [web3.js](https://web3js.readthedocs.io/en/v1.10.0/) and [Web3.py](https://web3py.readthedocs.io/en/stable/), allowing developers to use either library for their blockchain operations.
+
+All these tools together provide an ecosystem for EVM-compatible smart contract development, making the process more manageable and efficient.
+
+### Smart Contract
+---
+A smart contract is a digital agreement coded into a blockchain network, designed to automatically execute or enforce the terms of a contract. These self-executing contracts, primarily developed on decentralized computer systems, eliminate the need for an intermediary by conducting transactions directly between parties. Smart contracts are transparent, traceable, and irreversible, providing immediate certainty about outcomes once preset conditions are met. They streamline various applications, from finance to supply chain management, by automating workflows and facilitating trustless interactions.
+
+### Differences with Ethereum
+---
+Autonomys Token (AI3) (TSSC for Subspace Credit during the testnet) is the sole method of payment for gas within the Autonomys EVM runtime.
+There will be a bridge to convert farmed tokens into EVM-compatible tokens to cover the gas fees, however, at the moment the only viable option to get some tAI3 on your wallet is through the Autonomys [faucet](/develop/auto-evm/faucet).
+
+### What is Solidity? 
+---
+Solidity is a statically typed, contract-oriented, high-level language primarily used for implementing smart contracts on blockchain platforms like Ethereum. Its syntax is similar to that of JavaScript and C++, which makes it relatively easy for developers from those language backgrounds to pick it up. Its features such as contract classes, inheritance, complex user-defined types, and libraries bring object-oriented programming capabilities to blockchain development.
+
+
+One of the key features of Solidity is its first-class support for "contracts." These are akin to classes in object-oriented languages but are deployed on the Ethereum blockchain, allowing them to maintain a persistent state over time and interact with other contracts, the same way as objects interact in traditional programming.
+
+
+Moreover, Solidity comes with safety features, such as a robust type system and control structures, which help prevent bugs. It also provides a variety of built-in functions for performing operations like cryptographic hashing, signature verification, and address checking, making it easier to write secure code.
+
+
+The popularity of Solidity is primarily due to its design for Ethereum, the leading smart contract platform. As Ethereum gained traction for decentralized applications (dApps), Solidity became the go-to language for writing smart contracts for these applications. Furthermore, its resemblance to widely-used languages like JavaScript and C++ helped its adoption amongst developers.
+
+
+Lastly, Solidity is continually evolving with frequent updates, new features, and improvements that address the unique needs of blockchain development. This responsive development and the thriving community around it further solidify its position as the leading language for smart contract development.
+
+Solidity has a great community of developers and extensive documentation is available on the official [website](https://soliditylang.org/).
+
+
+---
+
+### File: evm/hardhat.mdx
+
+### Hardhat testing and deployment
+---
+Hardhat is an excellent tool that facilitates building on the Ethereum Virtual Machine. It helps developers manage and automate the recurring tasks that are inherent to the process of building smart contracts and dApps, and it allows them to easily introduce more functionality around this workflow. This includes compiling and testing at the very core. Flexible deployment options also allow you to point to the Autonomys EVM domain RPC to deploy your contracts and dApps.
+
+Official documentation for Hardhat is available [on their website](https://hardhat.org/docs), but this guide will cover everything required to get you started.
+
+**Prerequisites**
+Make sure you have [NodeJS](https://nodejs.org/en) version >=16.0 installed.
+
+1. Open a new terminal and run these commands to create a new folder for the project. 
+
+\`\`\`
+mkdir subspace-hardhat
+cd subspace-hardhat
+\`\`\`
+
+2. Then initialize an npm project as shown below. You'll be prompted to answer some questions.
+
+\`\`\`
+npm install --save-dev hardhat
+npm install --save-dev @openzeppelin/contracts
+npx hardhat
+\`\`\`
+
+Select "Create a JavaScript Project" from the list of the available options. Select project root folder and select to create a .gitignore file (optional). 
+
+![Hardhat-1](/developers/Hardhat-1.png)
+
+3. Right after you create your workspace, you will notice several folders. All of your contracts will reside inside the \`contracts\` folder, deployment scripts are available inside the \`scripts\` folder, and tests can be found inside the \`test\` folder. Click on the contracts folder and open \`Lock.sol\`.
+
+![Hardhat-3](/developers/Hardhat-3.png)
+
+4. When in \`Lock.sol\`, you can change the name of your contract (in the example, to \`Counter\`), the name of the token (in this example, we're calling it \`AutonomysTestToken\`) and the token symbol (we're using \`TSSCtest\`).
+
+Let’s add a simple smart contract that has three functions - \`setNumber()\`, \`increment()\` and \`decrement()\`.
+
+\`\`\`
+// SPDX-License-Identifier: UNLICENSED
+pragma solidity ^0.8.9;
+
+import '@openzeppelin/contracts/token/ERC20/ERC20.sol';
+
+contract Counter is ERC20 \{
+    constructor() ERC20("AutonomysTestToken", "TSSCtest") \{\}
+
+    uint256 public number;
+
+    function setNumber(uint256 newNumber) public \{
+        number = newNumber;
+    \}
+
+    function increment() public \{
+        number++;
+    \}
+
+    function decrement() public \{
+        number--;
+    \}
+\}
+\`\`\`
+
+Let's also rename the filename to \`Counter.sol\` for consistency. 
+
+
+5. Deploying a smart contract can be an expensive procedure due to the gas costs associated with the transaction. Hence, it’s advisable to thoroughly test the smart contracts for correctness before proceeding with deployment. To test the contract, open the tests folder and examine the Lock.js file created for us. Replace the internals of the file with the following code:
+
+\`\`\`
+const \{ expect \} = require("chai");
+
+describe("Counter", function() \{
+let Counter;
+let counter;
+let owner;
+let addr1;
+
+beforeEach(async function() \{
+    Counter = await ethers.getContractFactory("Counter");
+    [owner, addr1] = await ethers.getSigners();
+
+    counter = await Counter.deploy();
+\});
+
+describe("Counter operations", function() \{
+    it("Should return initial value of zero", async function() \{
+    expect(await counter.number()).to.equal(0);
+    \});
+
+    it("Should set number to a new value", async function() \{
+    await counter.setNumber(5);
+    expect(await counter.number()).to.equal(5);
+    \});
+
+    it("Should increment the number", async function() \{
+    await counter.setNumber(5);
+    await counter.increment();
+    expect(await counter.number()).to.equal(6);
+    \});
+
+    it("Should decrement the number", async function() \{
+    await counter.setNumber(5);
+    await counter.decrement();
+    expect(await counter.number()).to.equal(4);
+    \});
+\});
+\});
+\`\`\`
+
+For consistency, let's also rename \`Lock.js\` to \`CounterTest.js\`
+
+7. To run the test, simply type \`npx hardhat test\`
+
+ ![Hardhat-4](/developers/Hardhat-4.png)
+
+Great, looks like everything is working as expected. We’re all set for the deployment!
+
+8. In order to deploy the contract, we need to set a deployment network for hardhat. 
+Open \`hardhat.config.js\` file and add the subspace to the list of networks. 
+
+\`\`\`
+require("@nomicfoundation/hardhat-toolbox");
+module.exports = \{
+solidity: "0.8.19",
+networks: \{
+    subspace: \{
+    url: "https://nova-0.gemini-3h.subspace.network/ws",
+    accounts: ["private_key_to_your_account"]
+    \}
+\}
+\};
+\`\`\`
+
+> **Tip:** Be careful to not commit hardhat.config.js file as it contain your private key. You can use NPM tools like [dotenv](https://www.npmjs.com/package/dotenv) to securely store your private keys in the \`.env\` file.
+
+9. Open \`deploy.js\` file and replace the content with the code. 
+
+![Hardhat-5](/developers/Hardhat-5.png)
+
+\`\`\`
+const hre = require("hardhat");
+
+async function main() \{
+const Contract = await hre.ethers.getContractFactory("Counter");
+const contract = await Contract.deploy();
+
+console.log("Contract deployed to:", contract.target);
+\}
+
+main().catch((error) => \{
+console.error(error);
+process.exitCode = 1;
+\});
+\`\`\`
+
+10. You're all set to deploy your smart contract on Autonomys Network!
+In order to deploy, run \`npx hardhat run scripts/deploy.js --network subspace\`. 
+
+This command will deploy your smart contract on the network we've just specified in \`hardhat.config.js\` file. 
+
+In case of success deployment, you should see \`Contract deployed to: transaction hash\`.  
+
+![Hardhat-6](/developers/Hardhat-6.png)
+
+> **Caution:** In some cases when deploying the script, you may experience **"No manual gas limit set"** or **"Gas estimation failed"** issues. Please refer to [this section](/develop/auto-evm/introduction#gas-estimation-issue) for the solution. 
+
+11. **Congratulations**, you've successfully deployed your smart contract on the Autonomys EVM domain!
+
+
+---
+
+### File: evm/intro.mdx
+
+> **Note:** Currently, Auto EVM is available exclusively on **Taurus** network. 
+>Auto EVM's availability on the mainnet is planned for **Phase 2 of the mainnet launch**. For further details, please refer to our [Phased Launch Roadmap](https://forum.autonomys.xyz/t/phased-launch-roadmap/4414) post on the forum.
+
+
+## The only tools needed to get you started
+---
+The Quick Start is designed with the presumption that you are not a novice developer and have some basic understanding or experience. The Quick Start also anticipates that you seek a straightforward initiation into setting up a remote development environment.
+
+Autonomys utilizes EVM (Ethereum Virtual Machine) so any tool available for Ethereum development is compatible with Autonomys.
+
+### Setup a MetaMask Wallet (or any other EVM-compatible wallet) and connect it to our custom EVM
+---
+\`\`\`
+Network Name: Autonomys EVM
+New RPC URL: https://auto-evm-0.taurus.subspace.network/ws
+Chain ID: 490000
+Currency Symbol: tAI3
+\`\`\`
+
+### Get tokens to your wallet using our faucet
+---
+Follow the instructions [here](/develop/auto-evm/faucet) to use our **Faucet** to get some tAI3.
+
+### Test and deploy your smart contract
+---
+You can use **[Remix](https://remix.ethereum.org/)**, **[Foundry](https://book.getfoundry.sh/)** or any other tool familiar to you for testing and deploying your smart contracts. Just make sure to use our custom EVM domain and you're all set.
+
+If anything above sounds unfamiliar, you can always fall back to our full guide. 
+
+---
+### Important note about submitting a transaction
+
+Please avoid attempting to accelerate a transaction by including a tip alongside the gas fees. The transaction queue operates differently with Autonomys, leading to the possibility of two transactions sharing the same nonce. This could result in dual charges for gas fees - once for the execution and storage in the first transaction, and solely for storage in the second transaction. To prevent this scenario, ensure that you refrain from adding a tip in an attempt to speed the transaction up.
+
+---
+### Gas Estimation Issue
+
+When deploying smart contracts to our EVM-compatible domain **Auto EVM**, you may encounter an error related to gas estimation, typically presenting as:
+
+\`"No manual gas limit set" or "Gas estimation failed"\`.
+
+This issue often occurs because development tools like Foundry simulate transactions and use calculated or hardcoded gas estimation instead of querying the RPC (Remote Procedure Call) for it. **Auto EVM** may require different gas amounts for certain operations compared to other EVM-compatible chains like Ethereum's testnets.
+
+> **Note:** We have submitted an upstream PR to fix this issue with **Foundry**. Described below are the workarounds, until the issue is resolved by the **Foundry team**.
+
+
+#### Solutions
+
+If you encounter this issue, try the following solutions:
+
+- Skip simulation: Use the \`--skip-simulation\` flag when deploying with Foundry to bypass built-in simulation and rely on RPC for gas estimation.
+
+- Set manual gas limit: Specify a higher gas limit manually in your deployment command or UI.
+
+- Adjust deployment script: Modify your script to include custom gas settings or implement \`try/catch\` blocks for handling deployment failures.
+
+- Use Web3 provider: If using **Remix IDE**, switch to \`Injected Web3\` environment to leverage external Web3 providers like MetaMask.
+
+- Custom deployment function: Create a deployment function with adjustable gas parameters. 
+
+
+#### Solution examples
+
+**Foundry**
+
+1. Try using \`--skip-simulation\` flag: \`forge script path/to/your/script.s.sol --rpc-url your_rpc_url --private-key your_private_key --broadcast --skip-simulation\`.
+
+2. Try setting the gas limit manually: \`forge script path/to/your/script.s.sol --rpc-url your_rpc_url --private-key your_private_key --broadcast --gas-limit 300000\`.
+
+Adjust the gas limit value as needed. Start with a higher value and gradually lower it to find the optimal limit.
+
+**Remix IDE**
+
+1. Try settiing gas limit manually: In the **Deploy & Run Transactions** panel, expand the **Advanced** section.
+Set a higher value in the **Gas Limit** field. Try starting with **300000** and adjust as needed.
+
+2. Try adjusting gas price: In the same **Advanced** section, you can also adjust the **Gas Price** if needed.
+
+3. Try switching to the **Injected Web3** environment in the **Deploy & Run Transactions** panel. This will use your browser's Web3 provider (like MetaMask) which might handle gas estimation better for the network.
+
+4. If the above steps don't work, you can create a custom deployment function that includes gas parameters:
+
+   \`\`\`
+   function deployWithCustomGas(uint256 gasLimit, uint256 gasPrice) public returns (address) \{
+      return address(new YourContract\{gas: gasLimit, gasPrice: gasPrice\}());
+   \}
+   \`\`\`
+
+**Other possible solution**
+
+1. Modify your deployment script and override the default gas settings: 
+
+   \`\`\`
+   vm.txGasPrice(uint256 gasPrice);
+   vm.txGasLimit(uint256 gasLimit);
+   \`\`\`
+
+2. Implement a try/catch block in your script to handle gas estimation failures:
+
+   \`\`\`
+   try yourContract.deploy\{gas: 300000\}(constructorArgs) returns (YourContract deployed) \{
+      // Deployment successful
+   \} catch Error(string memory reason) \{
+      console.log("Deployment failed:", reason);
+   \}
+   \`\`\`
+
+---
+
+### Have any questions? Feel free to post them on [our forum](https://forum.autonomys.xyz/) or in our [Developer-chat on Discord](https://discord.gg/EAw6B48r).
+---
+
+In order to get access to the role-gated developer chat:
+1. Join our [Discord](https://discord.gg/vhv5cEZN)
+2. Click on Autonomys Network at the top left corner and choose **Linked Roles**.
+
+   ![Discord-1](/developers/Discord-1.png)
+
+3. Link your GitHub account to get a developer role and gain access to **developer-chat**. 
+   ![Discord-2](/developers/Discord-2.png)
+
+---
+
+### File: evm/local.mdx
+
+### Setting up a local development environment
+
+**You can always set up a local network to test and deploy your smart contract!**
+
+To establish a full local network, you need to run a local node, a Core-EVM domain, and a farmer.
+
+First, visit the **[Autonomys releases](https://github.com/autonomys/subspace/releases)** page and download the most up-to-date stable versions of the node and farmer.
+
+> **Tip:** 
+>For each release, there are two versions:
+
+>1. skylake: for newer processors from around 2015 and onwards
+>2. x86-64-v2: for older processors from around 2009 and some older VMs
+
+>Older processors/VMs are no longer supported by official releases, but they can still be [compiled manually](https://github.com/autonomys/subspace/blob/main/docs/development.md) if desired.
+
+After downloading both files that suit your system, start a node using your preferred terminal. If you want to start an EVM domain on your local machine, you need to specify:
+
+- Your local RPC server port
+- Your local web-socket RPC port
+You can do this with the following command:
+
+\`\`\`bash
+./your_subspace_node_path run --dev --rpc-listen-on 127.0.0.1:9944 -- --domain-id 3 --dev --rpc-listen-on 127.0.0.1:8545
+\`\`\`
+
+This will create a local RPC on port **8545**.
+
+Secondly, you need to start a farmer by running the following command:
+
+\`\`\`bash
+ ./your_subspace_farmer_path farm --reward-address [YOUR REWARD ADDRESS] path=tmp-farm,size=100M
+\`\`\`
+
+You can specify the desired plot size, but 100M should be sufficient.
+
+**And that’s it!** By starting your **local node** and a **farmer**, you have your **local RPC** ready for testing and deploying your smart contracts! You can easily connect your [MetaMask](https://metamask.io/) account to the local development network, as well as use [Remix](https://remix.ethereum.org/) or [Foundry](https://book.getfoundry.sh/) in order to test and deploy smart contracts on a local network! 
+
+---
+
+### File: evm/metamask.mdx
+
+### Adding Autonomys RPC using MetaMask
+---
+You can use any EVM-compatible wallet, this guide will be using [**MetaMask**](https://metamask.io/) wallet.
+
+First, let’s set up a MetaMask wallet and then go over connecting it to the Autonomys Development Network.
+
+1. Go to the [MetaMask Website](https://metamask.io/) and download an extension for your browser.
+   Select your preferred language in the top-right corner. 
+   Read and agree to MetaMask's terms of use.
+
+  ![MetaMask-1](/developers/MetaMask-1.png)
+
+
+2. Click on “Create a new wallet”.
+  Read a note on gathering usage data and either agree to collect your anonymized data, or skip this step. It does not affect the creation of a wallet. 
+
+  ![MetaMask-2](/developers/MetaMask-2.png)
+
+3. On the next screen you will be asked to create a password. Remember to always set a secure password that’s difficult to guess. Type your password twice before proceeding to the next step.
+
+  ![MetaMask-3](/developers/MetaMask-3.png)
+
+4. MetaMask automatically assesses the strength of your password. 
+  
+  > **Tip:** As a rule of thumb, you should set a strong password, meaning that it includes uppercase letters, lowercase letters, numbers and special characters.
+
+  ![MetaMask-4](/developers/MetaMask-4.png)
+
+5. Watch a video to learn more about your Secret Recovery Phrase before proceeding to the next step. 
+
+  ![MetaMask-5](/developers/MetaMask-5.png)
+
+6. Have a look and write down your 12-word recovery phrase. 
+  > **Info:** The wallet with the recovery phrase for this guide will be deleted right after the guide is complete.
+
+  ![MetaMask-6](/developers/MetaMask-6.png)
+
+7. Confirm that you’ve written down the recovery phrase by filling in the missing words of your recovery phrase. 
+
+  ![MetaMask-7](/developers/MetaMask-7.png)
+
+8. Now that your wallet is created, let’s connect to the Autonomys Core EVM. Click on the Ethereum Mainnet logo and select Add Network.
+
+  ![MetaMask-8](/developers/MetaMask-8.png)
+
+9. At the settings, click on “Add a network manually”
+
+  ![MetaMask-9](/developers/MetaMask-9.png)
+
+10. To connect to Autonomys RPC specify the values below
+
+  \`\`\`
+  Network Name: Autonomys EVM
+  New RPC URL: https://auto-evm-0.taurus.subspace.network/ws
+  Chain ID: 490000
+  Currency Symbol: tAI3
+  \`\`\`
+
+You're all set, **you have successfully configured your MetaMask wallet** and connected it to **Autonomys Core EVM**. To deploy your smart contract, you first need to get a small amount of **tAI3**  tokens into your wallet. Please make sure to refer to the [faucet section](/develop/auto-evm/faucet) of the guide to learn more about getting test tokens. 
+
+---
+
+### File: evm/remix.mdx
+
+### Remix IDE guide
+---
+Remix is a great tool that allows you to easily write, test and deploy smart contracts on any EVM-compatible  blockchain. Moreover, integration with MetaMask allows the utilization of any RPC, that’s why we’ve just set up a reference to Autonomys core EVM in our MetaMask wallet!
+
+Remix has [amazing documentation](https://remix-ide.readthedocs.io/en/latest/), but this guide will cover everything required to get you started.
+
+1. Using the browser of your choice navigate to **[Remix website](https://remix.ethereum.org)**.
+You will see a file explorer and interface for creating new workspaces, integrations with GitHub, Gist, IPFS, HTTPS, preloaded templates, and plugins.
+Let’s create a new workspace by clicking on the + sign beside WORKSPACES.
+
+ ![Remix-1](/developers/Remix-1.png)
+
+2. You can enter any name and use the ERC20 template.
+
+ ![Remix-2](/developers/Remix-2.png)
+
+3. Right after you create your workspace, you will see a few folders created for you.
+Let’s click on contracts and have a look at \`MyToken.sol\`.
+
+ ![Remix-3](/developers/Remix-3.png)
+
+4. Here, you can change the name of your contract (in the example, to \`Counter\`), the name of the token (in this example, we're calling it \`SubspaceTestToken\`) and the token symbol (we're using \`TSSCtest\`).
+Let’s add a simple smart contract that has three functions - \`setNumber()\`, \`increment()\` and \`decrement()\`.
+
+ \`\`\`
+  // SPDX-License-Identifier: MIT
+ pragma solidity ^0.8.9;
+
+ import '@openzeppelin/contracts/token/ERC20/ERC20.sol';
+
+ contract Counter is ERC20 \{
+     constructor() ERC20("AutonomysTestToken", "TSSCtest") \{\}
+
+     uint256 public number;
+
+     function setNumber(uint256 newNumber) public \{
+         number = newNumber;
+     \}
+
+     function increment() public \{
+         number++;
+     \}
+
+     function decrement() public \{
+         number--;
+     \}
+  \}
+ \`\`\`
+
+ ![Remix-4](/developers/Remix-4.png)
+
+5. Next, let’s compile a \`Counter\` contract. To compile, click on SOLIDITY COMPILER on the left and choose the compiler version that corresponds to the Solidity version of your contract. In our case, it’s version 0.8.9.
+Click on \`Compile MyToken.sol\` and check if it compiles correctly. If it does, you will see a green checkmark by the compiler.
+
+ ![Remix-5](/developers/Remix-5.png)
+
+6. Deploying a smart contract could be an expensive procedure, based on the gas costs associated with the transaction. That is why it’s recommended that you thoroughly test the smart contracts for correctness before proceeding with deployment.
+To test the contract, let’s open the tests folder and have a look at \`MyToken.sol\` created for us.      
+Let’s first try to run a test as is without making any changes.
+
+ ![Remix-6](/developers/Remix-6.png)
+
+7. To run the tests, select SOLIDITY UNIT TESTING in the bar on the left and click Run.
+
+ ![Remix-7](/developers/Remix-7.png)
+
+8. As expected, the test failed because we manually changed the token name and symbol.
+This is Test Driven Development (TDD) in action! In order to make the test pass, replace the internals of \`MyToken.sol\` with the provided below code. In the test, we're adding a few assertions for the \`increment()\` and \`decrement()\` functions. In this example, we will set up an initial value of \`number\` to 2 and \`increment\` and then \`decrement\` it by 1. We would expect the number to increase to 3 and then decrease back to 2.
+
+ \`\`\`bash
+  pragma solidity >=0.7.0 <0.9.0;
+  import "remix_tests.sol";
+  import "../contracts/MyToken.sol";
+
+  contract CounterTest is Counter \{
+
+     function testTokenInitialValues() public \{
+         Assert.equal(name(), "AutonomysTestToken", "token name did not match");
+         Assert.equal(symbol(), "TSSCtest", "token symbol did not match");
+         Assert.equal(decimals(), 18, "token decimals did not match");
+         Assert.equal(totalSupply(), 0, "token supply should be zero");
+     \}
+
+     Counter public counter;
+
+     function setUp() public \{
+         counter = new Counter();
+         counter.setNumber(2);
+     \}
+
+     function testIncrement() public \{
+         counter.increment();
+         Assert.equal(counter.number(), 3, "test increment did not match");
+     \}
+
+     function testDecrement() public \{
+         counter.decrement();
+         Assert.equal(counter.number(), 2, "test decrement did not match");
+     \}
+  \}
+ \`\`\`
+
+ ![Remix-8](/developers/Remix-8.png)
+
+9. Great, all tests are now passing which means our smart contract \`Counter\` is indeed working as we expect.
+We’re all set to deploy it now!
+
+ ![Remix-9](/developers/Remix-9.png)
+
+10. To deploy click on the DEPLOY AND RUN TRANSACTIONS tab on the left.
+Remix allows you to use one of the existing EVMs or inject your own provider through its integration with MetaMask.
+Since we already have a MetaMask Account set up, let’s use this option.
+
+ ![Remix-10](/developers/Remix-10.png)
+
+11. You will be prompted to confirm the password with MetaMask, just make sure that the network you’re connected to is Autonomys EVM.
+
+ ![Remix-11](/developers/Remix-11.png)
+
+12. Adjust the gas limit and deploy your smart contract on Autonomys Core EVM.
+Now your transaction is recorded and you can interact with your smart contract at the bottom of the page - it's possible to call the functions \`increment()\` and \`decrement()\` as well as \`setNumber()\`
+
+> **Caution:** Do not attempt to speed up a transaction (do not include a tip on top of the gas fees). To read more about this, please refer to [this section](/develop/auto-evm/introduction#important-note-about-submitting-a-transaction).
+
+> **Caution:** In some cases when deploying the script, you may experience **"No manual gas limit set"** or **"Gas estimation failed"** issues. Please refer to [this section](/develop/auto-evm/introduction#gas-estimation-issue) for the solution. 
+
+
+![Remix-12](/developers/Remix-12.png)
+
+Congratulations, you've just deployed your smart contract on Autonomys Core EVM!
+
+---
+
+### File: index.mdx
+
+### Introduction
+Autonomys is a secure, scalable, and decentralized blockchain that resolves the blockchain trilemma without making compromises. It offers a platform where developers can build applications with ease, leveraging innovative protocols and familiar tools. This guide provides an overview of the development options available on the Autonomys Network.
+
+### Is It Difficult to Build Applications on Autonomys?
+
+Absolutely not! Our primary objective is to minimize barriers to entry for both farmers and developers.
+
+We pride ourselves on enabling unlimited possibilities - there are no boundaries!
+
+## Development Options
+
+**Developers** can choose to utilize **Auto SDK** - a comprehensive toolkit designed to simplify development on the Autonomys Network, or **Auto EVM** - Autonomys's EVM-compatible domain, allowing you to utilize all the familiar functionalities available on networks like Ethereum. Soon, you'll also be able to build your own local custom virtual machines.
+
+## [Auto SDK](/develop/auto-sdk/intro)
+
+### Key Features:
+- **Modular Packages**: The SDK is organized into packages like auto-utils, auto-consensus, and auto-id. This partitions functionality intuitively and allows you to import only what you need.
+- **Simplified Interactions**: Abstracts the complexity of blockchain operations with high-level functions.
+- **Flexibility**: Suitable for building decentralized applications (dApps) and services with ease.
+
+### Getting Started with Auto SDK
+To start using Auto SDK, refer to our [Setup Instructions](/develop/auto-sdk/intro) to clone the repository, install dependencies, and run tests. The SDK is designed to be developer-friendly, ensuring you can get up and running quickly.
+
+## [Auto EVM - EVM Compatible Domain](/develop/auto-evm/introduction)
+
+> **Info:**
+>Currently, Auto EVM is available exclusively on the **Taurus** network.
+
+>Auto EVM's availability on the mainnet is planned for **Phase 2 of the mainnet launch**. For further details, please refer to our [Phased Launch Roadmap](https://forum.autonomys.xyz/t/phased-launch-roadmap/4414) post on the forum.
+
+
+### Key Features:
+- **Solidity Smart Contracts**: Write and deploy smart contracts using Solidity, just as you would on Ethereum.
+- **Tool Compatibility**: Any tool available for Ethereum development - like Remix, Truffle, or Hardhat - is compatible with Auto EVM.
+- **Seamless Transition**: Developers familiar with Ethereum can transition to Autonomys without a steep learning curve.
+
+### Why Use Auto EVM?
+- **Familiar Environment**: Leverage existing knowledge and resources from the Ethereum ecosystem.
+- **Scalability and Security**: Benefit from Autonomys's scalable and secure infrastructure while using tried-and-true development practices.
+- **Interoperability**: Create applications that can interact seamlessly with other EVM-compatible networks.
+
+### Getting Started with Auto EVM
+To start using Auto EVM, refer to our [Guides and Manuals](/develop/auto-evm/introduction).
+
+
+## RPC endpoints
+
+**List of Currently Active RPCs endpoints**
+
+#### Consensus
+- wss://rpc-0.gemini-3h.subspace.network/ws
+- wss://rpc-1.gemini-3h.subspace.network/ws
+- wss://rpc.taurus.subspace.foundation/ws
+- wss://rpc.mainnet.subspace.foundation/ws
+
+>**Tip:** Auto EVM
+>Currently, Auto EVM is available exclusively on the taurus network. Availability on mainnet is planned in Q1, 2025
+
+#### Auto EVM
+- wss://auto-evm-0.taurus.subspace.network/ws
+- wss://auto-evm-1.taurus.subspace.network/ws
+
+>**Tip:** Auto ID
+> Currently, Auto ID is available exclusively on the **Gemini-3h** test network. It will soon be accessible on **Taurus** and **Mainnet**.
+
+
+#### Auto ID
+- wss://autoid-0.gemini-3h.subspace.network/ws
+
+---
+
+### File: sdk/auto-consensus.mdx
+
+import AutoConsensusFetchBalance from '/components/auto_consensus_fetch_balance.js';
+
+## Auto-Consensus Package Documentation
+
+### Introduction
+
+The \`@autonomys/auto-consensus\` package provides functions for interacting with the Consensus Layer of the Autonomys Network. It allows developers to perform actions such as account management, balance inquiries, transfers, staking operations, and more. This package works hand-in-hand with \`@autonomys/auto-utils\` to simplify blockchain interactions.
+
+### Installation
+
+Install the package via npm or yarn:
+
+\`\`\`bash
+# Using npm
+npm install @autonomys/auto-consensus
+
+# Using yarn
+yarn add @autonomys/auto-consensus
+\`\`\`
+
+### Importing the Package
+
+Before using the functions provided by the \`auto-consensus\` package, you need to import them into your project:
+
+\`\`\`typescript
+// Import specific functions
+import \{ balance, transfer, account \} from '@autonomys/auto-consensus';
+
+// Or import everything
+import * as consensus from '@autonomys/auto-consensus';
+\`\`\`
+
+### Overview of the \`api\` Object
+
+Many functions in the \`auto-consensus\` package require an \`api\` object as a parameter. This \`api\` object is an instance of \`ApiPromise\` from the Polkadot.js API library, which serves as the gateway to interact with the blockchain node.
+
+**Core Components of \`api\`**:
+
+- **api.rpc**: Methods to perform remote procedure calls to the node.
+- **api.query**: Access to the blockchain's runtime storage.
+- **api.tx**: Create and submit extrinsics (transactions) to the blockchain.
+- **api.consts**: Runtime constants defined in the blockchain's metadata.
+- **api.events**: Access to events emitted by the blockchain.
+- **api.types**: Type definitions used by the chain.
+
+**Example**:
+
+\`\`\`typescript
+import \{ createConnection \} from '@autonomys/auto-utils';
+
+async function getApiInstance() \{
+  const endpoint = 'wss://rpc-0.gemini-3h.subspace.network/ws';
+  const api = await createConnection(endpoint);
+  return api;
+\}
+\`\`\`
+
+---
+
+## Available Functions
+
+### Account Management
+
+- **\`account(api, address): Promise<AccountData>\`**: Retrieves account's nonce and balance data.
+- **\`balance(api, address): Promise<BalanceData>\`**: Retrieves an account's balance details.
+
+### Balances
+
+- **\`totalIssuance(networkId?): Promise<BigInt>\`**: Gets total token issuance in the network.
+- **\`batch(api, txs[]): SubmittableExtrinsic\`**: Creates a batch transaction for multiple operations.
+
+### Blockchain Information
+
+- **\`block(api): Promise<RawBlock>\`**: Retrieves the latest block data.
+- **\`header(api): Promise<RawBlockHeader>\`**: Retrieves the latest block header.
+- **\`blockHash(api): Promise<string>\`**: Retrieves the latest block hash.
+- **\`blockNumber(api): Promise<number>\`**: Retrieves the current block number.
+- **\`networkTimestamp(api): Promise<bigint>\`**: Retrieves the network timestamp.
+
+### Consensus Information
+
+- **\`blockchainSize(api): Promise<bigint>\`**: Calculates the blockchain's total size.
+- **\`spacePledged(api): Promise<bigint>\`**: Calculates total space pledged by farmers.
+- **\`solutionRanges(api): Promise<SolutionRanges>\`**: Retrieves current and next solution ranges.
+- **\`shouldAdjustSolutionRange(api): Promise<boolean>\`**: Checks if solution range needs adjustment.
+- **\`segmentCommitment(api): Promise<[StorageKey<AnyTuple>, Codec][]>\`**: Gets segment commitment entries.
+- **\`slotProbability(api): [number, number]\`**: Returns slot probability constants.
+- **\`maxPiecesInSector(api): bigint\`**: Returns maximum pieces in a sector.
+
+### Domains
+
+- **\`domainStakingSummary(api): Promise<DomainStakingSummary[]>\`**: Retrieves domain staking summaries.
+- **\`domains(api): Promise<DomainRegistry[]>\`**: Retrieves domain registries.
+- **\`latestConfirmedDomainBlock(api): Promise<ConfirmedDomainBlock[]>\`**: Retrieves latest confirmed blocks per domain.
+
+### Operators and Staking
+
+- **\`operators(api): Promise<Operator[]>\`**: Retrieves list of all operators.
+- **\`operator(api, operatorId): Promise<OperatorDetails>\`**: Retrieves details of a specific operator.
+- **\`deposits(api, operatorId, account?): Promise<Deposit[]>\`**: Retrieves deposits for an operator.
+- **\`withdrawals(api, operatorId, account?): Promise<Withdrawal[]>\`**: Retrieves withdrawals for an operator.
+- **\`registerOperator(params): SubmittableExtrinsic\`**: Creates a transaction to register a new operator.
+- **\`nominateOperator(params): SubmittableExtrinsic\`**: Creates a transaction to nominate an operator.
+- **\`withdrawStake(params): SubmittableExtrinsic\`**: Creates a transaction to withdraw staked tokens.
+- **\`deregisterOperator(params): SubmittableExtrinsic\`**: Creates a transaction to deregister an operator.
+- **\`unlockFunds(params): SubmittableExtrinsic\`**: Creates a transaction to unlock staked funds.
+- **\`unlockNominator(params): SubmittableExtrinsic\`**: Creates a transaction to unlock nominator funds.
+
+### Transfers
+
+- **\`transfer(api, receiver, amount, allowDeath?): SubmittableExtrinsic\`**: Creates a transaction to transfer funds.
+- **\`transferAll(api, receiver, keepAlive?): SubmittableExtrinsic\`**: Creates a transaction to transfer all tokens.
+
+### Utility Functions
+
+- **\`query<T>(api, methodPath, params?): Promise<T>\`**: Queries blockchain state for a method.
+- **\`remark(api, remark, withEvent?): SubmittableExtrinsic\`**: Creates a remark transaction.
+- **\`rpc<T>(api, methodPath, params?): Promise<T>\`**: Performs an RPC call.
+
+---
+
+*Note:* All asynchronous functions return a \`Promise\` and should be used with \`await\` for proper execution flow.
+
+---
+## Interactive Usage Examples
+
+### Fetching the Wallet Balance (unlocked, locked) and nonce for the wallet
+
+<AutoConsensusFetchBalance />
+
+---
+
+## Usage Examples
+
+Below are examples demonstrating how to use the functions provided by \`@autonomys/auto-consensus\`.
+
+### 1. Account Management
+
+#### Retrieve Account Information
+
+Get detailed account information, including the nonce and balance data.
+
+\`\`\`typescript
+import \{ account \} from '@autonomys/auto-consensus';
+import \{ activate \} from '@autonomys/auto-utils';
+
+(async () => \{
+  const api = await activate(\{ networkId: 'gemini-3h' \});
+  const accountData = await account(api, 'your_address');
+
+  console.log(\`Nonce: \$\{accountData.nonce\}\`);
+  console.log(\`Free Balance: \$\{accountData.data.free\}\`);
+  console.log(\`Reserved Balance: \$\{accountData.data.reserved\}\`);
+
+  await api.disconnect();
+\})();
+\`\`\`
+
+#### Activate a Wallet and Check Balance
+
+\`\`\`typescript
+import \{ activateWallet \} from '@autonomys/auto-utils';
+import \{ balance \} from '@autonomys/auto-consensus';
+
+(async () => \{
+  // Activate a wallet using a mnemonic phrase
+  const \{ api, accounts \} = await activateWallet(\{
+    mnemonic: 'your mnemonic phrase here', // Replace with your mnemonic
+    networkId: 'gemini-3h', // Optional: specify the network ID
+  \});
+
+  const account = accounts[0];
+  console.log(\`Connected with account address: \$\{account.address\}\`);
+
+  // Check the account balance
+  const accountBalance = await balance(api, account.address);
+  console.log(\`Account balance: \$\{accountBalance.free\}\`);
+
+  // Disconnect when done
+  await api.disconnect();
+\})();
+\`\`\`
+
+### 2. Balance Operations
+
+#### Retrieve Account Balance
+
+Get the free balance of an account.
+
+\`\`\`typescript
+import \{ balance \} from '@autonomys/auto-consensus';
+import \{ activate \} from '@autonomys/auto-utils';
+
+(async () => \{
+  const api = await activate(\{ networkId: 'gemini-3h' \});
+  const accountBalance = await balance(api, 'your_address');
+
+  console.log(\`Free Balance: \$\{accountBalance.free\}\`);
+
+  await api.disconnect();
+\})();
+\`\`\`
+
+#### Get Total Issuance
+
+Retrieve the total token issuance in the network.
+
+\`\`\`typescript
+import \{ totalIssuance \} from '@autonomys/auto-consensus';
+
+(async () => \{
+  const total = await totalIssuance('gemini-3h');
+
+  console.log(\`Total Issuance: \$\{total.toString()\}\`);
+\})();
+\`\`\`
+
+### 3. Transfers
+
+#### Transfer Funds Between Accounts
+
+\`\`\`typescript
+import \{ activateWallet \} from '@autonomys/auto-utils';
+import \{ transfer \} from '@autonomys/auto-consensus';
+
+(async () => \{
+  // Activate sender's wallet
+  const senderWallet = await activateWallet(\{
+    mnemonic: 'sender mnemonic phrase', // Replace with sender's mnemonic
+  \});
+  const sender = senderWallet.accounts[0];
+
+  // Activate receiver's wallet
+  const receiverWallet = await activateWallet(\{
+    mnemonic: 'receiver mnemonic phrase', // Replace with receiver's mnemonic
+  \});
+  const receiver = receiverWallet.accounts[0];
+
+  // Transfer 1 ATC from sender to receiver
+  const amount = 1; // Amount in ATC
+  const transferTx = await transfer(senderWallet.api, receiver.address, amount);
+
+  // Sign and send the transaction
+  await transferTx.signAndSend(sender, (\{ status, txHash, events \}) => \{
+    if (status.isInBlock) \{
+      console.log(\`Transaction included at blockHash \$\{status.asInBlock\}\`);
+      console.log(\`Transaction hash: \$\{txHash\}\`);
+    \} else if (status.isFinalized) \{
+      console.log(\`Transaction finalized at blockHash \$\{status.asFinalized\}\`);
+    \}
+  \});
+
+  // Disconnect when done
+  await senderWallet.api.disconnect();
+  await receiverWallet.api.disconnect();
+\})();
+\`\`\`
+
+#### Transfer Tokens
+
+Transfer tokens from one account to another.
+
+\`\`\`typescript
+import \{ transfer \} from '@autonomys/auto-consensus';
+import \{ activateWallet, signAndSendTx, disconnect \} from '@autonomys/auto-utils';
+
+(async () => \{
+  const \{ api, accounts \} = await activateWallet(\{
+    networkId: 'gemini-3h',
+    mnemonic: 'your_mnemonic',
+  \});
+
+  const sender = accounts[0];
+  const recipientAddress = 'recipient_address';
+  const amount = '1000000000000'; // Amount in smallest units (e.g., wei)
+
+  const tx = await transfer(api, recipientAddress, amount);
+
+  // Sign and send the transaction
+  await signAndSendTx(sender, tx);
+
+  console.log(\`Transferred \$\{amount\} tokens to \$\{recipientAddress\}\`);
+
+  await disconnect(api);
+\})();
+\`\`\`
+
+### 4. Staking Operations
+
+#### Register an Operator
+
+Register a new operator for staking.
+
+\`\`\`typescript
+import \{ registerOperator \} from '@autonomys/auto-consensus';
+import \{ activateWallet, signAndSendTx \} from '@autonomys
+
+/auto-utils';
+
+(async () => \{
+  const \{ api \} = await activateWallet(\{
+    networkId: 'gemini-3h',
+    mnemonic: 'sender_mnemonic',
+  \});
+
+  // Sender's account (who will register the operator)
+  const \{ accounts: senderAccounts \} = await activateWallet(\{
+    networkId: 'gemini-3h',
+    mnemonic: 'sender_mnemonic',
+  \});
+  const sender = senderAccounts[0];
+
+  // Operator's account
+  const \{ accounts: operatorAccounts \} = await activateWallet(\{
+    networkId: 'gemini-3h',
+    mnemonic: 'operator_mnemonic',
+  \});
+  const operatorAccount = operatorAccounts[0];
+
+  const tx = await registerOperator(\{
+    api,
+    senderAddress: sender.address,
+    Operator: operatorAccount,
+    domainId: '0', // Domain ID where the operator will be registered
+    amountToStake: '1000000000000000000', // Amount in smallest units
+    minimumNominatorStake: '10000000000000000',
+    nominationTax: '5', // Percentage as a string (e.g., '5' for 5%)
+  \});
+
+  // Sign and send the transaction
+  await signAndSendTx(sender, tx);
+
+  console.log('Operator registered successfully');
+\})();
+\`\`\`
+
+#### Nominate an Operator
+
+Nominate an existing operator by staking tokens.
+
+\`\`\`typescript
+import \{ nominateOperator \} from '@autonomys/auto-consensus';
+import \{ activateWallet, signAndSendTx \} from '@autonomys/auto-utils';
+
+(async () => \{
+  const \{ api, accounts \} = await activateWallet(\{
+    networkId: 'gemini-3h',
+    mnemonic: 'nominator_mnemonic',
+  \});
+  const nominator = accounts[0];
+
+  const operatorId = '1'; // The ID of the operator to nominate
+  const amountToStake = '5000000000000000000'; // Amount in smallest units
+
+  const tx = await nominateOperator(\{
+    api,
+    operatorId,
+    amountToStake,
+  \});
+
+  // Sign and send the transaction
+  await signAndSendTx(nominator, tx);
+
+  console.log(\`Nominated operator \$\{operatorId\} with \$\{amountToStake\} stake\`);
+\})();
+\`\`\`
+
+### 5. Blockchain Information
+
+#### Get Block and Network Information
+
+Retrieve the current block number, block hash, and network timestamp.
+
+\`\`\`typescript
+import \{ blockNumber, blockHash, networkTimestamp \} from '@autonomys/auto-consensus';
+import \{ activate \} from '@autonomys/auto-utils';
+
+(async () => \{
+  const api = await activate(\{ networkId: 'gemini-3h' \});
+
+  const currentBlockNumber = await blockNumber(api);
+  const currentBlockHash = await blockHash(api);
+  const currentTimestamp = await networkTimestamp(api);
+
+  console.log(\`Current Block Number: \$\{currentBlockNumber\}\`);
+  console.log(\`Current Block Hash: \$\{currentBlockHash\}\`);
+  console.log(\`Network Timestamp: \$\{currentTimestamp\}\`);
+
+  await api.disconnect();
+\})();
+\`\`\`
+
+### 6. Domain Interactions
+
+#### Retrieve Domains Information
+
+Get the list of domains registered on the network.
+
+\`\`\`typescript
+import \{ domains \} from '@autonomys/auto-consensus';
+import \{ activate \} from '@autonomys/auto-utils';
+
+(async () => \{
+  const api = await activate(\{ networkId: 'gemini-3h' \});
+  const domainList = await domains(api);
+
+  domainList.forEach((domain) => \{
+    console.log(\`Domain ID: \$\{domain.id\}\`);
+    console.log(\`Owner Address: \$\{domain.owner\}\`);
+    console.log(\`Creation Block: \$\{domain.creationBlock\}\`);
+    // ...other domain properties
+  \});
+
+  await api.disconnect();
+\})();
+\`\`\`
+
+#### Get Domain Staking Summary
+
+Retrieve staking summaries for all domains.
+
+\`\`\`typescript
+import \{ domainStakingSummary \} from '@autonomys/auto-consensus';
+import \{ activate \} from '@autonomys/auto-utils';
+
+(async () => \{
+  const api = await activate(\{ networkId: 'gemini-3h' \});
+  const stakingSummaries = await domainStakingSummary(api);
+
+  stakingSummaries.forEach((summary) => \{
+    console.log(\`Domain ID: \$\{summary.domainId\}\`);
+    console.log(\`Total Stake: \$\{summary.totalStake\}\`);
+    // ...other summary properties
+  \});
+
+  await api.disconnect();
+\})();
+\`\`\`
+
+#### Get Latest Confirmed Domain Blocks
+
+Fetch the latest confirmed blocks for each domain.
+
+\`\`\`typescript
+import \{ latestConfirmedDomainBlock \} from '@autonomys/auto-consensus';
+import \{ activate \} from '@autonomys/auto-utils';
+
+(async () => \{
+  const api = await activate(\{ networkId: 'gemini-3h' \});
+  const confirmedBlocks = await latestConfirmedDomainBlock(api);
+
+  confirmedBlocks.forEach((blockInfo) => \{
+    console.log(\`Domain ID: \$\{blockInfo.id\}\`);
+    console.log(\`Block Number: \$\{blockInfo.number\}\`);
+    console.log(\`Block Hash: \$\{blockInfo.hash\}\`);
+    // ...other block properties
+  \});
+
+  await api.disconnect();
+\})();
+\`\`\`
+
+---
+
+## Notes
+
+- **Asynchronous Functions**: Many functions return promises and should be used with \`await\` to ensure proper execution flow.
+
+- **API Disconnection**: Always disconnect the API instance after your operations are complete to free up resources.
+
+- **Error Handling**: Wrap your asynchronous calls in \`try...catch\` blocks to handle potential errors gracefully.
+
+---
+
+### File: sdk/auto-drive.mdx
+
+## Auto-Drive Package Documentation
+
+### Introduction
+
+The \`@autonomys/auto-drive\` package provides utilities for creating and managing IPLD DAGs (InterPlanetary Linked Data Directed Acyclic Graphs) for files and folders. It facilitates chunking large files, handling metadata, and creating folder structures suitable for distributed storage systems like IPFS.
+
+### Features
+
+- **File Chunking and DAG Creation**: Efficiently split large files into smaller chunks and create IPLD DAGs.
+- **Folder Structure Creation**: Generate IPLD DAGs for directory structures.
+- **Metadata Handling**: Add and manage metadata for files and folders.
+- **CID Management**: Utilities for working with Content Identifiers (CIDs).
+- **TypeScript Support**: Fully typed for enhanced developer experience.
+
+---
+
+## Auto Drive Dashboard
+
+Logging in to Auto Drive will allow you to view your upload and download limits, access files uploaded by other users, and manage and share your submissions.
+
+1. Log in to [Auto Drive](https://ai3.storage/)
+2. Sign in via Google or Discord  
+
+   ![Auto-Drive-1](/developers/Auto-Drive-1.png)
+
+3. On the landing page (dashboard) you will see:  
+
+   - Your upload limit (currently **100MB** per month)  
+   - Your download limit (currently **5GB** per month)  
+   - A list of **uploaded files** and their **CIDs**
+   - Options to **Download**, **Share**, or **Remove** each file
+
+  ![Auto-Drive-2](/developers/Auto-Drive-2.png)
+
+> **Tip:** Removing a file does not delete it from the DSN, as it is permanent storage. It only removes the file from your dashboard.
+
+You can use the in-browser environment to upload, download, or share files, or you can use the SDK functions (described later on this page) to upload files or folders via the CLI.
+
+  ![Auto-Drive-3](/developers/Auto-Drive-3.png)
+
+
+### Getting an API Key
+
+Click on \`Profile\` to create your \`API\` key. You can then use this API key in the CLI to upload files or folders.
+
+  ![Auto-Drive-4](/developers/Auto-Drive-4.png)
+
+### Sharing Files
+
+To share a file, click the \`Share\` button next to the file. You can share it using a link, or by providing the user’s public ID. Each user’s public ID is visible on their \`Profile\` page.
+
+  ![Auto-Drive-5](/developers/Auto-Drive-5.png)
+
+---
+### Installation
+
+Install the package via npm or yarn:
+
+\`\`\`bash
+# Using npm
+npm install @autonomys/auto-drive
+
+# Using yarn
+yarn add @autonomys/auto-drive
+\`\`\`
+
+### Importing the Package
+
+Before using the functions provided by the \`auto-drive\` package, you need to import them into your project:
+
+\`\`\`typescript
+// Import specific functions
+import \{ createFileIPLDDag, createFolderIPLDDag \} from '@autonomys/auto-drive';
+
+// Or import everything
+import * as drive from '@autonomys/auto-drive';
+\`\`\`
+
+---
+
+## Available Functions
+
+### Upload and Download Operations
+
+- **\`uploadFile(api, file, options): Promise<string>\`**: Uploads a file (using a buffer, \`File\`, or a custom interface) with optional encryption and compression. Returns the resulting CID as a string.
+- **\`uploadFileFromFilepath(api, filepath, options): Promise<string>\`**: Uploads a file from a filesystem path.
+- **\`uploadFileFromInput(api, file, options): Promise<string>\`**: Uploads a file obtained from a browser's \`File\` API.
+- **\`uploadFolderFromFolderPath(api, folderPath, options): Promise<string>\`**: Uploads a folder from a filesystem path.
+- **\`uploadFolderFromInput(api, fileList, options): Promise<string>\`**: Uploads a folder from a browser's \`FileList\`.
+- **\`uploadFileWithinFolderUpload(api, uploadId, file, options): Promise<string>\`**: Uploads a file within an existing folder upload session.
+- **\`downloadFile(api, cid, password?): AsyncIterable<Buffer>\`**: Downloads a file from its CID, with optional decryption using a password.
+- **\`downloadObject(api, params): AsyncIterable<Buffer>\`**: Downloads an object by its CID. *(Likely implemented as \`apiCalls.downloadObject\`.)*
+
+
+### Utility Functions
+
+- **\`uploadFileChunks(api, fileUploadId, asyncIterable, uploadChunkSize, onProgress): Promise<void>\`**: Handles the chunked upload of files to the server.
+- **\`constructZipBlobFromTreeAndPaths(tree, filesMap): Promise<Blob>\`**: Creates a zip archive from a file tree and corresponding file paths.
+- **\`constructFromInput(files): FolderTree\`**: Constructs a folder tree from an array of files.
+- **\`fileToIterable(file): AsyncIterable<Buffer>\`**: Converts a file into an async iterable of buffers.
+
+### CID Utilities
+
+- **\`cidOfNode(node): CID\`**: Generates a CID from an IPLD node.
+- **\`cidToString(cid): string\`**: Converts a CID to its string representation.
+- **\`stringToCid(cidString): CID\`**: Parses a CID string back into a CID object.
+
+### Node Encoding and Decoding
+
+- **\`encodeNode(node): Uint8Array\`**: Encodes an IPLD node into a byte array.
+- **\`decodeNode(encodedNode): any\`**: Decodes a byte array back into an IPLD node.
+
+---
+
+*Note:* All asynchronous functions return a \`Promise\` (or an async iterable in the case of \`downloadObject\`), and should be used with \`await\` for proper execution flow.
+
+---
+
+## Usage Examples
+
+### 1. Uploading a File from Filepath
+
+\`\`\`typescript
+import \{ uploadFileFromFilepath,createAutoDriveApi \} from '@autonomys/auto-drive'
+
+const api = createAutoDriveApi(\{ apiKey: 'your-api-key' \}) // Initialize your API instance with API key
+const filePath = 'path/to/your/file.txt' // Specify the path to your file
+const options = \{
+  password: 'your-encryption-password', // Optional: specify a password for encryption
+  compression: true,
+  // an optional callback useful for large file uploads
+  onProgress?: (progress: number) => \{
+    console.log(\`The upload is completed is \$\{progress\}% completed\`)
+  \}
+\}
+
+const cid = await uploadFileFromFilepath(api, filePath, options)
+
+console.log(\`The file is uploaded and its cid is \$\{cid\}\`)
+\`\`\`
+
+### 2. Uploading a File from Input (Interface)
+
+\`\`\`typescript
+import \{ uploadFileFromInput, createAutoDriveApi \} from '@autonomys/auto-drive'
+
+const api = createAutoDriveApi(\{ apiKey: 'your-api-key' \}) // Initialize your API instance with API key
+
+// e.g Get File from object from HTML event
+const file: File = e.target.value // Substitute with your file
+const options = \{
+  password: 'your-encryption-password', // Optional: specify a password for encryption
+  compression: true,
+\}
+const cid = await uploadFileFromInput(api, file, options)
+
+console.log(\`The file is uploaded and its cid is \$\{cid\}\`)
+
+\`\`\`
+
+### 3. Uploading a file from Custom Interface
+
+Some times you might have a custom interface that doesn't fit either File or filepath. For those cases exists the interface GenericFile:
+
+
+
+\`\`\`typescript
+export interface GenericFile \{
+  read(): AsyncIterable<Buffer> // A buffer generator function that will output the bytes of the file
+  name: string
+  mimeType?: string
+  size: number
+  path: string // Could be ignored in file upload
+\}
+\`\`\`
+
+You could upload any file that could be represented in that way. For example, uploading a file as a Buffer
+
+\`\`\`typescript
+import \{ createAutoDriveApi, uploadFile \} from '@autonomys/auto-drive'
+
+const api = createAutoDriveApi(\{ apiKey: 'your-api-key' \}) // Initialize your API instance with API key
+const buffer = Buffer.from(...);
+const genericFile = \{
+  read: async function *() \{
+    yield buffer
+  \},
+  name: "autonomys-whitepaper.pdf",
+  mimeType: "application/pdf",
+  size: 1234556,
+  path: "autonomys-whitepaper.pdf"
+\}
+
+const options = \{
+  password: 'your-encryption-password', // Optional: specify a password for encryption
+  compression: true,
+  // an optional callback useful for large file uploads
+  onProgress?: (progress: number) => \{
+    console.log(\`The upload is completed is \$\{progress\}% completed\`)
+  \}
+\}
+
+const cid = uploadFile(api, genericFile, options)
+
+console.log(\`The file is uploaded and its cid is \$\{cid\}\`)
+\`\`\`
+
+
+### 4. Uploading a folder
+
+\`\`\`typescript
+import \{ createAutoDriveApi, uploadFolderFromFolderPath \} from '@autonomys/auto-drive'
+
+const api = createAutoDriveApi(\{ apiKey: 'your-api-key' \}) // Initialize your API instance with API key
+const folderPath = 'path/to/your/folder' // Specify the path to your folder
+
+const options = \{
+  uploadChunkSize: 1024 * 1024, // Optional: specify the chunk size for uploads
+  password: 'your-encryption-password', // Optional: If folder is encrypted
+  // an optional callback useful for large file uploads
+  onProgress: (progress: number) => \{
+    console.log(\`The upload is completed is \$\{progress\}% completed\`)
+  \},
+\}
+
+const folderCID = await uploadFolderFromFolderPath(api, folderPath, options)
+
+console.log(\`The folder is uploaded and its cid is \$\{folderCID\}\`)
+
+\`\`\`
+
+> **Note:** When the folder is encrypted, a zip file would be generated first, and then that file would be encrypted and uploaded.
+
+### 5. Downloading files
+
+\`\`\`typescript
+import \{ createAutoDriveApi, downloadFile \} from '@autonomys/auto-drive'
+
+const api = createAutoDriveApi(\{ apiKey: 'your-api-key' \}) // Initialize your API instance with API key
+
+try \{
+  const cid = '..'
+  const stream = await downloadFile(api, cid)
+  let file = Buffer.alloc(0)
+  for await (const chunk of stream) \{
+    file = Buffer.concat([file, chunk])
+  \}
+  console.log('File downloaded successfully:', stream)
+\} catch (error) \{
+  console.error('Error downloading file:', error)
+\}
+\`\`\`
+
+### 6. Usage example of \`getRoots\` (retrieve the root directories)
+
+
+\`\`\`typescript
+import \{ createAutoDriveApi, apiCalls, Scope \} from '@autonomys/auto-drive'
+
+const api = createAutoDriveApi(\{ apiKey: 'your-api-key' \}) // Initialize your API instance with API key
+
+try \{
+  const myFiles = await apiCalls.getRoots(api, \{
+    scope: Scope.User,
+    limit: 100,
+    offset: 0,
+  \})
+
+  console.log(\`Retrieved \$\{myFiles.rows.length\} files of \$\{myFiles.totalCount\} total\`)
+  for (const file of myFiles.rows) \{
+    console.log(\`\$\{file.name\} - \$\{file.headCid\}: \$\{file.size\}\`)
+  \}
+\} catch (error) \{
+  console.error('Error downloading file:', error)
+\}
+\`\`\`
+
+---
+
+## Notes
+
+- **Asynchronous Functions**: Use \`await\` with all promises for proper execution flow.
+- **Error Handling**: Wrap asynchronous calls in \`try...catch\` blocks to handle potential errors gracefully.
+- **File System Operations**: Ensure that file paths are correct and accessible when reading from or writing to the file system.
+
+---
+
+---
+
+### File: sdk/auto-id.mdx
+
+## Auto-ID Package Documentation
+
+> **Warning:** Auto ID domain is not yet available on Taurus Network or Autonomys Mainnet
+
+### Introduction
+
+The \`@autonomys/auto-id\` package provides functionalities for managing certificates, authenticating users, and integrating Zero-Knowledge Proofs (ZKPs) on the Autonomys Network. It enables developers to:
+
+- **Authenticate Users**: Verify user identities using their Auto IDs.
+- **Manage Certificates**: Create, issue, and handle x509 certificates associated with Auto IDs.
+- **Integrate Zero-Knowledge Proofs (ZKPs)**: Utilize ZKP claims for enhanced privacy and authentication.
+
+### Features
+
+- **Certificate Management**: Create and manage x509 certificates linked to Auto IDs.
+- **Zero-Knowledge Proof Integration**: Implement privacy-preserving claims using ZKPs.
+- **User Authentication**: Authenticate users through their Auto IDs and certificates.
+- **TypeScript Support**: Fully typed for enhanced developer experience.
+- **Blockchain Interaction**: Interact with the Autonomys Network without dealing with low-level blockchain complexities.
+
+---
+
+## Installation
+
+Install the package via npm or yarn:
+
+\`\`\`bash
+# Using npm
+npm install @autonomys/auto-id
+
+# Using yarn
+yarn add @autonomys/auto-id
+\`\`\`
+
+---
+
+## Importing the Package
+
+Before using the functions provided by the \`auto-id\` package, you need to import them into your project:
+
+\`\`\`typescript
+// Import specific functions
+import \{ selfIssueCertificate, authenticateAutoIdUser \} from '@autonomys/auto-id';
+
+// Or import everything
+import * as autoId from '@autonomys/auto-id';
+\`\`\`
+
+---
+
+## Available Functions
+
+### Auto ID Functions
+
+- **\`addDaysToCurrentDate(days: number): Date\`**: Returns current date plus specified days.
+- **\`authenticateAutoIdUser(api, autoId, challenge, signature): Promise<boolean>\`**: Verifies an Auto ID user by signature over a challenge.
+- **\`AutoIdError\`**: Enum of possible Auto ID errors.
+- **\`checkCertificateAndRevocationList(api, autoIdIdentifier, getCertificate): Promise<AutoIdX509Certificate>\`**: Checks if a certificate exists and is not revoked.
+- **\`convertX509CertToDerEncodedComponents(certificate): [Uint8Array, Uint8Array]\`**: Converts an X.509 certificate to DER-encoded components.
+- **\`decryptPem(pem, password): string\`**: Decrypts an encrypted PEM key using a password.
+- **\`deactivateAutoId(api, autoIdIdentifier, signature): Promise<SubmittableExtrinsic>\`**: Creates a transaction to deactivate an Auto ID.
+- **\`derEncodeSignatureAlgorithmOID(oid, parameters?): Uint8Array\`**: DER-encodes a signature algorithm OID.
+- **\`getCertificate(api, autoIdIdentifier): Promise<AutoIdX509Certificate | undefined>\`**: Retrieves a certificate from the blockchain.
+- **\`getCertificateRevocationList(api, autoIdIdentifier): Promise<string[]>\`**: Gets the revocation list for an Auto ID.
+- **\`getCertificateSubjectPublicKey(api, autoIdIdentifier): Promise<CryptoKey>\`**: Retrieves the public key from a stored certificate.
+- **\`hexStringToU8a(hexString): Uint8Array\`**: Converts a hex string to a \`Uint8Array\`.
+- **\`identifierFromX509Cert(issuerId, certificate): string\`**: Generates an Auto ID identifier from a certificate.
+- **\`mapErrorCodeToEnum(errorCode): AutoIdError | null\`**: Maps an error code to an \`AutoIdError\`.
+- **\`pemToCryptoKeyForSigning(pem, algorithm): Promise<CryptoKey>\`**: Converts a PEM key to a \`CryptoKey\` for signing.
+- **\`pemToHex(pem): string\`**: Converts a PEM key to a hex string.
+- **\`registerAutoId(api, certificate, issuerId?): SubmittableExtrinsic\`**: Creates a transaction to register an Auto ID.
+- **\`renewAutoId(api, autoIdIdentifier, newCertificate): Promise<SubmittableExtrinsic>\`**: Creates a transaction to renew an Auto ID.
+- **\`revokeCertificate(api, autoIdIdentifier, signature): Promise<SubmittableExtrinsic>\`**: Creates a transaction to revoke a certificate.
+- **\`validateCertificatePublicKey(certPublicKey, derivedPublicKey): Promise<boolean>\`**: Validates if a derived public key matches the certificate's.
+
+### Certificate Management
+
+- **\`certificateToPem(cert): string\`**: Converts a certificate to PEM format.
+- **\`createAndSignCSR(subjectName, keyPair): Promise<Pkcs10CertificateRequest>\`**: Creates and signs a CSR.
+- **\`createCSR(subjectName, keyPair): Promise<Pkcs10CertificateRequest>\`**: Creates a Certificate Signing Request.
+- **\`getCertificateAutoId(certificate): string | undefined\`**: Extracts Auto ID from a certificate's SAN extension.
+- **\`getSubjectCommonName(subject): string | undefined\`**: Retrieves the common name from a certificate subject.
+- **\`issueCertificate(csr, issuerCertificateData, validityPeriodDays?): Promise<X509Certificate>\`**: Issues a certificate based on a CSR.
+- **\`pemToCertificate(pem): X509Certificate\`**: Converts a PEM string to a certificate object.
+- **\`prettyPrintCertificate(cert): void\`**: Prints certificate details to the console.
+- **\`saveCertificate(certificate, filePath): Promise<void>\`**: Saves a certificate to a file in PEM format.
+- **\`selfIssueCertificate(subjectName, keyPair, validityPeriodDays?): Promise<X509Certificate>\`**: Generates a self-signed certificate.
+- **\`signCSR(csr, keyPair): Promise<Pkcs10CertificateRequest>\`**: Signs a CSR using a private key.
+
+### Key Management
+
+- **\`cryptoKeyPairFromPrivateKey(privateKey, algorithm, password?): Promise<CryptoKeyPair>\`**: Generates a key pair from a private key.
+- **\`cryptoKeyToPem(key, password?): Promise<string>\`**: Converts a \`CryptoKey\` to PEM format.
+- **\`doPublicKeysMatch(publicKey1, publicKey2): Promise<boolean>\`**: Checks if two public keys are identical.
+- **\`generateEd25519KeyPair(): Promise<CryptoKeyPair>\`**: Generates an Ed25519 key pair.
+- **\`generateRsaKeyPair(keySize?): Promise<CryptoKeyPair>\`**: Generates an RSA key pair.
+- **\`keyToHex(key): Promise<string>\`**: Converts a \`CryptoKey\` to a hex string.
+- **\`loadPrivateKey(filePath, algorithm, password?): Promise<CryptoKey>\`**: Loads a private key from a file.
+- **\`loadPublicKey(filePath, algorithm): Promise<CryptoKey>\`**: Loads a public key from a file.
+- **\`pemToPrivateKey(pemData, algorithm, password?): Promise<CryptoKey>\`**: Converts a PEM private key to a \`CryptoKey\`.
+- **\`pemToPublicKey(pemData, algorithm): Promise<CryptoKey>\`**: Converts a PEM public key to a \`CryptoKey\`.
+- **\`rawToPrivateKey(arrayBuffer, algorithm): Promise<CryptoKey>\`**: Imports a private key from raw data.
+- **\`rawToPublicKey(rawKey, algorithm): Promise<CryptoKey>\`**: Imports a public key from raw data.
+- **\`saveKey(key, filePath, password?): Promise<void>\`**: Saves a \`CryptoKey\` to a file.
+
+---
+
+## Usage Examples
+
+Below are examples demonstrating how to use the functions provided by \`@autonomys/auto-id\`.
+
+### 1. User Authentication
+
+#### **Authenticate a User with Auto ID**
+
+Verify a user's identity using their Auto ID, challenge message, and signature.
+
+\`\`\`typescript
+import \{ authenticateAutoIdUser \} from '@autonomys/auto-id';
+import \{ activate \} from '@autonomys/auto-utils';
+
+(async () => \{
+  // Activate the network API
+  const api = await activate(\{ networkId: 'mainnet' \});
+
+  // User's Auto ID
+  const autoId = 'user-auto-id'; // Replace with the user's Auto ID
+
+  // Challenge message that the user needs to sign
+  const challengeMessage = 'Please sign this message to authenticate.';
+  const challenge = new TextEncoder().encode(challengeMessage);
+
+  // Assume the user provides the signature
+  const signature = new Uint8Array([...]); // User's signature as Uint8Array
+
+  // Authenticate the user
+  const isAuthenticated = await authenticateAutoIdUser(api, autoId, challenge, signature);
+
+  if (isAuthenticated) \{
+    console.log('User authenticated successfully.');
+  \} else \{
+    console.log('Authentication failed.');
+  \}
+
+  // Disconnect when done
+  await api.disconnect();
+\})();
+\`\`\`
+
+**Parameters:**
+
+- \`api\`: Connected API instance.
+- \`autoId\`: User's Auto ID.
+- \`challenge\`: The challenge message (\`BufferSource\`).
+- \`signature\`: User's signature over the challenge (\`BufferSource\`).
+
+**Returns:**
+
+- \`Promise<boolean>\` indicating authentication success.
+
+---
+
+### 2. Certificate Management
+
+#### **Self-Issuing a Certificate**
+
+Generate a self-signed x509 certificate for an Auto ID.
+
+\`\`\`typescript
+import \{ selfIssueCertificate \} from '@autonomys/auto-id';
+import \{ generateKeyPair \} from '@autonomys/auto-utils';
+
+(async () => \{
+  // Generate a key pair
+  const keyPair = await generateKeyPair();
+
+  // Subject name for the certificate
+  const subjectName = 'CN=User Name'; // Replace with appropriate subject
+
+  // Generate a self-signed certificate
+  const certificate = await selfIssueCertificate(subjectName, keyPair);
+
+  console.log('Certificate created:', certificate);
+
+  // Optionally, save the certificate to a file or store it securely
+\})();
+\`\`\`
+
+**Parameters:**
+
+- \`subjectName\`: The subject name for the certificate (e.g., \`'CN=User Name'\`).
+- \`keyPair\`: The key pair for the certificate.
+
+**Returns:**
+
+- \`Promise<x509.X509Certificate>\`.
+
+#### **Issuing a Certificate**
+
+Issue a certificate based on a Certificate Signing Request (CSR).
+
+\`\`\`typescript
+import \{
+  createAndSignCSR,
+  issueCertificate,
+  selfIssueCertificate,
+\} from '@autonomys/auto-id';
+import \{ generateKeyPair \} from '@autonomys/auto-utils';
+
+(async () => \{
+  // Generate key pairs for the subject and issuer
+  const subjectKeyPair = await generateKeyPair();
+  const issuerKeyPair = await generateKeyPair();
+
+  // Subject and issuer names
+  const subjectName = 'CN=Subject Name';
+  const issuerName = 'CN=Issuer Name';
+
+  // Create issuer's self-signed certificate
+  const issuerCertificate = await selfIssueCertificate(issuerName, issuerKeyPair);
+
+  // Create and sign CSR for the subject
+  const csr = await createAndSignCSR(subjectName, subjectKeyPair);
+
+  // Issue certificate for the subject using issuer's certificate and key pair
+  const issuedCertificate = await issueCertificate(csr, \{
+    certificate: issuerCertificate,
+    keyPair: issuerKeyPair,
+  \});
+
+  console.log('Issued Certificate:', issuedCertificate);
+\})();
+\`\`\`
+
+**Parameters for \`issueCertificate\`:**
+
+- \`csr\`: The CSR from the subject.
+- \`issuerCertificateData\`: Contains the issuer's certificate and key pair.
+- \`validityPeriodDays\` (optional): Certificate validity period in days.
+
+**Returns:**
+
+- \`Promise<x509.X509Certificate>\`.
+
+---
+
+### 3. Key Management
+
+#### **Generating and Saving a Key Pair**
+
+Generate a cryptographic key pair and save it to files.
+
+\`\`\`typescript
+import \{ generateKeyPair, saveKey \} from '@autonomys/auto-id';
+
+(async () => \{
+  // Generate a key pair
+  const keyPair = await generateKeyPair();
+
+  // Save the private key
+  await saveKey(keyPair.privateKey, 'path/to/privateKey.pem', 'your-password');
+
+  // Save the public key
+  await saveKey(keyPair.publicKey, 'path/to/publicKey.pem');
+
+  console.log('Keys saved successfully.');
+\})();
+\`\`\`
+
+**Parameters:**
+
+- \`key\`: The \`CryptoKey\` to save.
+- \`filePath\`: The file path where the key will be saved.
+- \`password\` (optional): Password for encrypting the private key.
+
+---
+
+### 4. Zero-Knowledge Proofs (ZKPs)
+
+#### **Creating a ZKP Claim**
+
+Generate a Zero-Knowledge Proof claim using the Reclaim protocol.
+
+\`\`\`typescript
+import \{ ReclaimZKPClaim, buildReclaimRequest \} from '@autonomys/auto-id';
+import \{ Proof \} from '@reclaimprotocol/js-sdk';
+
+(async () => \{
+  // Application ID from Reclaim Protocol
+  const appId = 'your-app-id'; // Replace with your actual app ID
+
+  // Supported claim type (e.g., 'GoogleEmail')
+  const claimType = 'GoogleEmail';
+
+  // Build a Reclaim proof request
+  const reclaimRequest = await buildReclaimRequest(appId, claimType);
+
+  // Start the Reclaim session (this may involve user interaction)
+  reclaimRequest.startSession(\{
+    onSuccessCallback: async (proofs: Proof[]) => \{
+      // Handle the proofs
+      const proof = proofs[0];
+
+      // Create a ZKP claim
+      const zkpClaim = new ReclaimZKPClaim('your-service-id', proof);
+
+      // Verify the proof validity
+      const isValid = await zkpClaim.verify();
+
+      if (isValid) \{
+        console.log('ZKP Claim is valid:', zkpClaim);
+      \} else \{
+        console.log('ZKP Claim verification failed.');
+      \}
+    \},
+    onFailureCallback: (error: Error) => \{
+      console.error('Reclaim session failed:', error);
+    \},
+  \});
+\})();
+\`\`\`
+
+**Parameters:**
+
+- \`serviceId\`: An identifier for your service.
+- \`proof\`: The proof object obtained from the Reclaim protocol.
+
+**Returns:**
+
+- \`Promise<void>\`.
+
+---
+
+## Notes
+
+- **Asynchronous Functions**: Many functions return promises and should be used with \`await\` to ensure proper execution flow.
+
+- **API Disconnection**: Always disconnect the API instance after your operations are complete to free up resources.
+
+- **Error Handling**: Wrap your asynchronous calls in \`try...catch\` blocks to handle potential errors gracefully.
+
+- **Security Considerations**:
+
+  - **Private Keys**: Handle private keys securely. Do not expose them in your code or logs.
+
+  - **Password Protection**: When saving private keys, use password protection to encrypt the key files.
+
+  - **Certificate Validity**: Ensure that certificates have appropriate validity periods and are renewed before expiration.
+
+---
+
+---
+
+### File: sdk/auto-utils.mdx
+
+## Auto-Utils Package Documentation
+
+### Introduction
+
+The \`@autonomys/auto-utils\` package provides core utility functions for interacting with the Autonomys Network. It offers functionalities for:
+
+- **Wallet Management**: Initialize and manage wallets using mnemonics or URIs.
+- **Network Configuration**: Access and manage network and domain settings.
+- **Data Storage**: Save and read data to and from local storage or the file system.
+- **Cryptographic Operations**: Perform hashing and data manipulation using cryptographic functions.
+- **API Activation**: Activate and manage connections to the Autonomys Network APIs.
+- **Address Utilities**: Convert and decode addresses to and from standardized formats.
+
+This package serves as the foundational layer for building applications within the Autonomys ecosystem.
+
+### Installation
+
+Install the package via npm or yarn:
+
+\`\`\`bash
+# Using npm
+npm install @autonomys/auto-utils
+
+# Using yarn
+yarn add @autonomys/auto-utils
+\`\`\`
+
+### Importing the Package
+
+Before using the functions provided by the \`auto-utils\` package, you need to import them into your project:
+
+\`\`\`typescript
+// Import specific functions
+import \{ activateWallet, activate, blake2b_256 \} from '@autonomys/auto-utils';
+
+// Or import everything
+import * as utils from '@autonomys/auto-utils';
+\`\`\`
+
+---
+
+## Available Functions
+
+### Account and Address Utilities
+
+- **\`address(input): string\`**: Standardizes an address format.
+- **\`createAccountIdType(api, address): Uint8Array\`**: Creates an \`AccountId\` object from an address.
+- **\`decode(input): Uint8Array\`**: Decodes an address to bytes.
+
+### API and Connection Management
+
+- **\`activate(options?): Promise<ApiPromise>\`**: Connects to the Autonomys Network.
+- **\`activateDomain(params): Promise<ApiPromise>\`**: Connects to a specific domain.
+- **\`createConnection(endpoint, options?): Promise<ApiPromise>\`**: Creates a new API connection.
+- **\`disconnect(api): Promise<void>\`**: Disconnects an API instance.
+
+### Cryptographic Functions
+
+- **\`blake2b_256(data): string\`**: Hashes data with BLAKE2b-256.
+- **\`concatenateUint8Arrays(...arrays): Uint8Array\`**: Concatenates multiple \`Uint8Array\`s.
+- **\`stringToUint8Array(string): Uint8Array\`**: Converts a string to \`Uint8Array\`.
+
+### Data Storage
+
+- **\`read(key): Promise<any>\`**: Reads data from storage.
+- **\`readFromFileSystem(key): Promise<any>\`**: Reads from file system.
+- **\`readFromLocalStorage(key): Promise<any>\`**: Reads from localStorage.
+- **\`save(key, value): Promise<void>\`**: Saves data to storage.
+- **\`saveOnFileSystem(key, value): Promise<void>\`**: Saves to file system.
+- **\`saveOnLocalStorage(key, value): Promise<void>\`**: Saves to localStorage.
+
+### Event Management
+
+- **\`eventName(type, event): string\`**: Combines type and event to a full event name.
+- **\`eventsGroup\`**: Groups system events by name.
+- **\`expectSuccessfulTxEvent\`**: Default success event names array.
+- **\`Type\`**: Enum for event types (e.g., \`system\`).
+- **\`validateEvents(events, eventsExpected?, tx, block, log?): EventsValidated\`**: Checks if expected events are in transaction events.
+
+### Network Management
+
+- **\`getNetworkDetails(options): NetworkDetails\`**: Gets details of a network.
+- **\`getNetworkDomainDetails(options): DomainDetails\`**: Gets details of a domain.
+- **\`getNetworkDomainRpcUrls(options): string[]\`**: Gets RPC URLs for a domain.
+- **\`getNetworkRpcUrls(options): string[]\`**: Gets RPC URLs for a network.
+- **\`networks\`**: Array of available networks.
+
+### Signing Utilities
+
+- **\`signMessage(signer, address, data): Promise<\{ signature: string \}>\`**: Signs a message with a signer and address.
+- **\`signatureVerify\`**: Verifies signatures (re-exported from \`@polkadot/util-crypto\`).
+- **\`signingKey(publicKey): string\`**: Converts a public key to a hex string.
+
+### String Utilities
+
+- **\`capitalizeFirstLetter(string): string\`**: Capitalizes first letter.
+- **\`fixLengthEntryId(blockHeight, indexInBlock?): string\`**: Creates fixed-length IDs.
+- **\`isAddress(address): boolean\`**: Validates a Substrate address.
+- **\`isHex(value): boolean\`**: Validates a hexadecimal string.
+- **\`shortString(value, initialLength?, endLength?): string\`**: Truncates strings.
+- **\`stringify(value): string\`**: Stringifies values, handling BigInt.
+
+### Token and Value Formatting
+
+- **\`formatSpacePledged(value, decimals?): string\`**: Formats space amount with units.
+- **\`formatTokenAmount(amount, decimals?): bigint\`**: Formats token amount with decimals.
+- **\`parseTokenAmount(amount, decimals?): number\`**: Parses token amount with decimals.
+
+### Transaction Utilities
+
+- **\`signAndSendTx(sender, tx, options?, eventsExpected?, log?, mapErrorCodeToEnum?): Promise<TransactionSignedAndSend>\`**: Signs, sends, and validates a transaction.
+
+### Wallet Management
+
+- **\`activateWallet(options): Promise<\{ api, accounts \}>\`**: Activates a wallet using mnemonic or URI.
+- **\`generateWallet(): GeneratedWallet\`**: Generates a new wallet with mnemonic.
+- **\`getMockWallet(name, wallets): Wallet\`**: Retrieves a mock wallet by name.
+- **\`mockWallets(options, api?): Promise<Wallet[]>\`**: Creates mock wallets for testing.
+- **\`setupWallet(params): Wallet\`**: Sets up a wallet from mnemonic or URI.
+
+---
+
+*Note:* All asynchronous functions return a \`Promise\` and should be used with \`await\` for proper execution flow.
+
+---
+
+## Usage Examples
+
+Below are examples demonstrating how to use the functions provided by \`@autonomys/auto-utils\`.
+
+### 1. Wallet Management
+
+#### **Activate a Wallet**
+
+Activate a wallet using a mnemonic phrase:
+
+\`\`\`typescript
+import \{ activateWallet \} from '@autonomys/auto-utils';
+
+(async () => \{
+  const mnemonic = 'your mnemonic phrase here';
+
+  const \{ api, accounts \} = await activateWallet(\{
+    mnemonic,
+    networkId: 'gemini-3h', // Optional: specify the network ID
+  \});
+
+  const account = accounts[0];
+  console.log(\`Connected with account address: \$\{account.address\}\`);
+
+  // Perform actions with the account...
+
+  // Disconnect when done
+  await api.disconnect();
+\})();
+\`\`\`
+
+#### **Activate a Wallet Using URI**
+
+Activate a wallet using a URI:
+
+\`\`\`typescript
+import \{ activateWallet \} from '@autonomys/auto-utils';
+
+(async () => \{
+  const \{ api, accounts \} = await activateWallet(\{
+    uri: '//Alice',
+    networkId: 'localhost', // Connect to a local network
+  \});
+
+  const account = accounts[0];
+  console.log(\`Connected with account address: \$\{account.address\}\`);
+
+  // Disconnect when done
+  await api.disconnect();
+\})();
+\`\`\`
+
+#### **Create Mock Wallets for Testing**
+
+Create mock wallets for testing purposes:
+
+\`\`\`typescript
+import \{ activate, mockWallets, getMockWallet \} from '@autonomys/auto-utils';
+
+(async () => \{
+  const api = await activate(\{ networkId: 'gemini-3h' \});
+
+  const wallets = await mockWallets(\{\}, api);
+  const aliceWallet = getMockWallet('Alice', wallets);
+  const bobWallet = getMockWallet('Bob', wallets);
+
+  console.log(\`Alice's address: \$\{aliceWallet.accounts[0].address\}\`);
+  console.log(\`Bob's address: \$\{bobWallet.accounts[0].address\}\`);
+
+  // Disconnect when done
+  await api.disconnect();
+\})();
+\`\`\`
+
+### 2. Network Management
+
+#### **Get Available Networks**
+
+List all available networks:
+
+\`\`\`typescript
+import \{ networks \} from '@autonomys/auto-utils';
+
+networks.forEach((network) => \{
+  console.log(\`Network ID: \$\{network.id\}, Name: \$\{network.name\}\`);
+\});
+\`\`\`
+
+#### **Get Network Details**
+
+Retrieve details of a specific network:
+
+\`\`\`typescript
+import \{ getNetworkDetails \} from '@autonomys/auto-utils';
+
+const network = getNetworkDetails(\{ networkId: 'gemini-3h' \});
+console.log(\`Network Name: \$\{network.name\}\`);
+console.log(\`RPC URLs: \$\{network.rpcUrls.join(', ')\}\`);
+\`\`\`
+
+#### **Get Domain Details**
+
+Retrieve details of a specific domain within a network:
+
+\`\`\`typescript
+import \{ getNetworkDomainDetails \} from '@autonomys/auto-utils';
+
+const domain = getNetworkDomainDetails(\{ domainId: '1', networkId: 'gemini-3h' \});
+console.log(\`Domain Name: \$\{domain.name\}\`);
+console.log(\`RPC URLs: \$\{domain.rpcUrls.join(', ')\}\`);
+\`\`\`
+
+### 3. Cryptographic Functions
+
+#### **Hash Data Using BLAKE2b-256**
+
+Hash a string using BLAKE2b-256:
+
+\`\`\`typescript
+import \{ blake2b_256, stringToUint8Array \} from '@autonomys/auto-utils';
+
+const data = 'Hello, Autonomys!';
+const dataBytes = stringToUint8Array(data);
+const hash = blake2b_256(dataBytes);
+
+console.log(\`Hash: \$\{hash\}\`); // Outputs the hash of the input string
+\`\`\`
+
+#### **Convert String to Uint8Array**
+
+Convert a string to a \`Uint8Array\`:
+
+\`\`\`typescript
+import \{ stringToUint8Array \} from '@autonomys/auto-utils';
+
+const text = 'Sample text';
+const byteArray = stringToUint8Array(text);
+
+console.log(byteArray); // Outputs Uint8Array representation of the string
+\`\`\`
+
+#### **Concatenate Uint8Arrays**
+
+Concatenate two \`Uint8Array\` instances:
+
+\`\`\`typescript
+import \{ stringToUint8Array, concatenateUint8Arrays \} from '@autonomys/auto-utils';
+
+const array1 = stringToUint8Array('First part ');
+const array2 = stringToUint8Array('Second part');
+
+const concatenated = concatenateUint8Arrays(array1, array2);
+console.log(\`Concatenated Result: \$\{new TextDecoder().decode(concatenated)\}\`);
+// Outputs: "First part Second part"
+\`\`\`
+
+### 4. API Activation
+
+#### **Activate the Network API**
+
+Connect to the Autonomys Network:
+
+\`\`\`typescript
+import \{ activate \} from '@autonomys/auto-utils';
+
+(async () => \{
+  const api = await activate(\{ networkId: 'gemini-3h' \});
+
+  console.log('API connected');
+
+  // Perform API calls...
+
+  // Disconnect when done
+  await api.disconnect();
+\})();
+\`\`\`
+
+#### **Activate a Domain API**
+
+Connect to a specific domain within the network:
+
+\`\`\`typescript
+import \{ activateDomain \} from '@autonomys/auto-utils';
+
+(async () => \{
+  const api = await activateDomain(\{ domainId: '1', networkId: 'gemini-3h' \});
+
+  console.log('Domain API connected');
+
+  // Perform domain-specific API calls...
+
+  // Disconnect when done
+  await api.disconnect();
+\})();
+\`\`\`
+
+### 5. Data Storage
+
+#### **Save and Read Data**
+
+Save data to local storage or the file system and read it back:
+
+\`\`\`typescript
+import \{ save, read \} from '@autonomys/auto-utils';
+
+const key = 'myData';
+const value = \{ message: 'Hello, Autonomys!' \};
+
+// Save data
+save(key, value);
+
+// Read data
+const retrievedValue = read(key);
+console.log(retrievedValue); // Outputs: \{ message: 'Hello, Autonomys!' \}
+\`\`\`
+
+### 6. Address Utilities
+
+#### **Convert Address Formats**
+
+Convert an address to a standardized format and decode it:
+
+\`\`\`typescript
+import \{ address, decode \} from '@autonomys/auto-utils';
+
+const originalAddress = '5GmS1wtCfR4tK5SSgnZbVT4kYw5W8NmxmijcsxCQE6oLW6A8';
+const standardizedAddress = address(originalAddress);
+const decodedAddress = decode(originalAddress);
+
+console.log(\`Standardized Address: \$\{standardizedAddress\}\`);
+console.log('Decoded Address:', decodedAddress);
+\`\`\`
+
+---
+
+*Note:* All asynchronous functions return a \`Promise\` and should be used with \`await\` for proper execution flow.
+
+---
+
+## Notes
+
+- **Asynchronous Functions**: Use \`await\` with all promises for proper execution flow.
+- **API Disconnection**: Always disconnect the API instance after operations to free up resources.
+- **Error Handling**: Wrap asynchronous calls in \`try...catch\` blocks to handle potential errors gracefully.
+- **Security Considerations**:
+- **Private Keys**: Handle private keys securely. Do not expose them in code or logs.
+- **Data Persistence**: Be cautious when saving sensitive data using \`save\` and \`read\`.
+
+---
+
+### File: sdk/auto-xdm.mdx
+
+> **Warning:** XDM is not yet enabled on Taurus Network or Autonomys Mainnet
+
+### Cross-Domain Transfers
+
+- \`transfer(api: ApiPromise, destination: ChainOrDomain, receiver: string, amount: Amount): Promise<SubmittableExtrinsic>\`: Creates a transaction to transfer a specified amount to a receiver on a given destination, which can be either the consensus chain or a specific domain.
+
+### Types:
+
+- **Amount**: \`BigInt | number | string\`  
+  Represents the amount to be transferred.
+
+- **Consensus**: \`\{ type: 'consensus' \}\`  
+  Indicates that the destination is the consensus chain.
+
+- **ChainOrDomain**: \`Consensus | Domain\`  
+  A union type representing either the consensus chain or a domain.
+
+- **Domain**: \`\{ type: 'domain'; domainId: number \}\`  
+  Specifies a domain as the destination, identified by a \`domainId\`.
+
+---
+
+### Usage Example
+
+\`\`\`typescript
+// For transferring to the consensus chain
+await transfer(api, \{ type: 'consensus' \}, 'receiverAddress', amount)
+
+// For transferring to a specific domain
+await transfer(api, \{ type: 'domain', domainId: 1 \}, 'receiverAddress', amount)
+\`\`\`
+
+> **Note:** The \`transfer\` function returns a \`Promise\` that resolves to a \`SubmittableExtrinsic\`, which can be signed and submitted to the blockchain.
+
+---
+
+### File: sdk/index.mdx
+
+## Introduction to the Auto SDK
+
+Welcome to the Auto SDK documentation! The Autonomys Auto SDK is a powerful toolkit designed to empower developers to seamlessly integrate with the Autonomys Network. It enables interaction through familiar programming languages like TypeScript, without needing to delve into the complexities of blockchain or smart contracts. The SDK provides simple APIs for issuing and verifying Auto IDs, interacting with the consensus layer, handling data uploads, and managing payments using Auto Coin.
+
+### What is the Auto SDK?
+
+The Auto SDK is a collection of JavaScript/TypeScript packages that abstract away the complexity of blockchain interactions. It includes utilities for consensus interactions, identity management, data storage, and general-purpose functions that are essential for building decentralized applications (dApps) and services on the Autonomys Network.
+
+### Key Features:
+
+- **Modular Architecture**: Use only the packages you need.
+- **Ease of Use**: Simplifies blockchain operations with high-level functions.
+- **Flexibility**: Suitable for both beginners and experienced blockchain developers.
+- **Community-Driven and Open-source**.
+
+### Why Use the Auto SDK?
+
+- **Simplify Development**: Focus on your application's logic rather than blockchain intricacies.
+- **Accelerate Time-to-Market**: Reduce development time with ready-to-use functions.
+- **Ensure Compatibility**: Stay up-to-date with the latest Autonomys blockchain protocols.
+- **Enhance Security**: Utilize well-tested code for critical operations like identity management.
+
+## Packages
+
+This monorepo contains multiple packages, each serving a specific purpose. All packages are published to npm under the \`@autonomys\` scope:
+
+- **@autonomys/auto-utils**: Core utility functions for interacting with the Autonomys Network.
+- **@autonomys/auto-consensus**: Functions for interacting with the Consensus Layer.
+- **@autonomys/auto-drive**: Tools for preparing and managing data for on-chain storage.
+- **@autonomys/auto-id**: Functions for generating, renewing, and revoking Decentralized Identities (Auto IDs).
+
+## Video Guide: Installing Auto SDK and Retrieving Account Balance 
+For those who prefer a visual guide, we have created a short video demonstrating how to install the Auto SDK, along with a simple coding example that shows how to retrieve an account balance using the SDK. For step-by-step instructions, please refer to the [Requirements and Installation Guide below](#requirements).
+
+<iframe width="560" height="315" src="https://www.youtube.com/embed/B5J9fwE5-vI?si=Mt133r3I2QnCae0A" title="Installing and using Auto SDK" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+
+## Installation
+
+### Requirements
+
+- **Node.js** (version 14 or higher)
+- **Yarn** or **npm**
+
+### Installing the Packages
+
+Install the packages you need via npm or yarn. For example, to install \`@autonomys/auto-utils\` and \`@autonomys/auto-consensus\`:
+
+#### Using npm
+
+\`\`\`bash
+npm install @autonomys/auto-utils @autonomys/auto-consensus
+\`\`\`
+
+#### Using yarn
+
+\`\`\`bash
+yarn add @autonomys/auto-utils @autonomys/auto-consensus
+\`\`\`
+
+## Cloning the Repository and Building Locally (Optional)
+
+If you wish to contribute to the SDK or run the SDK packages locally, you can clone the repository and build the packages from source.
+
+### Setup Instructions
+
+1. **Clone the Repository**
+
+   Open your terminal and run:
+
+   \`\`\`bash
+   git clone https://github.com/autonomys/auto-sdk.git
+   \`\`\`
+
+2. **Navigate to the Project Directory**
+
+   \`\`\`bash
+   cd auto-sdk
+   \`\`\`
+
+3. **Install Dependencies**
+
+   \`\`\`bash
+   yarn install
+   \`\`\`
+
+4. **Build All Packages**
+
+   To compile all packages, run:
+
+   \`\`\`bash
+   yarn run build
+   \`\`\`
+
+5. **Run Tests**
+
+   To execute tests for all packages:
+
+   \`\`\`bash
+   yarn run test
+   \`\`\`
+
+## Localhost Testing
+
+You can test the SDK packages against a local Autonomys node using the provided scripts instead of a public testnet (**Gemini 3h**).
+
+### Steps
+
+1. **Verify OS and Architecture Settings**
+
+    Edit the \`scripts/download.sh\` file and ensure that lines 3-7 match your current operating system and architecture:
+
+    \`\`\`bash
+    # Change the following variables as needed
+    # OS to download
+    OS="macos" # Options: macos | ubuntu | windows
+    # Architecture to download
+    ARCHITECTURE="aarch64" # Options: aarch64 | x86_64-skylake | x86_64-v2
+    \`\`\`
+
+2. **Run the Development Script**
+
+    Execute the following command to start the local node and farmer:
+
+    \`\`\`bash
+    node scripts/run-dev.js
+    \`\`\`
+
+    This script will:
+
+    1. Download the latest version of the node and farmer compatible with your OS and architecture (\`scripts/download.sh\`).
+    2. Start the Node and create/insert the keystore (\`scripts/run-node.sh\`).
+    3. Start the Farmer (\`scripts/run-farmer.sh\`).
+    4. Register the Node as an operator, wait for synchronization, and then terminate the node and farmer (handled within \`scripts/run-dev.js\`).
+    5. Restart the Node as an operator (\`scripts/run-operator.sh\`).
+    6. Restart the Farmer (\`scripts/run-farmer.sh\`).
+
+**Run Tests Against the Local Node**
+
+\`\`\`bash
+bash scripts/localhost-run-test.sh
+\`\`\`
+
+The tests will automatically detect the local node and farmer, executing against them instead of the public testnet.
+
+## Next Steps
+
+With the Auto SDK set up locally, you're ready to start building and testing your blockchain applications. Explore the additional pages for code examples and a functions overview.
+
+---
+
+```
+
+</div>
+
