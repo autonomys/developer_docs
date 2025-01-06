@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import { useTheme } from 'next-themes';
+import { CustomFooter } from './components/customFooter';
 
 export default {
   project: {
@@ -107,7 +108,7 @@ export default {
     )
   },
   footer: {
-    text: '© 2025 Autonomys Network. All rights reserved.',
+    component: CustomFooter
   },
   components: {
     h1: ({ children }) => (
