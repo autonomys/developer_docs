@@ -1,0 +1,160 @@
+---
+title: Application Examples
+description: Learn from real applications built on Autonomys Network
+---
+
+## [Argu-mint]: On-Chain Memory Auto Agent
+
+Argu-mint is the first Auto Agent deployed on Autonomys Network, demonstrating the power of on-chain agent memory and transparent AI interactions. As a social debate agent, it engages in conversations on X (formerly Twitter) while permanently archiving its interaction history on the Autonomys Network.
+
+![Argu-mint](/developers/Argu-mint-1.png)
+
+### How It Works
+
+1. **Monitoring & Analysis**
+   - Scans key influencers, hashtags, and trending topics in web3 x AI
+   - Evaluates potential engagements using built-in interaction model
+   - Makes autonomous decisions about engagement
+
+2. **Interaction**
+   - Responds to mentions when tagged `@0xargumint`
+   - Stores each interaction in real-time on Autonomys Network's DSN
+   - Archives both content and reasoning behind each interaction
+
+3. **On-Chain Storage**
+   - Creates permanent, timestamped records
+   - Generates blockchain hashes for verification
+   - Maintains a queryable interaction history
+
+### See It in Action
+
+- **Try the Agent**: Mention [@0xargumint](https://x.com/0xargumint) on X
+- **Explore Memory**: Visit [0xargumint.ai](http://0xargumint.ai) to:
+  - Search conversation archives
+  - View interaction history
+  - Explore decision reasoning
+  - Verify on-chain storage
+
+![Argu-mint-memory](/developers/Argu-mint-2.png)
+
+### Technical Implementation
+
+Argu-mint leverages two core components:
+- Distributed Storage Network (DSN) for permanent data archival
+- Auto Drive API for interaction management
+- Soon: Decentralized compute infrastructure for enhanced autonomy
+
+## Building Your Own Auto Agent
+
+### Getting Started
+
+1. **Set Up Development Environment**
+```bash
+git clone https://github.com/autonomys/auto-agents
+cd auto-agents
+yarn install
+```
+
+2. **Configure Environment**
+```bash
+cp .env.sample .env
+# Edit .env with required credentials
+```
+
+### Creating Agent Characters
+
+Characters are stored in `src/agents/workflows/kol/characters/`. To create a new character:
+
+```bash
+# Create a new character from template
+cp src/agents/workflows/kol/characters/character.example.ts \
+   src/agents/workflows/kol/characters/my-character.ts
+```
+
+### Character Configuration
+
+Define your agent's personality and behavior by configuring these properties:
+
+```typescript
+export const character = {
+  name: 'Agent Name',
+  username: 'twitter_handle',
+  description: 'Core personality description',
+  personality: 'Key behavioral traits',
+  expertise: 'Areas of knowledge',
+  rules: 'Operating guidelines',
+  trendFocus: 'Topics to monitor',
+  contentFocus: 'Content creation guidelines',
+  replyStyle: 'Engagement approach',
+  wordsToAvoid: ['list', 'of', 'words', 'to', 'avoid'],
+  engagementCriteria: 'Rules for when to engage with tweets'
+};
+```
+
+### Example Characters
+
+1. **Rational Agent** (`character.ts`):
+```typescript
+export const character = {
+  name: 'Rational Thinker',
+  username: 'RationalBot',
+  description: 'A logical and analytical personality focused on clear reasoning',
+  expertise: 'Logic, critical thinking, cognitive biases',
+  trendFocus: 'Rational discourse, logical fallacies, clear thinking',
+  // ... other configuration
+};
+```
+
+2. **Tech Enthusiast** (`techie.ts`):
+```typescript
+export const character = {
+  name: 'Tech Explorer',
+  username: 'TechieBot',
+  description: 'An enthusiastic tech analyst exploring emerging technologies',
+  expertise: 'AI, blockchain, web3, programming',
+  trendFocus: 'Tech news, programming, AI developments',
+  // ... other configuration
+};
+```
+
+### Running Your Agent
+
+Launch your agent in different modes:
+
+```bash
+# Development mode with default character
+yarn dev
+
+# Production mode with default character
+yarn start
+
+# Run specific character (omit .ts/.js extension)
+yarn dev argumint
+yarn start techie
+```
+
+Note: When specifying character files, omit both `.ts` and `.js` extensions. The system automatically uses the correct extension for development (`.ts`) and production (`.js`).
+
+### Autonomys Network Integration
+
+The framework integrates with Autonomys Network for permanent memory storage:
+
+1. **Features Enabled**
+   - Persistent agent memory across sessions
+   - Verifiable interaction history
+   - Cross-agent memory sharing
+   - Decentralized agent identity
+
+2. **Configuration**
+```env
+# In your .env file
+AUTO_DRIVE_UPLOAD=true
+AUTONOMYS_WALLET_KEY=your_wallet_key
+AUTONOMYS_ENCRYPTION_PASSWORD=your_password
+```
+
+### Development Resources
+
+- [Auto SDK Documentation](/sdk)
+- [Framework Repository](https://github.com/autonomys/auto-agents)
+- [Auto Horizon Developer Challenge](/challenges)

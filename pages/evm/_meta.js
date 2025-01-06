@@ -1,5 +1,5 @@
 export default {
-    intro: 'Introduction',
+    introduction: 'Introduction',
     general_information: 'General Information',
     metamask: 'Setting Up MetaMask',
     faucet: 'Faucet (get testnet tokens)',
