@@ -6,6 +6,7 @@ export default {
 
       }
     },
+    application_examples: 'Application Examples',
     sdk: 'Auto SDK',
     '---': {
       type: 'separator'
