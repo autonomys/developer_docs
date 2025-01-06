@@ -2,3 +2,4 @@ node_modules
 .next
 .tool-versions
 .DS_Store
+public/.DS_Store
