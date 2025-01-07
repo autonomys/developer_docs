@@ -6,7 +6,7 @@ export function SDKHeader() {
           <div className="sdk_header-content">
             <div className="sdk_header-tag">
               <img src="/new_autonomys-logo-light-icon.svg" alt="" className="sdk_tag-img" />
-              <div className="sdk_tag-text">Auto SDK</div>
+              <div className="sdk_tag-text">Autonomys Network Developer Hub</div>
             </div>
             
             <h1 className="sdk_header-h1">Do More,<br/>Code Less</h1>
@@ -15,14 +15,14 @@ export function SDKHeader() {
             </p>
   
             <div className="sdk_header-block-container">
-              <a href="/application_examples/argu-mint" target="_blank" className="sdk_header-block">
+              <a href="/application_examples/argu-mint" className="sdk_header-block">
                 <h2 className="sdk_header-block-h2">View Application Examples</h2>
                 <p className="sdk_header-block-p">Learn about the power of Autonomys Network by looking at application examples.</p>
                 <div className="sdk_header-block-btn">
                   <img src="/arrow-sdk.svg" alt="" className="sdk_header-block-icon" />
                 </div>
               </a>
-              <a href="/sdk" target="_blank" className="sdk_header-block">
+              <a href="/sdk" className="sdk_header-block">
                 <h2 className="sdk_header-block-h2">Start Building using Auto SDK</h2>
                 <p className="sdk_header-block-p">A powerful toolkit designed to empower developers to seamlessly integrate with the Autonomys Network.</p>
                 <div className="sdk_header-block-btn">
@@ -30,7 +30,7 @@ export function SDKHeader() {
                 </div>
               </a>
   
-              <a href="/evm/introduction" target="_blank" className="sdk_header-block">
+              <a href="/evm/introduction" className="sdk_header-block">
                 <h2 className="sdk_header-block-h2">Start Building using Auto EVM</h2>
                 <p className="sdk_header-block-p">EVM-compatible environment on Autonomys Network.</p>
                 <div className="sdk_header-block-btn">
