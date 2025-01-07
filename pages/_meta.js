@@ -4,7 +4,7 @@ export default {
       theme: {
         breadcrumb: false,
         footer: true,
-        sidebar: false,
+        sidebar: true,
         toc: false,
         navbar: true,
         pagination: false,
