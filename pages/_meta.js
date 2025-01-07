@@ -11,6 +11,7 @@ export default {
         layout: 'full'
       }
     },
+    intoduction: "Introduction",
     application_examples: 'Application Examples',
     sdk: 'Auto SDK',
     '---': {
