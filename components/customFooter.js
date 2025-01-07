@@ -107,7 +107,7 @@ export function CustomFooter() {
                 href={link.href}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex flex-col items-center justify-center p-2 text-gray-600 hover:text-gray-900 transition-colors group"
+                className="flex flex-col items-center justify-center p-2 text-gray-600 hover:text-indigo-500 transition-colors group"
                 title={link.name}
               >
                 <div className="w-8 h-8 flex items-center justify-center mb-1 group-hover:scale-110 transition-transform">

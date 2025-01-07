@@ -1,4 +1,4 @@
-// components/CopyButton.js
+// components/copyButton.js
 import { useState } from 'react';
 
 export function CopyButton() {
