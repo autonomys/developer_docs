@@ -15,19 +15,26 @@ export function SDKHeader() {
             </p>
   
             <div className="sdk_header-block-container">
-              <a href="https://docs.autonomys.xyz/develop/auto-sdk/intro/" target="_blank" className="sdk_header-block">
-                <h2 className="sdk_header-block-h2">Start Building</h2>
-                <p className="sdk_header-block-p">Begin with our developer quick start guide.</p>
+              <a href="/application_examples/argu-mint" target="_blank" className="sdk_header-block">
+                <h2 className="sdk_header-block-h2">View Application Examples</h2>
+                <p className="sdk_header-block-p">Learn about the power of Autonomys Network by looking at application examples.</p>
+                <div className="sdk_header-block-btn">
+                  <img src="/arrow-sdk.svg" alt="" className="sdk_header-block-icon" />
+                </div>
+              </a>
+              <a href="/sdk" target="_blank" className="sdk_header-block">
+                <h2 className="sdk_header-block-h2">Start Building using Auto SDK</h2>
+                <p className="sdk_header-block-p">A powerful toolkit designed to empower developers to seamlessly integrate with the Autonomys Network.</p>
                 <div className="sdk_header-block-btn">
                   <img src="/arrow-sdk.svg" alt="" className="sdk_header-block-icon" />
                 </div>
               </a>
   
-              <a href="https://autonomys.xyz/discord" target="_blank" className="sdk_header-block">
-                <h2 className="sdk_header-block-h2">Get in Touch</h2>
-                <p className="sdk_header-block-p">Collaborate with our team for a fast and customized experience.</p>
+              <a href="/evm/introduction" target="_blank" className="sdk_header-block">
+                <h2 className="sdk_header-block-h2">Start Building using Auto EVM</h2>
+                <p className="sdk_header-block-p">EVM-compatible environment on Autonomys Network.</p>
                 <div className="sdk_header-block-btn">
-                  <img src="/images/arrow-sdk.svg" alt="" className="sdk_header-block-icon" />
+                  <img src="/arrow-sdk.svg" alt="" className="sdk_header-block-icon" />
                 </div>
               </a>
             </div>
@@ -103,7 +110,7 @@ export function SDKHeader() {
       {
         title: "Technical Documentation",
         description: "Start building with comprehensive guides.",
-        link: "https://docs.autonomys.xyz/develop/auto-sdk/intro/"
+        link: "/sdk"
       },
       {
         title: "GitHub",
