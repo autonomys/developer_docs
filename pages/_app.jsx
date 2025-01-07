@@ -1,5 +1,6 @@
 import '../styles/globals.css';
+import 'nextra-theme-docs/style.css';
 
-export default function App({ Component, pageProps }) {
-    return <Component {...pageProps} />
-  }
+export default function MyApp({ Component, pageProps }) {
+  return <Component {...pageProps} />;
+}
