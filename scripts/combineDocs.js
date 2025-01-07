@@ -11,7 +11,7 @@ async function combineDocsContent() {
 title: LLM-Friendly Documentation
 ---
 
-import { CopyButton } from '../components/copyButton'
+import { CopyButton } from '../components/CopyButton'
 
 <div className="raw-content">
 
