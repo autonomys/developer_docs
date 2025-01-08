@@ -158,7 +158,7 @@
   }
   
   .sdk_overview-card {
-    cursor: pointer;
+    /* cursor: pointer; */
     background-color: #40568f;
     border-radius: 20px;
     padding: 30px;
