@@ -33,7 +33,7 @@ export default {
     llm_friendly_docs: {
       title: 'LLM-Friendly Docs',
       theme: {
-        layout: 'raw'
+        layout: 'full'
       }
     }
   }
