@@ -1,6 +1,11 @@
-import { Sandpack } from "@codesandbox/sandpack-react";
+import dynamic from "next/dynamic";
+
+const Sandpack = dynamic(() => import("@codesandbox/sandpack-react").then((mod) => mod.Sandpack), {
+  ssr: false, // Disable server-side rendering for Sandpack
+});
 
 export default function InteractiveCode() {
+  const token = process.env.CODESANDBOX_TOKEN;
   const code = `
     import { account } from '@autonomys/auto-consensus';
     import { activate, parseTokenAmount} from '@autonomys/auto-utils';
@@ -30,8 +35,11 @@ export default function InteractiveCode() {
         },
       }}
       options={{
-        showConsole: true, // Display a live console
+        showConsole: true,
         editorHeight: 400,
+      }}
+      codeSandboxOptions={{
+        authToken: token,
       }}
     />
   );
