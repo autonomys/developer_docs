@@ -9,9 +9,9 @@ export function SDKHeader() {
               <div className="sdk_tag-text">Autonomys Network Developer Hub</div>
             </div>
             
-            <h1 className="sdk_header-h1">Do More,<br/>Code Less</h1>
+            <h1 className="sdk_header-h1">Build More,<br/>Code Less</h1>
             <p className="sdk_header-p">
-              Build decentralized apps with ease: leverage permanent storage, manage identities, create AI agents, and handle payments—all using your familiar languages: TypeScript and JavaScript.
+              Build AI-powered decentalized apps (super dApps) and on-chain agents (Auto Agents) with permanent distributed storage and compute, decentalized identities, payment handling, and more - all using TypeScript and JavaScript.
             </p>
   
             <div className="sdk_header-block-container">
@@ -55,8 +55,8 @@ export function SDKHeader() {
               <h2 className="sdk_overview-h2">What is <br/>Autonomys SDK?</h2>
               <div className="sdk_what-block">
                 <p className="sdk_overview-p first">
-                  Autonomys Auto SDK: Your gateway to building on the Autonomys Network. 
-                  Streamline dApp development with modular packages, high-level functions, and decentralized solutions— powered by secure and scalable blockchain.
+                  The <b>Auto SDK</b> is a development toolkit for building on the Autonomys Network, and your shortcut to AI3.0 innovation.
+                  Streamline your super dApp and on-chain agent development with the Auto SDK's modular packages, high-level functions, and decentralized solutions - all powered by secure, scalable blockchain.
                 </p>
                 <div className="sdk_overfiew-first-img"></div>
               </div>
@@ -71,7 +71,7 @@ export function SDKHeader() {
   export function SDKFeatures() {
     const features = [
       {
-        title: "Modular Architecture",
+        title: "Modular",
         description: "Use only the packages you need."
       },
       {
@@ -79,11 +79,11 @@ export function SDKHeader() {
         description: "Simplifies blockchain operations with high-level functions."
       },
       {
-        title: "Flexibility",
+        title: "Flexible",
         description: "Suitable for both beginners and experienced blockchain developers."
       },
       {
-        title: "Community-Driven and Open-Source",
+        title: "Open-Source",
         description: "Built by and for the community."
       }
     ]
@@ -91,7 +91,7 @@ export function SDKHeader() {
     return (
       <section className="sdk_overview-content mt-4">
         <div className="sdk_small-tag">KEY FEATURES</div>
-        <h2 className="sdk_overview-h2">Powerful. Simple. Transparent.</h2>
+        <h2 className="sdk_overview-h2">Powerful. Accessible. Transparent.</h2>
         <div className="sdk_overview-card-grid">
           {features.map((feature, index) => (
             <div key={index} className="sdk_overview-card">
