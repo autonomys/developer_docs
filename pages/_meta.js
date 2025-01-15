@@ -4,18 +4,6 @@ export default {
       theme: {
         breadcrumb: false,
         footer: true,
-        sidebar: false,
-        toc: false,
-        navbar: true,
-        pagination: false,
-        layout: 'full'
-      }
-    },
-    index2: {
-      title: 'Develop on Autonomys Network',
-      theme: {
-        breadcrumb: false,
-        footer: true,
         sidebar: true,
         toc: false,
         navbar: true,
