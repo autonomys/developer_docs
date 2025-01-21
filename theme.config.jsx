@@ -21,7 +21,7 @@ export default {
     defaultMenuCollapsed: false,
     hiddenPages: ['/'], // Hide the sidebar only on the landing page
   },
-  docsRepositoryBase: 'https://github.com/autonomys/developer_docs',
+  docsRepositoryBase: 'https://github.com/autonomys/developer_docs/blob/main',
   useNextSeoProps() {
     return {
       titleTemplate: '%s - Autonomys Network Developer Documentation',
