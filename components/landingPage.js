@@ -17,7 +17,7 @@ export function SDKHeader() {
             <div className="sdk_header-block-container">
               <a href="/application_examples/argu-mint" className="sdk_header-block">
                 <h2 className="sdk_header-block-h3"><b>Example use cases</b></h2>
-                <h2 className="mt-20px"></h2>
+                <div className="mt-35px"></div>
                 <p className="sdk_header-block-p ">Discover the power of Autonomys by exploring example applications.</p>
                 <div className="sdk_header-block-btn">
                   <img src="/arrow-sdk.svg" alt="" className="sdk_header-block-icon" />

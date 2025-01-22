@@ -2,8 +2,8 @@
 @tailwind components;
 @tailwind utilities;
 
-.mt-20px {
-  margin-top: 40px;
+.mt-35px {
+  margin-top: 35px;
 }
 
 .section-sdk_header {
