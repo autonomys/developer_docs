@@ -16,14 +16,16 @@ export function SDKHeader() {
   
             <div className="sdk_header-block-container">
               <a href="/application_examples/argu-mint" className="sdk_header-block">
-                <h2 className="sdk_header-block-h2"><b>Example use cases</b></h2>
-                <p className="sdk_header-block-p">Discover the power of Autonomys by exploring example applications.</p>
+                <h2 className="sdk_header-block-h3"><b>Example use cases</b></h2>
+                <div className="mt-35px"></div>
+                <p className="sdk_header-block-p ">Discover the power of Autonomys by exploring example applications.</p>
                 <div className="sdk_header-block-btn">
                   <img src="/arrow-sdk.svg" alt="" className="sdk_header-block-icon" />
                 </div>
               </a>
               <a href="/sdk" className="sdk_header-block">
-                <h2 className="sdk_header-block-h2"><b>Start building with the Auto SDK</b></h2>
+                <h2 className="sdk_header-block-h3 "><b>Start building with the Auto SDK</b></h2>
+                
                 <p className="sdk_header-block-p">A powerful toolkit that simplifies interacting with the Autonomys Network.</p>
                 <div className="sdk_header-block-btn">
                   <img src="/arrow-sdk.svg" alt="" className="sdk_header-block-icon" />
@@ -31,7 +33,8 @@ export function SDKHeader() {
               </a>
   
               <a href="/evm/introduction" className="sdk_header-block">
-                <h2 className="sdk_header-block-h2"><b>Start building with the Auto EVM</b></h2>
+                <h2 className="sdk_header-block-h3"><b>Start building with the Auto EVM</b></h2>
+                
                 <p className="sdk_header-block-p">An EVM-compatible environment on the Autonomys Network.</p>
                 <div className="sdk_header-block-btn">
                   <img src="/arrow-sdk.svg" alt="" className="sdk_header-block-icon" />
@@ -52,7 +55,7 @@ export function SDKHeader() {
           <div className="sdk_overview-content-wrapper">
             <div className="sdk_overview-content">
               <div className="sdk_small-tag">Overview</div>
-              <h2 className="sdk_overview-h2">What is the <br/>Auto SDK?</h2>
+              <h2 className="sdk_overview-h2">What is the Auto SDK?</h2>
               <div className="sdk_what-block">
                 <p className="sdk_overview-p first">
                   The <b>Auto SDK</b> is a development toolkit for building on the Autonomys Network, and your shortcut to AI3.0 innovation.
@@ -127,7 +130,7 @@ export function SDKHeader() {
     return (
       <section className="sdk_overview-content" id="support">
         <div className="sdk_small-tag">Resources</div>
-        <h2 className="sdk_overview-h2">Tools & support<br/>with Autonomys SDK.</h2>
+        <h2 className="sdk_overview-h2">Tools & support</h2>
         <div className="sdk_overview-card-grid resources">
           {resources.map((resource, index) => (
             <a key={index} href={resource.link} target="_blank" className="sdk_overview-card">
@@ -152,7 +155,7 @@ export function SDKHeader() {
               <a href="https://academy.autonomys.xyz/" target="_blank" className="sdk_cta-btn">
                 Explore
               </a>
-              <a href="/documents/autonomys_whitepaper.pdf" target="_blank" className="sdk_cta-btn">
+              <a href="https://cdn.prod.website-files.com/66d7181179fbc331d39e9df0/6734a4bf4a74c3c5c6b01d34_autonomys_whitepaper.pdf" target="_blank" className="sdk_cta-btn">
                 Whitepaper
               </a>
             </div>
