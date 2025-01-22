@@ -2,6 +2,10 @@
 @tailwind components;
 @tailwind utilities;
 
+.mt-20px {
+  margin-top: 40px;
+}
+
 .section-sdk_header {
     padding-top: 100px;
   }
@@ -49,6 +53,10 @@
     justify-content: flex-start;
     align-items: center;
     display: flex;
+  }
+  
+  .sdk_header-block-p {
+    margin-top: 10px;
   }
   
   .sdk_tag-img {
