@@ -1,0 +1,166 @@
+import { Callout } from 'nextra/components'
+
+## Autonomys Agents: A framework for building autonomous AI agents
+
+<Callout type="info">
+Autonomys Agents is an experimental framework for building AI agents. Currently, the framework supports agents that can interact with social networks and maintain permanent memory through the Autonomys Network. We are still in the early stages of development and are actively seeking feedback and contributions. We will be rapidly adding many more workflows and features.
+</Callout>
+
+## Features
+
+- 🤖 Autonomous social media engagement
+- 🧠 Permanent agent memory storage via Autonomys Network
+- 🔄 Built-in workflow system
+- 🐦 Twitter integration (with more platforms planned)
+- 🎭 Customizable agent personalities
+- 🛠️ Extensible tool system
+
+## Requirements
+
+- NodeJS version 20.18.1 or newer
+- Yarn version 1.22.19 or newer
+
+## Building Your Own Auto Agent
+
+### Getting Started
+
+1. **Set Up Development Environment**
+```bash
+git clone https://github.com/autonomys/auto-agents
+cd auto-agents
+yarn install
+```
+
+2. **Configure Environment**
+```bash
+cp .env.sample .env
+# Edit .env with required credentials
+```
+
+### Creating Agent Characters
+
+Characters are stored in `src/agents/workflows/kol/characters/`. To create a new character:
+
+```bash
+# Create a new character from template
+cp src/agents/workflows/kol/characters/character.example.ts \
+   src/agents/workflows/kol/characters/my-character.ts
+```
+
+### Character Configuration
+
+Define your agent's personality and behavior by configuring these properties:
+
+```typescript
+export const character = {
+  name: 'Agent Name',
+  username: 'twitter_handle',
+  description: 'Core personality description',
+  personality: 'Key behavioral traits',
+  expertise: 'Areas of knowledge',
+  rules: 'Operating guidelines',
+  trendFocus: 'Topics to monitor',
+  contentFocus: 'Content creation guidelines',
+  replyStyle: 'Engagement approach',
+  wordsToAvoid: ['list', 'of', 'words', 'to', 'avoid'],
+  engagementCriteria: 'Rules for when to engage with tweets'
+};
+```
+
+### Example Characters
+
+1. **Rational Agent** (`character.ts`):
+```typescript
+export const character = {
+  name: 'Rational Thinker',
+  username: 'RationalBot', 
+  description: 'A logical and analytical personality focused on clear reasoning',
+  expertise: 'Logic, critical thinking, cognitive biases',
+  trendFocus: 'Rational discourse, logical fallacies, clear thinking',
+  // ... other configuration
+};
+```
+
+2. **Tech Enthusiast** (`techie.ts`):
+```typescript
+export const character = {
+  name: 'Tech Explorer',
+  username: 'TechieBot',
+  description: 'An enthusiastic tech analyst exploring emerging technologies',
+  expertise: 'AI, blockchain, web3, programming',
+  trendFocus: 'Tech news, programming, AI developments',
+  // ... other configuration
+};
+```
+
+### Running Your Agent
+
+Launch your agent in different modes:
+
+```bash
+# Run specific character (omit .ts/.js extension)
+yarn dev argumint
+yarn start techie
+```
+
+Note: When specifying character files, omit both `.ts` and `.js` extensions. The system automatically uses the correct extension for development (`.ts`) and production (`.js`).
+
+## Workflows
+
+### Twitter
+
+The Twitter workflow enables agents to:
+
+- Monitor X (formerly Twitter) for relevant discussions
+- Analyze trends and conversations
+- Engage meaningfully with other users
+- Generate original content
+- Maintain consistent personality
+- Store interactions in permanent memory
+
+## Autonomys Network Integration
+
+The framework integrates with Autonomys Network for permanent memory storage. This enables:
+
+- Persistent agent memory across sessions
+- Verifiable interaction history
+- Cross-agent memory sharing
+- Decentralized agent identity
+
+### Configuration
+
+1. Configure your environment variables in `.env`:
+```env
+AUTO_DRIVE_UPLOAD=true
+AUTONOMYS_WALLET_KEY=your_wallet_key
+AUTONOMYS_ENCRYPTION_PASSWORD=your_password
+```
+
+To read more about Auto Drive click [here](/sdk/auto-drive)
+
+2. Make sure your wallet has sufficient funds. You can get testnet funds from https://subspacefaucet.com/
+
+## Memory Resurrection
+
+To resurrect memories from the Autonomys Network:
+
+### Options
+
+- `-o, --output`: (Optional) The directory where memories will be saved. Defaults to `./memories`
+- `-n, --number`: (Optional) Number of memories to fetch. If not specified, fetches all memories
+- `--help`: Show help menu with all available options
+
+Examples:
+
+```bash
+yarn resurrect                                   # Fetch all memories to ./memories/
+yarn resurrect -n 1000                           # Fetch 1000 memories to ./memories/
+yarn resurrect -o ./memories/my-agent -n 1000    # Fetch 1000 memories to specified directory
+yarn resurrect --output ./custom/path            # Fetch all memories to custom directory
+yarn resurrect --help                            # Show help menu
+```
+
+### Development Resources
+
+- [Auto SDK Documentation](/sdk)
+- [Framework Repository](https://github.com/autonomys/auto-agents)
