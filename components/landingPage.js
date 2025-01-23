@@ -50,8 +50,7 @@ export function SDKHeader() {
   // components/sdk/Overview.js
   export function SDKOverview() {
     return (
-      <section className="section-sdk_overview">
-        <div className="container">
+        <div className="container mt-4">
           <div className="sdk_overview-content-wrapper">
             <div className="sdk_overview-content">
               <div className="sdk_small-tag">Overview</div>
@@ -66,7 +65,6 @@ export function SDKHeader() {
             </div>
           </div>
         </div>
-      </section>
     )
   }
   
@@ -130,7 +128,7 @@ export function SDKHeader() {
     return (
       <section className="sdk_overview-content" id="support">
         <div className="sdk_small-tag">Resources</div>
-        <h2 className="sdk_overview-h2">Tools & support</h2>
+        <h2 className="sdk_overview-h2">Tools & Support</h2>
         <div className="sdk_overview-card-grid resources">
           {resources.map((resource, index) => (
             <a key={index} href={resource.link} target="_blank" className="sdk_overview-card">

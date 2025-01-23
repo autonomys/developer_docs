@@ -4,16 +4,28 @@ import React from 'react';
 export function CustomFooter() {
     const links = [
         {
-          name: 'Official Website',
+          name: 'Website',
           href: 'https://www.autonomys.xyz/',
           icon: (
-            <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-              <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z" />
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+              <g transform="scale(0.012, -0.012) translate(0, -2000)">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="100" d="M663 1970 c-306 -109 -559 -388 -638 -704 -21 -83 -25 -122 -25 -246
+                  0 -135 14 -260 29 -260 6 0 11 7 106 175 34 61 151 265 260 455 323 563 344
+                  600 332 599 -7 0 -35 -9 -64 -19z"/>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="100" d="M1281 1968 c14 -26 50 -90 309 -543 162 -284 300 -525 365 -638 l22
+                  -38 12 45 c6 25 11 123 11 223 0 210 -14 282 -85 431 -112 236 -318 426 -564
+                  518 -78 30 -85 30 -70 2z"/>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="100" d="M961 1503 c-24 -43 -67 -118 -96 -168 -139 -239 -335 -588 -332 -591
+                  2 -3 216 -3 475 -2 l472 3 -53 90 c-48 81 -391 684 -414 728 -7 14 -16 4 -52
+                  -60z"/>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="100" d="M320 269 c135 -117 277 -193 436 -235 83 -23 121 -27 239 -27 154 -1
+                  238 13 359 60 128 49 222 106 311 187 l50 45 -715 0 -715 0 35 -30z"/>
+              </g>
             </svg>
           )
         },
         {
-          name: 'Farming Documentation',
+          name: 'Farming Docs',
           href: 'https://docs.autonomys.xyz/learn/intro',
           icon: (
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -22,7 +34,16 @@ export function CustomFooter() {
           )
         },
         {
-          name: 'Space Acres Desktop',
+          name: 'Forum',
+          href: 'https://forum.autonomys.xyz/',
+          icon: (
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 8h2a2 2 0 012 2v6a2 2 0 01-2 2h-2v4l-4-4H9a2 2 0 01-2-2v-6a2 2 0 012-2h8zM7 2h9a2 2 0 012 2v4H7a2 2 0 00-2 2v3H4a2 2 0 01-2-2V4a2 2 0 012-2z" />
+            </svg>
+          )
+        },
+        {
+          name: 'Space Acres',
           href: 'https://docs.autonomys.xyz/farming/space-acres/install',
           icon: (
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -63,15 +84,6 @@ export function CustomFooter() {
           icon: (
             <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
               <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
-            </svg>
-          )
-        },
-        {
-          name: 'LinkedIn',
-          href: 'https://www.linkedin.com/company/autonomys',
-          icon: (
-            <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-              <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
             </svg>
           )
         },
