@@ -12,7 +12,7 @@ export default {
       }
     },
     introduction: "Introduction",
-    application_examples: 'Application Examples',
+    application_examples: 'Example Applications',
     sdk: 'Auto SDK',
     '---': {
       type: 'separator'
