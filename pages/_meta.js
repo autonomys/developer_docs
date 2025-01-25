@@ -13,6 +13,7 @@ export default {
     },
     introduction: "Introduction",
     application_examples: 'Example Applications',
+    auto_agents_framework: 'Auto Agents Framework',
     sdk: 'Auto SDK',
     '---': {
       type: 'separator'
