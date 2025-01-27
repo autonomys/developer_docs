@@ -24,34 +24,32 @@ Autonomys Agents is an experimental framework for building AI agents. Currently,
 
 ## Building Your Own Auto Agent
 
-### Getting Started
+### Getting started
 
-1. **Set Up Development Environment**
+1. **Set up a development environment**
 ```bash
 git clone https://github.com/autonomys/autonomys-agents
 cd auto-agents
 yarn install
 ```
 
-2. **Configure Environment**
+2. **Configure the environment**
 ```bash
 cp .env.sample .env
 # Edit .env with required credentials
 ```
 
-### Creating Agent Characters
+### Creating agent characters
 
-Characters are stored in `src/agents/workflows/kol/characters/`. To create a new character:
+Characters are agent personalities with key behavioral traits, areas of knowledge, and engagement guidelines. They are stored in `src/agents/workflows/kol/characters/`.
 
+1. **Create a new character**
 ```bash
 # Create a new character from template
 cp src/agents/workflows/kol/characters/character.example.ts \
    src/agents/workflows/kol/characters/my-character.ts
 ```
-
-### Character Configuration
-
-Define your agent's personality and behavior by configuring these properties:
+2. **Configure the character by defining these properties**
 
 ```typescript
 export const character = {
@@ -69,9 +67,9 @@ export const character = {
 };
 ```
 
-### Example Characters
+#### Example characters
 
-1. **Rational Agent** (`character.ts`):
+1. **Rational agent** (`character.ts`):
 ```typescript
 export const character = {
   name: 'Rational Thinker',
@@ -83,7 +81,7 @@ export const character = {
 };
 ```
 
-2. **Tech Enthusiast** (`techie.ts`):
+2. **Tech enthusiast** (`techie.ts`):
 ```typescript
 export const character = {
   name: 'Tech Explorer',
@@ -97,15 +95,21 @@ export const character = {
 
 ### Running Your Agent
 
-Launch your agent in different modes:
+**Launch your agent in different modes**:
 
+- **Development mode with specific character**
 ```bash
 # Run specific character (omit .ts/.js extension)
 yarn dev argumint
+```
+
+- **Production mode with specific character**
+```bash
+# Run specific character (omit .ts/.js extension)
 yarn start techie
 ```
 
-Note: When specifying character files, omit both `.ts` and `.js` extensions. The system automatically uses the correct extension for development (`.ts`) and production (`.js`).
+> **Note**: When specifying character files, omit both `.ts` and `.js` extensions. The system automatically uses the correct extension for development (`.ts`) and production (`.js`)
 
 ## Workflows
 
@@ -122,12 +126,12 @@ The Twitter workflow enables agents to:
 
 ## Autonomys Network Integration
 
-The framework integrates with Autonomys Network for permanent memory storage. This enables:
-
-- Persistent agent memory across sessions
-- Verifiable interaction history
-- Cross-agent memory sharing
-- Decentralized agent identity
+The Auto Agents Framework integrates with the Autonomys Network for:
+  - Permanent memory storage
+  - Persistent agent memory across sessions
+  - Verifiable interaction history
+  - Cross-agent memory sharing
+  - Decentralized agent identity
 
 ### Configuration
 
