@@ -1,8 +1,10 @@
-## Auto-Utils Package Documentation
+## Auto-Utils Package
 
 ### Introduction
 
-The `@autonomys/auto-utils` package provides core utility functions for interacting with the Autonomys Network. It offers functionalities for:
+The `@autonomys/auto-utils` package provides core utility functions for interacting with and building applications on the Autonomys Network.
+
+### Features
 
 - **Wallet Management**: Initialize and manage wallets using mnemonics or URIs.
 - **Network Configuration**: Access and manage network and domain settings.
@@ -11,11 +13,9 @@ The `@autonomys/auto-utils` package provides core utility functions for interact
 - **API Activation**: Activate and manage connections to the Autonomys Network APIs.
 - **Address Utilities**: Convert and decode addresses to and from standardized formats.
 
-This package serves as the foundational layer for building applications within the Autonomys ecosystem.
-
 ### Installation
 
-Install the package via npm or yarn:
+Install the package via `npm` or `yarn`:
 
 ```bash
 # Using npm
@@ -25,9 +25,9 @@ npm install @autonomys/auto-utils
 yarn add @autonomys/auto-utils
 ```
 
-### Importing the Package
+### Importing
 
-Before using the functions provided by the `auto-utils` package, you need to import them into your project:
+Import the `auto-utils` functions you need into your project:
 
 ```typescript
 // Import specific functions
@@ -37,102 +37,96 @@ import { activateWallet, activate, blake2b_256 } from '@autonomys/auto-utils';
 import * as utils from '@autonomys/auto-utils';
 ```
 
----
+### Available functions
 
-## Available Functions
+> *Note:* All asynchronous functions return a `Promise` and should be used with `await` for proper execution flow. Wrap asynchronous calls in `try...catch` blocks to handle potential errors gracefully.
 
-### Account and Address Utilities
+#### Account and address utilities
 
-- **`address(input): string`**: Standardizes an address format.
-- **`createAccountIdType(api, address): Uint8Array`**: Creates an `AccountId` object from an address.
-- **`decode(input): Uint8Array`**: Decodes an address to bytes.
+- `address(input): string`: Standardizes an address format.
+- `createAccountIdType(api, address): Uint8Array`: Creates an `AccountId` object from an address.
+- `decode(input): Uint8Array`: Decodes an address to bytes.
 
-### API and Connection Management
+#### API and connection management
 
-- **`activate(options?): Promise<ApiPromise>`**: Connects to the Autonomys Network.
-- **`activateDomain(params): Promise<ApiPromise>`**: Connects to a specific domain.
-- **`createConnection(endpoint, options?): Promise<ApiPromise>`**: Creates a new API connection.
-- **`disconnect(api): Promise<void>`**: Disconnects an API instance.
+> *Note:* Always disconnect the API instance after operations to free up resources.
 
-### Cryptographic Functions
+- `activate(options?): Promise<ApiPromise>`: Connects to the Autonomys Network.
+- `activateDomain(params): Promise<ApiPromise>`: Connects to a specific domain.
+- `createConnection(endpoint, options?): Promise<ApiPromise>`: Creates a new API connection.
+- `disconnect(api): Promise<void>`: Disconnects an API instance.
 
-- **`blake2b_256(data): string`**: Hashes data with BLAKE2b-256.
-- **`concatenateUint8Arrays(...arrays): Uint8Array`**: Concatenates multiple `Uint8Array`s.
-- **`stringToUint8Array(string): Uint8Array`**: Converts a string to `Uint8Array`.
+#### Cryptographic functions
 
-### Data Storage
+- `blake2b_256(data): string`: Hashes data with BLAKE2b-256.
+- `concatenateUint8Arrays(...arrays): Uint8Array`: Concatenates multiple `Uint8Array`s.
+- `stringToUint8Array(string): Uint8Array`: Converts a string to `Uint8Array`.
 
-- **`read(key): Promise<any>`**: Reads data from storage.
-- **`readFromFileSystem(key): Promise<any>`**: Reads from file system.
-- **`readFromLocalStorage(key): Promise<any>`**: Reads from localStorage.
-- **`save(key, value): Promise<void>`**: Saves data to storage.
-- **`saveOnFileSystem(key, value): Promise<void>`**: Saves to file system.
-- **`saveOnLocalStorage(key, value): Promise<void>`**: Saves to localStorage.
+#### Data storage
 
-### Event Management
+> *Note:* Be cautious when saving sensitive data using `save` and `read` as data storage is permanent. Handle private keys securely. Do not expose them in code or logs.
 
-- **`eventName(type, event): string`**: Combines type and event to a full event name.
-- **`eventsGroup`**: Groups system events by name.
-- **`expectSuccessfulTxEvent`**: Default success event names array.
-- **`Type`**: Enum for event types (e.g., `system`).
-- **`validateEvents(events, eventsExpected?, tx, block, log?): EventsValidated`**: Checks if expected events are in transaction events.
+- `read(key): Promise<any>`: Reads data from storage.
+- `readFromFileSystem(key): Promise<any>`: Reads data from file system.
+- `readFromLocalStorage(key): Promise<any>`: Reads data from local storage.
+- `save(key, value): Promise<void>`: Saves data to storage.
+- `saveOnFileSystem(key, value): Promise<void>`: Saves data to file system.
+- `saveOnLocalStorage(key, value): Promise<void>`: Saves data to local storage.
 
-### Network Management
+#### Event management
 
-- **`getNetworkDetails(options): NetworkDetails`**: Gets details of a network.
-- **`getNetworkDomainDetails(options): DomainDetails`**: Gets details of a domain.
-- **`getNetworkDomainRpcUrls(options): string[]`**: Gets RPC URLs for a domain.
-- **`getNetworkRpcUrls(options): string[]`**: Gets RPC URLs for a network.
-- **`networks`**: Array of available networks.
+- `eventName(type, event): string`: Combines a type and an event into a full event name.
+- `eventsGroup`: Groups system events by name.
+- `expectSuccessfulTxEvent`: Default success event names array.
+- `Type`: Enum for event types (e.g., `system`).
+- `validateEvents(events, eventsExpected?, tx, block, log?): EventsValidated`: Checks if expected events are in transaction events.
 
-### Signing Utilities
+#### Network management
 
-- **`signMessage(signer, address, data): Promise<{ signature: string }>`**: Signs a message with a signer and address.
-- **`signatureVerify`**: Verifies signatures (re-exported from `@polkadot/util-crypto`).
-- **`signingKey(publicKey): string`**: Converts a public key to a hex string.
+- `getNetworkDetails(options): NetworkDetails`: Retrieves the details of a network.
+- `getNetworkDomainDetails(options): DomainDetails`: Retrieves the details of a domain.
+- `getNetworkDomainRpcUrls(options): string[]`: Retrieves the RPC URLs for a domain.
+- `getNetworkRpcUrls(options): string[]`: Retrieves the RPC URLs for a network.
+- `networks`: Array of available networks.
 
-### String Utilities
+#### Signing utilities
 
-- **`capitalizeFirstLetter(string): string`**: Capitalizes first letter.
-- **`fixLengthEntryId(blockHeight, indexInBlock?): string`**: Creates fixed-length IDs.
-- **`isAddress(address): boolean`**: Validates a Substrate address.
-- **`isHex(value): boolean`**: Validates a hexadecimal string.
-- **`shortString(value, initialLength?, endLength?): string`**: Truncates strings.
-- **`stringify(value): string`**: Stringifies values, handling BigInt.
+- `signMessage(signer, address, data): Promise<{ signature: string }>`: Signs a message with a signer and an address.
+- `signatureVerify`: Verifies signatures (re-exported from `@polkadot/util-crypto`).
+- `signingKey(publicKey): string`: Converts a public key to a hex string.
 
-### Token and Value Formatting
+#### String utilities
 
-- **`formatSpacePledged(value, decimals?): string`**: Formats space amount with units.
-- **`formatTokenAmount(amount, decimals?): bigint`**: Formats token amount with decimals.
-- **`parseTokenAmount(amount, decimals?): number`**: Parses token amount with decimals.
+- `capitalizeFirstLetter(string): string`: Capitalizes the first letter.
+- `fixLengthEntryId(blockHeight, indexInBlock?): string`: Creates fixed-length IDs.
+- `isAddress(address): boolean`: Validates a Substrate address.
+- `isHex(value): boolean`: Validates a hexadecimal string.
+- `shortString(value, initialLength?, endLength?): string`: Truncates strings.
+- `stringify(value): string`: Stringifies values, handling BigInt.
 
-### Transaction Utilities
+#### Token and value formatting
 
-- **`signAndSendTx(sender, tx, options?, eventsExpected?, log?, mapErrorCodeToEnum?): Promise<TransactionSignedAndSend>`**: Signs, sends, and validates a transaction.
+- `formatSpacePledged(value, decimals?): string`: Formats space amount with units.
+- `formatTokenAmount(amount, decimals?): bigint`: Formats token amount with decimals.
+- `parseTokenAmount(amount, decimals?): number`: Parses token amount with decimals.
 
-### Wallet Management
+#### Transaction utilities
 
-- **`activateWallet(options): Promise<{ api, accounts }>`**: Activates a wallet using mnemonic or URI.
-- **`generateWallet(): GeneratedWallet`**: Generates a new wallet with mnemonic.
-- **`getMockWallet(name, wallets): Wallet`**: Retrieves a mock wallet by name.
-- **`mockWallets(options, api?): Promise<Wallet[]>`**: Creates mock wallets for testing.
-- **`setupWallet(params): Wallet`**: Sets up a wallet from mnemonic or URI.
+- `signAndSendTx(sender, tx, options?, eventsExpected?, log?, mapErrorCodeToEnum?): Promise<TransactionSignedAndSend>`: Signs, sends, and validates a transaction.
 
----
+#### Wallet management
 
-*Note:* All asynchronous functions return a `Promise` and should be used with `await` for proper execution flow.
+- `activateWallet(options): Promise<{ api, accounts }>`: Activates a wallet using a mnemonic or URI.
+- `generateWallet(): GeneratedWallet`: Generates a new wallet with a mnemonic.
+- `getMockWallet(name, wallets): Wallet`: Retrieves a mock wallet by name.
+- `mockWallets(options, api?): Promise<Wallet[]>`: Creates mock wallets for testing.
+- `setupWallet(params): Wallet`: Sets up a wallet from a mnemonic or URI.
 
----
+## Usage examples
 
-## Usage Examples
+### 1. Wallet management
 
-Below are examples demonstrating how to use the functions provided by `@autonomys/auto-utils`.
-
-### 1. Wallet Management
-
-#### **Activate a Wallet**
-
-Activate a wallet using a mnemonic phrase:
+#### Activate a wallet using a mnemonic phrase
 
 ```typescript
 import { activateWallet } from '@autonomys/auto-utils';
@@ -155,9 +149,7 @@ import { activateWallet } from '@autonomys/auto-utils';
 })();
 ```
 
-#### **Activate a Wallet Using URI**
-
-Activate a wallet using a URI:
+#### Activate a wallet using a URI
 
 ```typescript
 import { activateWallet } from '@autonomys/auto-utils';
@@ -176,9 +168,7 @@ import { activateWallet } from '@autonomys/auto-utils';
 })();
 ```
 
-#### **Create Mock Wallets for Testing**
-
-Create mock wallets for testing purposes:
+#### Create mock wallets for testing
 
 ```typescript
 import { activate, mockWallets, getMockWallet } from '@autonomys/auto-utils';
@@ -198,11 +188,9 @@ import { activate, mockWallets, getMockWallet } from '@autonomys/auto-utils';
 })();
 ```
 
-### 2. Network Management
+### 2. Network management
 
-#### **Get Available Networks**
-
-List all available networks:
+#### List all available networks
 
 ```typescript
 import { networks } from '@autonomys/auto-utils';
@@ -212,9 +200,7 @@ networks.forEach((network) => {
 });
 ```
 
-#### **Get Network Details**
-
-Retrieve details of a specific network:
+#### Retrieve the details of a specific network
 
 ```typescript
 import { getNetworkDetails } from '@autonomys/auto-utils';
@@ -224,9 +210,7 @@ console.log(`Network Name: ${network.name}`);
 console.log(`RPC URLs: ${network.rpcUrls.join(', ')}`);
 ```
 
-#### **Get Domain Details**
-
-Retrieve details of a specific domain within a network:
+#### Retrieve the details of a specific domain within a network
 
 ```typescript
 import { getNetworkDomainDetails } from '@autonomys/auto-utils';
@@ -236,11 +220,9 @@ console.log(`Domain Name: ${domain.name}`);
 console.log(`RPC URLs: ${domain.rpcUrls.join(', ')}`);
 ```
 
-### 3. Cryptographic Functions
+### 3. Cryptographic functions
 
-#### **Hash Data Using BLAKE2b-256**
-
-Hash a string using BLAKE2b-256:
+#### Hash a string using BLAKE2b-256
 
 ```typescript
 import { blake2b_256, stringToUint8Array } from '@autonomys/auto-utils';
@@ -252,9 +234,7 @@ const hash = blake2b_256(dataBytes);
 console.log(`Hash: ${hash}`); // Outputs the hash of the input string
 ```
 
-#### **Convert String to Uint8Array**
-
-Convert a string to a `Uint8Array`:
+#### Convert a string to a `Uint8Array`
 
 ```typescript
 import { stringToUint8Array } from '@autonomys/auto-utils';
@@ -265,9 +245,7 @@ const byteArray = stringToUint8Array(text);
 console.log(byteArray); // Outputs Uint8Array representation of the string
 ```
 
-#### **Concatenate Uint8Arrays**
-
-Concatenate two `Uint8Array` instances:
+#### Concatenate two `Uint8Array` instances
 
 ```typescript
 import { stringToUint8Array, concatenateUint8Arrays } from '@autonomys/auto-utils';
@@ -280,11 +258,9 @@ console.log(`Concatenated Result: ${new TextDecoder().decode(concatenated)}`);
 // Outputs: "First part Second part"
 ```
 
-### 4. API Activation
+### 4. API activation
 
-#### **Activate the Network API**
-
-Connect to the Autonomys Network:
+#### Activate the network API (connect to the Autonomys Network)
 
 ```typescript
 import { activate } from '@autonomys/auto-utils';
@@ -301,9 +277,7 @@ import { activate } from '@autonomys/auto-utils';
 })();
 ```
 
-#### **Activate a Domain API**
-
-Connect to a specific domain within the network:
+#### Activate a domain API (connect to a specific domain within the Autonomys Network)
 
 ```typescript
 import { activateDomain } from '@autonomys/auto-utils';
@@ -320,11 +294,9 @@ import { activateDomain } from '@autonomys/auto-utils';
 })();
 ```
 
-### 5. Data Storage
+### 5. Data storage
 
-#### **Save and Read Data**
-
-Save data to local storage or the file system and read it back:
+#### Save data to local storage or the file system and read it back
 
 ```typescript
 import { save, read } from '@autonomys/auto-utils';
@@ -340,11 +312,9 @@ const retrievedValue = read(key);
 console.log(retrievedValue); // Outputs: { message: 'Hello, Autonomys!' }
 ```
 
-### 6. Address Utilities
+### 6. Address utilities
 
-#### **Convert Address Formats**
-
-Convert an address to a standardized format and decode it:
+#### Convert an address to a standardized format and decode it
 
 ```typescript
 import { address, decode } from '@autonomys/auto-utils';
@@ -356,18 +326,3 @@ const decodedAddress = decode(originalAddress);
 console.log(`Standardized Address: ${standardizedAddress}`);
 console.log('Decoded Address:', decodedAddress);
 ```
-
----
-
-*Note:* All asynchronous functions return a `Promise` and should be used with `await` for proper execution flow.
-
----
-
-## Notes
-
-- **Asynchronous Functions**: Use `await` with all promises for proper execution flow.
-- **API Disconnection**: Always disconnect the API instance after operations to free up resources.
-- **Error Handling**: Wrap asynchronous calls in `try...catch` blocks to handle potential errors gracefully.
-- **Security Considerations**:
-- **Private Keys**: Handle private keys securely. Do not expose them in code or logs.
-- **Data Persistence**: Be cautious when saving sensitive data using `save` and `read`.
