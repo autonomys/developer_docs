@@ -49,7 +49,7 @@ Many functions in the `auto-consensus` package require an `api` object as a para
 import { createConnection } from '@autonomys/auto-utils';
 
 async function getApiInstance() {
-  const endpoint = 'wss://rpc-0.gemini-3h.subspace.network/ws';
+  const endpoint = 'wss://rpc-0.taurus.subspace.network/ws';
   const api = await createConnection(endpoint);
   return api;
 }
@@ -145,7 +145,7 @@ import { account } from '@autonomys/auto-consensus';
 import { activate } from '@autonomys/auto-utils';
 
 (async () => {
-  const api = await activate({ networkId: 'gemini-3h' });
+  const api = await activate({ networkId: 'taurus' });
   const accountData = await account(api, 'your_address');
 
   console.log(`Nonce: ${accountData.nonce}`);
@@ -166,7 +166,7 @@ import { balance } from '@autonomys/auto-consensus';
   // Activate a wallet using a mnemonic phrase
   const { api, accounts } = await activateWallet({
     mnemonic: 'your mnemonic phrase here', // Replace with your mnemonic
-    networkId: 'gemini-3h', // Optional: specify the network ID
+    networkId: 'taurus', // Optional: specify the network ID
   });
 
   const account = accounts[0];
@@ -192,7 +192,7 @@ import { balance } from '@autonomys/auto-consensus';
 import { activate } from '@autonomys/auto-utils';
 
 (async () => {
-  const api = await activate({ networkId: 'gemini-3h' });
+  const api = await activate({ networkId: 'taurus' });
   const accountBalance = await balance(api, 'your_address');
 
   console.log(`Free Balance: ${accountBalance.free}`);
@@ -209,7 +209,7 @@ Retrieve the total token issuance in the network.
 import { totalIssuance } from '@autonomys/auto-consensus';
 
 (async () => {
-  const total = await totalIssuance('gemini-3h');
+  const total = await totalIssuance('taurus');
 
   console.log(`Total Issuance: ${total.toString()}`);
 })();
@@ -266,7 +266,7 @@ import { activateWallet, signAndSendTx, disconnect } from '@autonomys/auto-utils
 
 (async () => {
   const { api, accounts } = await activateWallet({
-    networkId: 'gemini-3h',
+    networkId: 'taurus',
     mnemonic: 'your_mnemonic',
   });
 
@@ -299,20 +299,20 @@ import { activateWallet, signAndSendTx } from '@autonomys
 
 (async () => {
   const { api } = await activateWallet({
-    networkId: 'gemini-3h',
+    networkId: 'taurus',
     mnemonic: 'sender_mnemonic',
   });
 
   // Sender's account (who will register the operator)
   const { accounts: senderAccounts } = await activateWallet({
-    networkId: 'gemini-3h',
+    networkId: 'taurus',
     mnemonic: 'sender_mnemonic',
   });
   const sender = senderAccounts[0];
 
   // Operator's account
   const { accounts: operatorAccounts } = await activateWallet({
-    networkId: 'gemini-3h',
+    networkId: 'taurus',
     mnemonic: 'operator_mnemonic',
   });
   const operatorAccount = operatorAccounts[0];
@@ -344,7 +344,7 @@ import { activateWallet, signAndSendTx } from '@autonomys/auto-utils';
 
 (async () => {
   const { api, accounts } = await activateWallet({
-    networkId: 'gemini-3h',
+    networkId: 'taurus',
     mnemonic: 'nominator_mnemonic',
   });
   const nominator = accounts[0];
@@ -376,7 +376,7 @@ import { blockNumber, blockHash, networkTimestamp } from '@autonomys/auto-consen
 import { activate } from '@autonomys/auto-utils';
 
 (async () => {
-  const api = await activate({ networkId: 'gemini-3h' });
+  const api = await activate({ networkId: 'taurus' });
 
   const currentBlockNumber = await blockNumber(api);
   const currentBlockHash = await blockHash(api);
@@ -401,7 +401,7 @@ import { domains } from '@autonomys/auto-consensus';
 import { activate } from '@autonomys/auto-utils';
 
 (async () => {
-  const api = await activate({ networkId: 'gemini-3h' });
+  const api = await activate({ networkId: 'taurus' });
   const domainList = await domains(api);
 
   domainList.forEach((domain) => {
@@ -424,7 +424,7 @@ import { domainStakingSummary } from '@autonomys/auto-consensus';
 import { activate } from '@autonomys/auto-utils';
 
 (async () => {
-  const api = await activate({ networkId: 'gemini-3h' });
+  const api = await activate({ networkId: 'taurus' });
   const stakingSummaries = await domainStakingSummary(api);
 
   stakingSummaries.forEach((summary) => {
@@ -446,7 +446,7 @@ import { latestConfirmedDomainBlock } from '@autonomys/auto-consensus';
 import { activate } from '@autonomys/auto-utils';
 
 (async () => {
-  const api = await activate({ networkId: 'gemini-3h' });
+  const api = await activate({ networkId: 'taurus' });
   const confirmedBlocks = await latestConfirmedDomainBlock(api);
 
   confirmedBlocks.forEach((blockInfo) => {
