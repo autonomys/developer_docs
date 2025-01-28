@@ -1,6 +1,6 @@
 export default {
     index: {
-      title: 'Develop on Autonomys Network',
+      title: 'Develop on the Autonomys Network',
       theme: {
         breadcrumb: false,
         footer: true,
