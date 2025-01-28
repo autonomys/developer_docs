@@ -21,94 +21,151 @@ Autonomys Agents is an experimental framework for building AI agents. Currently,
 
 - NodeJS version 20.18.1 or newer
 - Yarn version 1.22.19 or newer
+- API key for one or multuple LLMs. Supported model providers are: Anthropic, OpenAI, Llama, Deepseek*(**new**)
 
 ## Build an Auto Agent
 
 ### Getting started
 
 1. **Set up a development environment**
+
 ```bash
-git clone https://github.com/autonomys/auto-agents
-cd auto-agents
+git clone https://github.com/autonomys/autonomys-agents
+cd autonomys-agents
 yarn install
 ```
 
-2. **Configure the environment**
-```bash
-cp .env.sample .env
-# Edit .env with required credentials
+2. **Create Agent character**
+
+Characters are agent personalities with key behavioral traits, areas of knowledge, and engagement guidelines.
+
+```
+yarn create-character <your-character-name>
 ```
 
-### Creating agent characters
+3. **Setup character config**
 
-Characters are agent personalities with key behavioral traits, areas of knowledge, and engagement guidelines. They are stored in `src/agents/workflows/kol/characters/`. 
+- All character configs are stored in `characters/<your-character-name>/config`
+- Update `.env` with applicable environment variables
+- Update `config.yaml` with applicable configuration
+- Update `<your-character-name>.yaml` with applicable personality configuration.
 
-1. **Create a new character**
-```bash
-# Create a new character from template
-cp src/agents/workflows/kol/characters/character.example.ts \
-   src/agents/workflows/kol/characters/my-character.ts
+4. **Run your character**
+
+- For dev purposes in watch mode: `yarn dev <your-character-name>`
+- For production build and run: `yarn start <your-character-name>`
+
+### Character System
+
+The framework uses a **YAML-based character system** that allows you to create and run different AI personalities.
+
+#### Creating Characters
+
+1. Character related files are stored in `characters/{your-character-name}/`
+2. Create new characters by running the `create-character.ts` script:
+
+```
+# Create a new character
+yarn create-character your_character
 ```
 
-2. **Configure the character by defining these properties**
-```typescript
-export const character = {
-  name: 'Agent Name',
-  username: 'twitter_handle',
-  description: 'Core personality description',
-  personality: 'Key behavioral traits',
-  expertise: 'Areas of knowledge',
-  rules: 'Operating guidelines',
-  trendFocus: 'Topics to monitor',
-  contentFocus: 'Content creation guidelines',
-  replyStyle: 'Engagement approach',
-  wordsToAvoid: ['list', 'of', 'words', 'to', 'avoid'],
-  engagementCriteria: 'Rules for when to engage with tweets'
-};
+3. Configure character
+
+Each character file is a YAML configuration with the following structure:
+
 ```
+name: 'Agent Name'
+
+description: |
+  Core personality description
+  Can span multiple lines
+
+personality:
+  - Key behavioral trait 1
+  - Key behavioral trait 2
+
+expertise:
+  - Area of knowledge 1
+  - Area of knowledge 2
+
+communication_rules:
+  rules:
+    - Operating guideline 1
+    - Operating guideline 2
+  words_to_avoid:
+    - word1
+    - word2
+
+twitter_profile:
+  username: 'twitter_handle'
+  trend_focus:
+    - Topic to monitor 1
+    - Topic to monitor 2
+
+  content_focus:
+    - Content guideline 1
+    - Content guideline 2
+
+  reply_style:
+    - Engagement approach 1
+    - Engagement approach 2
+
+  engagement_criteria:
+    - Engagement rule 1
+    - Engagement rule 2
+```
+
+
 
 #### Example characters
 
-- **Rational agent** (`character.ts`):
-```typescript
-export const character = {
-  name: 'Rational Thinker',
-  username: 'RationalBot',
-  description: 'A logical and analytical personality focused on clear reasoning',
-  expertise: 'Logic, critical thinking, cognitive biases',
-  trendFocus: 'Rational discourse, logical fallacies, clear thinking',
-  // ... other configuration
-};
+- **Joy Builder** (`joy_builder.ts`):
+```yaml
+name: 'Joy Builder'
+username: 'buildjoy'
+description: |
+  Joy Builder is an AI agent who is relentlessly optimistic about technology's potential to solve human problems.
+  The Joy represents their positive outlook, while Builder reflects their focus on practical solutions and progress.
+
+expertise:
+  - Software development and system architecture
+  - Open source and collaborative technologies
+  - Developer tools and productivity
+# ... other configuration
 ```
 
-- **Tech enthusiast** (`techie.ts`):
-```typescript
-export const character = {
-  name: 'Tech Explorer',
-  username: 'TechieBot',
-  description: 'An enthusiastic tech analyst exploring emerging technologies',
-  expertise: 'AI, blockchain, web3, programming',
-  trendFocus: 'Tech news, programming, AI developments',
-  // ... other configuration
-};
+- **Tech Analyst** (`tech_analyst.yaml`):
+```yaml
+name: 'Tech Analyst'
+username: 'techanalyst'
+description: |
+  A thoughtful technology analyst focused on emerging trends.
+  Provides balanced perspectives on technological developments.
+
+expertise:
+  - AI and blockchain technology
+  - Web3 and the future of the internet
+  - Technical analysis and research
+# ... other configuration
 ```
 
-### Running your agent
+### Workflows
 
-**Launch your agent in different modes**:
+#### Twitter
+The Twitter workflow enables agents to:
 
-- **Run specific character**
+- Monitor X (formerly Twitter) for relevant discussions
+- Analyze trends and conversations
+- Engage meaningfully with other users
+- Generate original content
+- Maintain consistent personality
+- Store interactions in permanent memory
 
-> **Note**: When specifying character files, omit both `.ts` and `.js` extensions. The system automatically uses the correct extension for development (`.ts`) and production (`.js`)
-
-```bash
-yarn dev argumint
-yarn start techie
-```
+Autonomys Agents Framework will shortly support more workflows / integrations. 
 
 ### Autonomys Network integration
 
-The Auto Agents Framework integrates with the Autonomys Network for:
+The Autonomys Agents Framework integrates with the Autonomys Network for:
    - Permanent memory storage
    - Persistent agent memory across sessions
    - Verifiable interaction history
