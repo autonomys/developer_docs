@@ -1,5 +1,5 @@
 export default {
-    'index': 'SDK Introduction',
+    'index': 'Introduction',
     'auto-consensus': 'Auto Consensus',
     'auto-drive': 'Auto Drive',
     'auto-utils': 'Auto Utils',
