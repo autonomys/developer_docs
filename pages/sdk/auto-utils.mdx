@@ -136,7 +136,7 @@ import { activateWallet } from '@autonomys/auto-utils';
 
   const { api, accounts } = await activateWallet({
     mnemonic,
-    networkId: 'gemini-3h', // Optional: specify the network ID
+    networkId: 'taurus', // Optional: specify the network ID
   });
 
   const account = accounts[0];
@@ -174,7 +174,7 @@ import { activateWallet } from '@autonomys/auto-utils';
 import { activate, mockWallets, getMockWallet } from '@autonomys/auto-utils';
 
 (async () => {
-  const api = await activate({ networkId: 'gemini-3h' });
+  const api = await activate({ networkId: 'taurus' });
 
   const wallets = await mockWallets({}, api);
   const aliceWallet = getMockWallet('Alice', wallets);
@@ -205,7 +205,7 @@ networks.forEach((network) => {
 ```typescript
 import { getNetworkDetails } from '@autonomys/auto-utils';
 
-const network = getNetworkDetails({ networkId: 'gemini-3h' });
+const network = getNetworkDetails({ networkId: 'taurus' });
 console.log(`Network Name: ${network.name}`);
 console.log(`RPC URLs: ${network.rpcUrls.join(', ')}`);
 ```
@@ -215,7 +215,7 @@ console.log(`RPC URLs: ${network.rpcUrls.join(', ')}`);
 ```typescript
 import { getNetworkDomainDetails } from '@autonomys/auto-utils';
 
-const domain = getNetworkDomainDetails({ domainId: '1', networkId: 'gemini-3h' });
+const domain = getNetworkDomainDetails({ domainId: '1', networkId: 'taurus' });
 console.log(`Domain Name: ${domain.name}`);
 console.log(`RPC URLs: ${domain.rpcUrls.join(', ')}`);
 ```
@@ -266,7 +266,7 @@ console.log(`Concatenated Result: ${new TextDecoder().decode(concatenated)}`);
 import { activate } from '@autonomys/auto-utils';
 
 (async () => {
-  const api = await activate({ networkId: 'gemini-3h' });
+  const api = await activate({ networkId: 'taurus' });
 
   console.log('API connected');
 
@@ -283,7 +283,7 @@ import { activate } from '@autonomys/auto-utils';
 import { activateDomain } from '@autonomys/auto-utils';
 
 (async () => {
-  const api = await activateDomain({ domainId: '1', networkId: 'gemini-3h' });
+  const api = await activateDomain({ domainId: '1', networkId: 'taurus' });
 
   console.log('Domain API connected');
 
