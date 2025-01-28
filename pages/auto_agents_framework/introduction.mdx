@@ -22,13 +22,13 @@ Autonomys Agents is an experimental framework for building AI agents. Currently,
 - NodeJS version 20.18.1 or newer
 - Yarn version 1.22.19 or newer
 
-## Building Your Own Auto Agent
+## Build an Auto Agent
 
 ### Getting started
 
 1. **Set up a development environment**
 ```bash
-git clone https://github.com/autonomys/autonomys-agents
+git clone https://github.com/autonomys/auto-agents
 cd auto-agents
 yarn install
 ```
@@ -41,7 +41,7 @@ cp .env.sample .env
 
 ### Creating agent characters
 
-Characters are agent personalities with key behavioral traits, areas of knowledge, and engagement guidelines. They are stored in `src/agents/workflows/kol/characters/`.
+Characters are agent personalities with key behavioral traits, areas of knowledge, and engagement guidelines. They are stored in `src/agents/workflows/kol/characters/`. 
 
 1. **Create a new character**
 ```bash
@@ -49,8 +49,8 @@ Characters are agent personalities with key behavioral traits, areas of knowledg
 cp src/agents/workflows/kol/characters/character.example.ts \
    src/agents/workflows/kol/characters/my-character.ts
 ```
-2. **Configure the character by defining these properties**
 
+2. **Configure the character by defining these properties**
 ```typescript
 export const character = {
   name: 'Agent Name',
@@ -69,11 +69,11 @@ export const character = {
 
 #### Example characters
 
-1. **Rational agent** (`character.ts`):
+- **Rational agent** (`character.ts`):
 ```typescript
 export const character = {
   name: 'Rational Thinker',
-  username: 'RationalBot', 
+  username: 'RationalBot',
   description: 'A logical and analytical personality focused on clear reasoning',
   expertise: 'Logic, critical thinking, cognitive biases',
   trendFocus: 'Rational discourse, logical fallacies, clear thinking',
@@ -81,7 +81,7 @@ export const character = {
 };
 ```
 
-2. **Tech enthusiast** (`techie.ts`):
+- **Tech enthusiast** (`techie.ts`):
 ```typescript
 export const character = {
   name: 'Tech Explorer',
@@ -93,77 +93,34 @@ export const character = {
 };
 ```
 
-### Running Your Agent
+### Running your agent
 
 **Launch your agent in different modes**:
 
-- **Development mode with specific character**
-```bash
-# Run specific character (omit .ts/.js extension)
-yarn dev argumint
-```
-
-- **Production mode with specific character**
-```bash
-# Run specific character (omit .ts/.js extension)
-yarn start techie
-```
+- **Run specific character**
 
 > **Note**: When specifying character files, omit both `.ts` and `.js` extensions. The system automatically uses the correct extension for development (`.ts`) and production (`.js`)
 
-## Workflows
+```bash
+yarn dev argumint
+yarn start techie
+```
 
-### Twitter
-
-The Twitter workflow enables agents to:
-
-- Monitor X (formerly Twitter) for relevant discussions
-- Analyze trends and conversations
-- Engage meaningfully with other users
-- Generate original content
-- Maintain consistent personality
-- Store interactions in permanent memory
-
-## Autonomys Network Integration
+### Autonomys Network integration
 
 The Auto Agents Framework integrates with the Autonomys Network for:
-  - Permanent memory storage
-  - Persistent agent memory across sessions
-  - Verifiable interaction history
-  - Cross-agent memory sharing
-  - Decentralized agent identity
+   - Permanent memory storage
+   - Persistent agent memory across sessions
+   - Verifiable interaction history
+   - Cross-agent memory sharing
+   - Decentralized agent identity
 
-### Configuration
+**Configure your .env file**
 
-1. Configure your environment variables in `.env`:
 ```env
 AUTO_DRIVE_UPLOAD=true
 AUTONOMYS_WALLET_KEY=your_wallet_key
 AUTONOMYS_ENCRYPTION_PASSWORD=your_password
-```
-
-To read more about Auto Drive click [here](/sdk/auto-drive)
-
-2. Make sure your wallet has sufficient funds. You can get testnet funds from https://subspacefaucet.com/
-
-## Memory Resurrection
-
-To resurrect memories from the Autonomys Network:
-
-### Options
-
-- `-o, --output`: (Optional) The directory where memories will be saved. Defaults to `./memories`
-- `-n, --number`: (Optional) Number of memories to fetch. If not specified, fetches all memories
-- `--help`: Show help menu with all available options
-
-Examples:
-
-```bash
-yarn resurrect                                   # Fetch all memories to ./memories/
-yarn resurrect -n 1000                           # Fetch 1000 memories to ./memories/
-yarn resurrect -o ./memories/my-agent -n 1000    # Fetch 1000 memories to specified directory
-yarn resurrect --output ./custom/path            # Fetch all memories to custom directory
-yarn resurrect --help                            # Show help menu
 ```
 
 ### Development Resources
