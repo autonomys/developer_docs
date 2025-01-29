@@ -3,25 +3,27 @@ import { Callout } from 'nextra/components'
 ## Autonomys Agents: A framework for building autonomous AI agents
 
 <Callout type="info">
-Autonomys Agents is an experimental framework for building AI agents. Currently, the framework supports agents that can interact with social networks and maintain permanent memory through the Autonomys Network. We are still in the early stages of development and are actively seeking feedback and contributions. We will be rapidly adding many more workflows and features.
+The **Auto Agents Framework** is experimental and still in the early stages of development. It currently primarily supports agentic social network interaction. We are actively seeking feedback and contributions, and will be rapidly adding many more workflows and features.
 </Callout>
 
 ![Auto-Agents Framework](/developers/Auto-Agents-1.png)
 
-## Features
+**Autonomys Agents** (**Auto Agents**) are truly autonomous on-chain AI agents capable of dynamic functionality, verifiable interaction, and permanent, censorship-resistant memory through the Autonomys Network.
+
+### Key features
 
 - 🤖 Autonomous social media engagement
-- 🧠 Permanent agent memory storage via Autonomys Network
+- 🧠 Permanent agent memory storage
 - 🔄 Built-in workflow system
-- 🐦 Twitter integration (with more platforms planned)
+- 🐦 X/Twitter integration (with more platforms planned)
 - 🎭 Customizable agent personalities
 - 🛠️ Extensible tool system
 
-## Requirements
+### Prerequisites
 
 - NodeJS version 20.18.1 or newer
 - Yarn version 1.22.19 or newer
-- API key for one or multuple LLMs. Supported model providers are: Anthropic, OpenAI, Llama, Deepseek*(**new**)
+- API key for one or multiple LLMs (supported model providers: Anthropic, OpenAI, Llama, DeepSeek (**NEW**)
 
 ## Build an Auto Agent
 
@@ -35,7 +37,7 @@ cd autonomys-agents
 yarn install
 ```
 
-2. **Create Agent character**
+2. **Create agent character**
 
 Characters are agent personalities with key behavioral traits, areas of knowledge, and engagement guidelines.
 
@@ -45,9 +47,9 @@ yarn create-character <your-character-name>
 
 3. **Setup character config**
 
-- All character configs are stored in `characters/<your-character-name>/config`
-- Update `.env` with applicable environment variables
-- Update `config.yaml` with applicable configuration
+- All character configs are stored in `characters/<your-character-name>/config`.
+- Update `.env` with applicable environment variables.
+- Update `config.yaml` with applicable configuration.
 - Update `<your-character-name>.yaml` with applicable personality configuration.
 
 4. **Run your character**
@@ -55,11 +57,11 @@ yarn create-character <your-character-name>
 - For dev purposes in watch mode: `yarn dev <your-character-name>`
 - For production build and run: `yarn start <your-character-name>`
 
-### Character System
+### Character system
 
 The framework uses a **YAML-based character system** that allows you to create and run different AI personalities.
 
-#### Creating Characters
+#### Creating characters
 
 1. Character related files are stored in `characters/{your-character-name}/`
 2. Create new characters by running the `create-character.ts` script:
@@ -151,28 +153,28 @@ expertise:
 
 ### Workflows
 
-#### Twitter
-The Twitter workflow enables agents to:
+#### X/Twitter
+The X/Twitter workflow enables agents to:
 
 - Monitor X (formerly Twitter) for relevant discussions
 - Analyze trends and conversations
 - Engage meaningfully with other users
 - Generate original content
-- Maintain consistent personality
+- Maintain a consistent personality
 - Store interactions in permanent memory
 
-Autonomys Agents Framework will shortly support more workflows / integrations. 
+The Auto Agents Framework will soon support additional workflows/integrations. 
 
 ### Autonomys Network integration
 
-The Autonomys Agents Framework integrates with the Autonomys Network for:
+The Auto Agents Framework integrates with the Autonomys Network for:
    - Permanent memory storage
    - Persistent agent memory across sessions
    - Verifiable interaction history
    - Cross-agent memory sharing
    - Decentralized agent identity
 
-**Configure your .env file**
+**Configure your .env file:**
 
 ```env
 AUTO_DRIVE_UPLOAD=true
@@ -180,7 +182,7 @@ AUTONOMYS_WALLET_KEY=your_wallet_key
 AUTONOMYS_ENCRYPTION_PASSWORD=your_password
 ```
 
-### Development Resources
+### Development resources
 
-- [Auto SDK Documentation](/sdk)
-- [Framework Repository](https://github.com/autonomys/autonomys-agents)
+- [Auto SDK documentation](/sdk)
+- [Auto Agents Framework repository](https://github.com/autonomys/autonomys-agents)
