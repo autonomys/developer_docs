@@ -47,6 +47,7 @@ export default function InteractiveCode() {
       }}
       options={{
         showConsole: true,
+        autorun: false,
         editorHeight: 400,
         recompileMode: "delayed",
         recompileDelay: 1000
