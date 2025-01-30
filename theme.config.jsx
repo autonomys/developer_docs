@@ -24,8 +24,11 @@ export default {
         src="/logo-black.png"
         alt="Autonomys Network Logo"
         style={{
-          height: '32px',
+          height: '24px',
           marginRight: '0.5rem',
+          '@media (min-width: 768px)': {
+            height: '32px',
+          }
         }}
       />
     )
@@ -47,11 +50,15 @@ export default {
         src="/logo-black.png"
         alt="Autonomys Network Logo"
         style={{
-          height: '32px',
+          height: '24px',
           marginRight: '0.5rem',
+          '@media (min-width: 768px)': {
+            height: '32px',
+          }
         }}
       />
       <span
+        className="hidden md:inline-block"
         style={{
           fontSize: '1.25rem',
           fontWeight: '600',   
