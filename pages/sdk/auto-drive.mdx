@@ -106,14 +106,29 @@ import * as drive from '@autonomys/auto-drive';
 - `decodeNode(encodedNode): any`: Decodes a byte array back into an IPLD node.
 
 
+### Network Configuration
+
+Since [AutoDrive](https://ai3.storage) is available on both Taurus testnet and Mainnet, you have to condifure the network when using the package.
+
+```ts
+import { NetworkId } from '@autonomys/auto-utils'
+
+const api = createAutoDriveApi({
+  apiKey: 'your-api-key',
+  network: NetworkId.TAURUS | NetworkId.MAINNET
+})
+
+```
+
 ## Usage examples
 
 ### 1. Uploading a file from a filepath
 
 ```typescript
-import { uploadFileFromFilepath,createAutoDriveApi } from '@autonomys/auto-drive'
+import { uploadFileFromFilepath,createAutoDriveApi, } from '@autonomys/auto-drive'
+import { NetworkId } from '@autonomys/auto-utils'
 
-const api = createAutoDriveApi({ apiKey: 'your-api-key' }) // Initialize your API instance with an API key
+const api = createAutoDriveApi({ apiKey: 'your-api-key'. network: NetworkId.TAURUS }) // Initialize your API instance with an API key and NetworkID
 const filePath = 'path/to/your/file.txt' // Specify the path to your file
 const options = {
   password: 'your-encryption-password', // Optional: specify a password for encryption
@@ -133,8 +148,9 @@ console.log(`The file is uploaded and its cid is ${cid}`)
 
 ```typescript
 import { uploadFileFromInput, createAutoDriveApi } from '@autonomys/auto-drive'
+import { NetworkId } from '@autonomys/auto-utils'
 
-const api = createAutoDriveApi({ apiKey: 'your-api-key' }) // Initialize your API instance with an API key
+const api = createAutoDriveApi({ apiKey: 'your-api-key', network: NetworkId.TAURUS}) // Initialize your API instance with an API key and NetworkID
 
 // e.g. Get the file from the object of an HTML event
 const file: File = e.target.value // Substitute with your file
@@ -163,8 +179,9 @@ You can upload any file that can be represented in this way, e.g. as a `Buffer`:
 
 ```typescript
 import { createAutoDriveApi, uploadFile } from '@autonomys/auto-drive'
+import { NetworkId } from '@autonomys/auto-utils'
 
-const api = createAutoDriveApi({ apiKey: 'your-api-key' }) // Initialize your API instance with an API key
+const api = createAutoDriveApi({ apiKey: 'your-api-key', network: NetworkId.TAURUS }) // Initialize your API instance with an API key and NetworkID
 const buffer = Buffer.from(...);
 const GenericFile = {
   read: async function *() {
@@ -197,8 +214,9 @@ console.log(`The file is uploaded and its cid is ${cid}`)
 
 ```typescript
 import { createAutoDriveApi, uploadFolderFromFolderPath } from '@autonomys/auto-drive'
+import { NetworkId } from '@autonomys/auto-utils'
 
-const api = createAutoDriveApi({ apiKey: 'your-api-key' }) // Initialize your API instance with an API key
+const api = createAutoDriveApi({ apiKey: 'your-api-key', network: NetworkId.TAURUS}) // Initialize your API instance with an API key and NetworkID
 const folderPath = 'path/to/your/folder' // Specify the path to your folder
 
 const options = {
@@ -216,14 +234,13 @@ console.log(`The folder is uploaded and its cid is ${folderCID}`)
 
 ```
 
-
-
 ### 5. Downloading files
 
 ```typescript
 import { createAutoDriveApi, downloadFile } from '@autonomys/auto-drive'
+import { NetworkId } from '@autonomys/auto-utils'
 
-const api = createAutoDriveApi({ apiKey: 'your-api-key' }) // Initialize your API instance with an API key
+const api = createAutoDriveApi({ apiKey: 'your-api-key', network: NetworkId.TAURUS }) // Initialize your API instance with an API key
 
 try {
   const cid = '..'
@@ -242,8 +259,9 @@ try {
 
 ```typescript
 import { createAutoDriveApi, apiCalls, Scope } from '@autonomys/auto-drive'
+import { NetworkId } from '@autonomys/auto-utils'
 
-const api = createAutoDriveApi({ apiKey: 'your-api-key' }) // Initialize your API instance with an API key
+const api = createAutoDriveApi({ apiKey: 'your-api-key', network: NetworkId.TAURUS }) // Initialize your API instance with an API key and NetworkID
 
 try {
   const myFiles = await apiCalls.getRoots(api, {
