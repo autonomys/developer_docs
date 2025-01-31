@@ -106,6 +106,20 @@ import * as drive from '@autonomys/auto-drive';
 - `decodeNode(encodedNode): any`: Decodes a byte array back into an IPLD node.
 
 
+### Network Configuration
+
+Since [AutoDrive](https://ai3.storage) is available on both Taurus testnet and Mainnet, you have to condifure the network when using the package.
+
+```ts
+import { NetworkId } from '@autonomys/auto-utils'
+
+const api = createAutoDriveApi({
+  apiKey: 'your-api-key',
+  network: NetworkId.TAURUS | NetworkId.MAINNET
+})
+
+```
+
 ## Usage examples
 
 ### 1. Uploading a file from a filepath
@@ -219,8 +233,6 @@ const folderCID = await uploadFolderFromFolderPath(api, folderPath, options)
 console.log(`The folder is uploaded and its cid is ${folderCID}`)
 
 ```
-
-
 
 ### 5. Downloading files
 
