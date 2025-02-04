@@ -1,35 +1,194 @@
-## Auto XDM
+## Auto-XDM Package
 
-> *Note:* Cross-domain messaging (XDM) is not yet enabled on the Taurus testnet or Autonomys Network mainnet.
+### Introduction
 
-### Available functions
+The `@autonomys/auto-xdm` package provides functionalities for cross-domain transfer of native tokens between **Autonomys Consensus (Taurus Testnet)** and **Auto EVM** chains on the Autonomys Network.
 
-#### Cross-domain transfers
+### Features
 
-> *Note:* The `transfer` function returns a `Promise` that resolves to a `SubmittableExtrinsic`, which can be signed and submitted to the blockchain.
+- **Cross-Domain Transfer**: Enable token transfers between consensus and domain accounts
+- **Multiple Account Types**: Support for both EVM (Account20) and Substrate (Account32) addresses
+- **TypeScript Support**: Full TypeScript type definitions for enhanced developer experience
 
-- `transfer(api: ApiPromise, destination: ChainOrDomain, receiver: string, amount: Amount): Promise<SubmittableExtrinsic>`: Creates a transaction to transfer a specified amount to a receiver at a given destination (can be either on the consensus chain or a specific domain).
+### Installation
 
-#### Types
+Install the package via `npm` or `yarn`:
 
-- **Amount**: `BigInt | number | string`  
-  Represents the amount to be transferred.
+```bash
+# Using npm
+npm install @autonomys/auto-xdm
 
-- **ChainOrDomain**: `Consensus | Domain`  
-  A union type representing either the consensus chain or a domain.
+# Using yarn
+yarn add @autonomys/auto-xdm
+```
 
-- **Consensus**: `{ type: 'consensus' }`  
-  Specifies the consensus chain as the destination.
+### Importing
 
-- **Domain**: `{ type: 'domain'; domainId: number }`  
-  Specifies a domain as the destination, identified by a `domainId`.
-
-## Usage example
+Import the Auto XDM functions you need into your project:
 
 ```typescript
-// For transferring to the consensus chain
-await transfer(api, { type: 'consensus' }, 'receiverAddress', amount)
+// Import specific functions
+import { 
+  transferToConsensus,
+  transferToDomainAccount20Type,
+  transferToDomainAccount32Type 
+} from '@autonomys/auto-xdm';
 
-// For transferring to a specific domain
-await transfer(api, { type: 'domain', domainId: 1 }, 'receiverAddress', amount)
+// Or import everything
+import * as xdm from '@autonomys/auto-xdm';
 ```
+
+### Available Functions
+
+#### Transfer Functions
+
+- `transfer(api, destination, amount): Promise<SubmittableExtrinsic>`: Base transfer function for cross-domain transfers
+- `transferToConsensus(api, accountId32, amount): Promise<SubmittableExtrinsic>`: Transfer tokens from a domain to consensus
+- `transferToDomainAccount20Type(api, destinationDomainId, accountId20, amount): Promise<SubmittableExtrinsic>`: Transfer to an EVM address
+- `transferToDomainAccount32Type(api, destinationDomainId, accountId32, amount): Promise<SubmittableExtrinsic>`: Transfer to a Substrate address
+
+#### Query Functions
+
+- `chainAllowlist(api): Promise<Codec>`: Retrieves the list of allowed chains
+- `allCancelledTransfers(api): Promise<Codec>`: Gets all cancelled transfers
+- `chainTransfers(api): Promise<Codec>`: Retrieves all chain transfers
+- `allDomainBalances(api): Promise<Codec>`: Gets balances across all domains
+- `domainBalances(api, domainId): Promise<Codec>`: Gets balances for a specific domain
+- `allUnconfirmedTransfers(api): Promise<Codec>`: Retrieves pending transfers
+
+### Type Definitions
+
+```typescript
+type Amount = BigInt | number | string;
+
+type Consensus = {
+    type: 'consensus';
+};
+
+type Domain = {
+    type: 'domain';
+    domainId: number;
+};
+
+type ChainOrDomain = Consensus | Domain;
+```
+
+### Usage Examples
+
+#### 1. Transfer from Consensus to Domain (EVM Address)
+
+```typescript
+import { activateWallet } from '@autonomys/auto-utils';
+import { transferToDomainAccount20Type } from '@autonomys/auto-xdm';
+
+(async () => {
+  const { api } = await activateWallet({ 
+    networkId: 'taurus', 
+    uri: '//alice' 
+  });
+
+  const tx = await transferToDomainAccount20Type(
+    api,
+    0, // Receiver domain (0 is Auto EVM on Taurus Testnet)
+    '0x1234567890abcdef', // Receiver EVM address
+    '1000000000000000000' // Amount in smallest unit
+  );
+
+  await tx.signAndSend(account);
+})();
+```
+
+#### 2. Transfer from Consensus to Domain (Substrate Address)
+
+```typescript
+import { activateWallet } from '@autonomys/auto-utils';
+import { transferToDomainAccount32Type } from '@autonomys/auto-xdm';
+
+(async () => {
+  const { api } = await activateWallet({ 
+    networkId: 'taurus', 
+    uri: '//alice' 
+  });
+
+  const tx = await transferToDomainAccount32Type(
+    api,
+    0, // Receiver domain
+    'su1234567890abcdef', // Receiver Substrate address
+    '1000000000000000000'
+  );
+
+  await tx.signAndSend(account);
+})();
+```
+
+#### 3. Transfer from Domain to Consensus
+
+```typescript
+import { activateWallet } from '@autonomys/auto-utils';
+import { transferToConsensus } from '@autonomys/auto-xdm';
+
+(async () => {
+  const { api } = await activateWallet({ 
+    networkId: 'taurus', 
+    domainId: 0, 
+    uri: '//alice' 
+  });
+
+  const tx = await transferToConsensus(
+    api,
+    'su1234567890abcdef', // Receiver consensus account
+    '1000000000000000000'
+  );
+
+  await tx.signAndSend(account);
+})();
+```
+
+#### 4. Query Domain Balances
+
+```typescript
+import { activateWallet } from '@autonomys/auto-utils';
+import { domainBalances } from '@autonomys/auto-xdm';
+
+(async () => {
+  const { api } = await activateWallet({ 
+    networkId: 'taurus' 
+  });
+
+  // Get balances for domain 0
+  const balances = await domainBalances(api, 0);
+  console.log('Domain balances:', balances.toString());
+})();
+```
+
+### Best Practices
+
+1. **Error Handling**: Always wrap your transactions in try-catch blocks:
+   ```typescript
+   try {
+     const tx = await transferToConsensus(api, receiver, amount);
+     await tx.signAndSend(account);
+   } catch (error) {
+     console.error('Transfer failed:', error);
+   }
+   ```
+
+2. **Amount Formatting**: Use appropriate decimal places for token amounts:
+   - The amount parameter expects the smallest unit of the token
+   - For 18 decimals, multiply by 10^18 or use formatTokenAmount from auto-utils
+
+3. **API Management**: Always disconnect the API when done:
+   ```typescript
+   try {
+     // ... your code ...
+   } finally {
+     await api.disconnect();
+   }
+   ```
+
+### Notes
+
+- All transfer functions return a `SubmittableExtrinsic` that must be signed and sent
+- Cross-domain transfers may take a few blocks to complete
+- Monitor transfer status using the query functions provided
+- Ensure sufficient balance in the sending account for the transfer and fees
