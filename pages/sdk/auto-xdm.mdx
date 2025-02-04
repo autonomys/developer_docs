@@ -2,13 +2,13 @@
 
 ### Introduction
 
-The `@autonomys/auto-xdm` package provides functionalities for cross-domain transfer of native tokens between **Autonomys Consensus (Taurus Testnet)** and **Auto EVM** chains on the Autonomys Network.
+The `@autonomys/auto-xdm` package provides functionalities for the cross-domain transfer of native tokens between Autonomys' **Taurus testnet consensus chain** and **Auto EVM** domain chain.
 
 ### Features
 
-- **Cross-Domain Transfer**: Enable token transfers between consensus and domain accounts
-- **Multiple Account Types**: Support for both EVM (Account20) and Substrate (Account32) addresses
-- **TypeScript Support**: Full TypeScript type definitions for enhanced developer experience
+- **Cross-Domain Transfer**: Enable token transfers between consensus and domain wallets.
+- **Multiple Account Types**: Support for both EVM (Account20) and Substrate (Account32) addresses.
+- **TypeScript Support**: Full TypeScript type definitions for an enhanced developer experience.
 
 ### Installation
 
@@ -24,7 +24,7 @@ yarn add @autonomys/auto-xdm
 
 ### Importing
 
-Import the Auto XDM functions you need into your project:
+Import the `auto-xdm` functions you need into your project:
 
 ```typescript
 // Import specific functions
@@ -38,25 +38,31 @@ import {
 import * as xdm from '@autonomys/auto-xdm';
 ```
 
-### Available Functions
+### Available functions
 
-#### Transfer Functions
+> *Note:* All asynchronous functions return a `Promise` and should be used with `await` for proper execution flow. Wrap asynchronous calls and transactions in `try...catch` blocks to handle potential errors gracefully. Always disconnect the API instance after your operations are complete to free up resources.
 
-- `transfer(api, destination, amount): Promise<SubmittableExtrinsic>`: Base transfer function for cross-domain transfers
-- `transferToConsensus(api, accountId32, amount): Promise<SubmittableExtrinsic>`: Transfer tokens from a domain to consensus
-- `transferToDomainAccount20Type(api, destinationDomainId, accountId20, amount): Promise<SubmittableExtrinsic>`: Transfer to an EVM address
-- `transferToDomainAccount32Type(api, destinationDomainId, accountId32, amount): Promise<SubmittableExtrinsic>`: Transfer to a Substrate address
+#### Transfer functions
 
-#### Query Functions
+> *Note:* All transfer functions return a `SubmittableExtrinsic` that must be signed and sent. The `amount` parameter expects the smallest unit of the token (Shannon). For 18 decimals, multiply by 10^18 or use `formatTokenAmount` from `auto-utils`. Ensure a sufficient balance in the sending account to cover both the transfer and fees. Cross-domain transfers may take a few blocks to complete.
 
-- `chainAllowlist(api): Promise<Codec>`: Retrieves the list of allowed chains
-- `allCancelledTransfers(api): Promise<Codec>`: Gets all cancelled transfers
-- `chainTransfers(api): Promise<Codec>`: Retrieves all chain transfers
-- `allDomainBalances(api): Promise<Codec>`: Gets balances across all domains
-- `domainBalances(api, domainId): Promise<Codec>`: Gets balances for a specific domain
-- `allUnconfirmedTransfers(api): Promise<Codec>`: Retrieves pending transfers
+- `transfer(api, destination, amount): Promise<SubmittableExtrinsic>`: Base transfer function for cross-domain transfers.
+- `transferToConsensus(api, accountId32, amount): Promise<SubmittableExtrinsic>`: Transfer tokens from a domain to the consensus chain.
+- `transferToDomainAccount20Type(api, destinationDomainId, accountId20, amount): Promise<SubmittableExtrinsic>`: Transfer tokens from the consensus chain to an EVM address.
+- `transferToDomainAccount32Type(api, destinationDomainId, accountId32, amount): Promise<SubmittableExtrinsic>`: Transfer tokens from the consensus chain to a Substrate address.
 
-### Type Definitions
+#### Query functions
+
+> *Note:* Monitor transfer status using query functions.
+
+- `chainAllowlist(api): Promise<Codec>`: Retrieves the list of allowed chains.
+- `allCancelledTransfers(api): Promise<Codec>`: Retrieves all cancelled transfers.
+- `chainTransfers(api): Promise<Codec>`: Retrieves all chain transfers.
+- `allDomainBalances(api): Promise<Codec>`: Retrieves balances across all domains.
+- `domainBalances(api, domainId): Promise<Codec>`: Retrieves balances for a specific domain.
+- `allUnconfirmedTransfers(api): Promise<Codec>`: Retrieves pending transfers. 
+
+### Type definitions
 
 ```typescript
 type Amount = BigInt | number | string;
@@ -73,9 +79,9 @@ type Domain = {
 type ChainOrDomain = Consensus | Domain;
 ```
 
-### Usage Examples
+## Usage examples
 
-#### 1. Transfer from Consensus to Domain (EVM Address)
+### 1. Transfer from `Consensus` to `Domain` (EVM address)
 
 ```typescript
 import { activateWallet } from '@autonomys/auto-utils';
@@ -89,16 +95,16 @@ import { transferToDomainAccount20Type } from '@autonomys/auto-xdm';
 
   const tx = await transferToDomainAccount20Type(
     api,
-    0, // Receiver domain (0 is Auto EVM on Taurus Testnet)
+    0, // Receiver domain (0 is Auto EVM on the Taurus testnet)
     '0x1234567890abcdef', // Receiver EVM address
-    '1000000000000000000' // Amount in smallest unit
+    '1000000000000000000' // Amount in smallest unit (Shannon)
   );
 
   await tx.signAndSend(account);
 })();
 ```
 
-#### 2. Transfer from Consensus to Domain (Substrate Address)
+### 2. Transfer from `Consensus` to `Domain` (Substrate address)
 
 ```typescript
 import { activateWallet } from '@autonomys/auto-utils';
@@ -114,14 +120,14 @@ import { transferToDomainAccount32Type } from '@autonomys/auto-xdm';
     api,
     0, // Receiver domain
     'su1234567890abcdef', // Receiver Substrate address
-    '1000000000000000000'
+    '1000000000000000000' // Amount in smallest unit (Shannon)
   );
 
   await tx.signAndSend(account);
 })();
 ```
 
-#### 3. Transfer from Domain to Consensus
+### 3. Transfer from `Domain` to `Consensus`
 
 ```typescript
 import { activateWallet } from '@autonomys/auto-utils';
@@ -136,15 +142,15 @@ import { transferToConsensus } from '@autonomys/auto-xdm';
 
   const tx = await transferToConsensus(
     api,
-    'su1234567890abcdef', // Receiver consensus account
-    '1000000000000000000'
+    'su1234567890abcdef', // Receiver consensus chain address
+    '1000000000000000000' // Amount in smallest unit (Shannon)
   );
 
   await tx.signAndSend(account);
 })();
 ```
 
-#### 4. Query Domain Balances
+### 4. Query domain balances
 
 ```typescript
 import { activateWallet } from '@autonomys/auto-utils';
@@ -155,15 +161,15 @@ import { domainBalances } from '@autonomys/auto-xdm';
     networkId: 'taurus' 
   });
 
-  // Get balances for domain 0
+  // Get balances for domain 0 (Auto EVM on the Taurus testnet)
   const balances = await domainBalances(api, 0);
   console.log('Domain balances:', balances.toString());
 })();
 ```
 
-### Best Practices
+### Best practices
 
-1. **Error Handling**: Always wrap your transactions in try-catch blocks:
+1. **Error Handling**: Wrap asynchronous calls and transactions in `try...catch` blocks to handle potential errors gracefully:
    ```typescript
    try {
      const tx = await transferToConsensus(api, receiver, amount);
@@ -174,10 +180,10 @@ import { domainBalances } from '@autonomys/auto-xdm';
    ```
 
 2. **Amount Formatting**: Use appropriate decimal places for token amounts:
-   - The amount parameter expects the smallest unit of the token
-   - For 18 decimals, multiply by 10^18 or use formatTokenAmount from auto-utils
+   - The `amount` parameter expects the smallest unit of the token (Shannon).
+   - For 18 decimals, multiply by 10^18 or use `formatTokenAmount` from `auto-utils`.
 
-3. **API Management**: Always disconnect the API when done:
+3. **API Management**: > Always disconnect the API instance after your operations are complete to free up resources:
    ```typescript
    try {
      // ... your code ...
@@ -185,10 +191,3 @@ import { domainBalances } from '@autonomys/auto-xdm';
      await api.disconnect();
    }
    ```
-
-### Notes
-
-- All transfer functions return a `SubmittableExtrinsic` that must be signed and sent
-- Cross-domain transfers may take a few blocks to complete
-- Monitor transfer status using the query functions provided
-- Ensure sufficient balance in the sending account for the transfer and fees
