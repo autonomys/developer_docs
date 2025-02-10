@@ -61,7 +61,7 @@ yarn create-character <your-character-name>
 
 - For dev purposes in watch mode: `yarn dev <your-character-name>`
 - For production build and run: `yarn start <your-character-name>`
-
+- For running the examples: `yarn example:<example-name> <your-character-name>`
 ### Character system
 
 The framework uses a **YAML-based character system** that allows you to create and run different AI personalities.
@@ -159,7 +159,7 @@ expertise:
 ### Workflows
 
 #### X/Twitter
-The X/Twitter workflow enables agents to:
+The X/Twitter workflow enables agents to perform the following actions autonomously:
 
 - Monitor X (formerly Twitter) for relevant discussions
 - Analyze trends and conversations
@@ -182,10 +182,42 @@ The Auto Agents Framework integrates with the Autonomys Network for:
 **Configure your .env file:**
 
 ```env
-AUTO_DRIVE_UPLOAD=true
+# AutoDrive Configuration
 AUTONOMYS_WALLET_KEY=your_wallet_key
 AUTONOMYS_ENCRYPTION_PASSWORD=your_password
+
+# Other Configuration related to Twitter credentials, LLM providers, and Blockchain Network
 ```
+*Note: You can find the .env.example file in the created character folder.*
+
+**Configure your config.yaml file:**
+
+```yaml
+twitter:
+  NUM_TIMELINE_TWEETS: 10
+  NUM_FOLLOWING_RECENT_TWEETS: 10
+  NUM_RANDOM_FOLLOWINGS: 5
+  POST_TWEETS: false
+  # ... other configuration related to Twitter
+
+auto_drive:
+  upload: true
+  network: 'taurus' # or 'mainnet'
+
+llm:
+ # If you plan to use directedTwitter workflow, you can configure the LLM nodes as follows:
+  nodes:
+    decision:
+      provider: 'anthropic'
+      model: 'claude-3-5-sonnet-latest'
+      temperature: 0.2
+  # ... other configuration related to LLM
+  ...
+
+```
+*Note: You can find the config.example.yaml file in the created character folder.*
+
+
 
 ### Development resources
 
