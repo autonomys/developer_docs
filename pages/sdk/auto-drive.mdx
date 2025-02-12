@@ -17,7 +17,7 @@ The `@autonomys/auto-drive` package provides utilities for creating and managing
 View your upload and download limits, access files uploaded by other users, and manage and share your submissions by logging in to Auto Drive:
 
 1. Open [Auto Drive](https://ai3.storage/)
-2. Sign in via Google or Discord  
+2. Sign in via Google, Discord or GitHub
 
    ![Auto-Drive-1](/developers/Auto-Drive-1.png)
 
@@ -76,35 +76,25 @@ import * as drive from '@autonomys/auto-drive';
 
 > *Note:* All asynchronous functions return a `Promise` (or an async iterable in the case of `downloadObject`), and should be used with `await` for proper execution flow. Wrap asynchronous calls in `try...catch` blocks to handle potential errors gracefully. Ensure that file paths are correct and accessible when reading from or writing to the file system.
 
-#### Upload and download operations
+#### Upload operations
 
 - `uploadFile(api, file, options): Promise<string>`: Uploads a file (using a buffer, `File`, or a custom interface) with optional encryption and compression. Returns the resulting CID as a string.
-- `uploadFileFromFilepath(api, filepath, options): Promise<string>`: Uploads a file from a filesystem path.
 - `uploadFileFromInput(api, file, options): Promise<string>`: Uploads a file obtained from a browser's `File` API.
-- `uploadFolderFromFolderPath(api, folderPath, options): Promise<string>`: Uploads a folder from a filesystem path.
 - `uploadFolderFromInput(api, fileList, options): Promise<string>`: Uploads a folder from a browser's `FileList`.
 - `uploadFileWithinFolderUpload(api, uploadId, file, options): Promise<string>`: Uploads a file within an existing folder upload session.
+- `uploadObjectAsJSON(api, object, name?, options): Promise<string>`: Serializes and uploads any object as a JSON file.
+
+#### Download operations
+
 - `downloadFile(api, cid, password?): AsyncIterable<Buffer>`: Downloads a file from its CID, with optional decryption using a password.
-- `downloadObject(api, params): AsyncIterable<Buffer>`: Downloads an object from its CID (likely implemented as `apiCalls.downloadObject`).
+- `getMyFiles(api, page, limit): Promise<PaginatedResult<ObjectSummary>>`: Retrieves paginated list of user's files.
+- `searchByNameOrCIDInMyFiles(api, value): Promise<ObjectSummary[]>`: Searches for files by name or CID within user's files.
+- `searchByNameOrCID(api, value): Promise<ObjectSummary[]>`: Global search for files by name or CID.
 
 #### Utility functions
 
-- `uploadFileChunks(api, fileUploadId, asyncIterable, uploadChunkSize, onProgress): Promise<void>`: Handles the chunked upload of files to the server.
-- `constructZipBlobFromTreeAndPaths(tree, filesMap): Promise<Blob>`: Creates a zip archive from a file tree and corresponding file paths.
-- `constructFromInput(files): FolderTree`: Constructs a folder tree from an array of files.
-- `fileToIterable(file): AsyncIterable<Buffer>`: Converts a file into an async iterable of buffers.
-
-#### CID utilities
-
-- `cidOfNode(node): CID`: Generates a CID from an IPLD node.
-- `cidToString(cid): string`: Converts a CID to its string representation.
-- `stringToCid(cidString): CID`: Parses a CID string back into a CID object.
-
-#### Node encoding and decoding
-
-- `encodeNode(node): Uint8Array`: Encodes an IPLD node into a byte array.
-- `decodeNode(encodedNode): any`: Decodes a byte array back into an IPLD node.
-
+- `getPendingCredits(api): Promise<{ upload: number; download: number }>`: Gets the current user's pending upload and download credits.
+- `getSubscriptionInfo(api): Promise<SubscriptionInfo>`: Retrieves the current user's subscription information.
 
 ### Network configuration
 
