@@ -156,6 +156,27 @@ expertise:
 # ... other configuration
 ```
 
+### Context Size Management
+The orchestrator helps manage the LLM's context window size through pruning parameters. These parameters control message summarization and retention. 
+Configure them in two ways:
+
+1. Dynamic configuration when creating the orchestrator:
+  ```yaml
+  const runner = await getOrchestratorRunner({
+    model,                   // model to use for the agent
+    prompts,                 // prompts for the agent
+    tools,                   // tools available to the agent
+    namespace,               // name of the agent
+    vectorStore,             // vector store for the agent
+    pruningParameters: PruningParameters{
+      maxWindowSummary: 10,  // End index for message slice
+      maxQueueSize: 50       // Trigger summarization threshold
+    }
+  });
+  ```
+
+When messages exceed maxQueueSize, a summary is created. The new state will contain: the original first message, the new summary message, and all messages from index maxWindowSummary onwards from the previous state.
+
 ### Workflows
 
 #### X/Twitter
@@ -188,36 +209,26 @@ AUTONOMYS_ENCRYPTION_PASSWORD=your_password
 
 # Other Configuration related to Twitter credentials, LLM providers, and Blockchain Network
 ```
-*Note: You can find the .env.example file in the created character folder.*
-
-**Configure your config.yaml file:**
-
-```yaml
-twitter:
-  NUM_TIMELINE_TWEETS: 10
-  NUM_FOLLOWING_RECENT_TWEETS: 10
-  NUM_RANDOM_FOLLOWINGS: 5
-  POST_TWEETS: false
-  # ... other configuration related to Twitter
-
-auto_drive:
-  upload: true
-  network: 'taurus' # or 'mainnet'
-
-llm:
- # If you plan to use directedTwitter workflow, you can configure the LLM nodes as follows:
-  nodes:
-    decision:
-      provider: 'anthropic'
-      model: 'claude-3-5-sonnet-latest'
-      temperature: 0.2
-  # ... other configuration related to LLM
-  ...
-
-```
 *Note: You can find the config.example.yaml file in the created character folder.*
 
+### Resurrection
 
+To resurrect memories from the Autonomys Network, run the following command:
+
+Options
+`-o, --output`: (Optional) The directory where memories will be saved. Defaults to ./memories
+`-n, --number`: (Optional) Number of memories to fetch. If not specified, fetches all memories
+`--help`: Show help menu with all available options
+
+Examples:
+
+```yaml
+yarn resurrect your_character_name                                  # Fetch all memories to ./memories/
+yarn resurrect your_character_name -n 1000                           # Fetch 1000 memories to ./memories/
+yarn resurrect your_character_name -o ./memories/my-agent -n 1000    # Fetch 1000 memories to specified directory
+yarn resurrect your_character_name --output ./custom/path            # Fetch all memories to custom directory
+yarn resurrect --help               
+```
 
 ### Development resources
 
