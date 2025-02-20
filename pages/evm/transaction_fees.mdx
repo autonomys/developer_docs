@@ -1,8 +1,8 @@
-# Account Balances and Transaction Fees on Taurus
+# Account Balances and Transaction Fees on Auto EVM
 
 ## Introduction
 
-While Taurus strives to maintain EVM compatibility, there are some important differences that developers should understand regarding account balances and transaction fees. These differences stem from Taurus's Substrate-based architecture and affect how balances are managed and fees are calculated.
+While Auto EVM strives to maintain EVM compatibility, there are some important differences that developers should understand regarding account balances and transaction fees. These differences stem from Auto EVM's Substrate-based architecture and affect how balances are managed and fees are calculated.
 
 ## Key Concepts
 
@@ -17,7 +17,7 @@ The Existential Deposit is a minimum balance that must be maintained in any acco
 
 ### Consensus Storage Fees
 
-In addition to standard gas fees, Taurus implements consensus storage fees:
+In addition to standard gas fees, Auto EVM implements consensus storage fees:
 
 - Applied to transactions that modify state
 - Separate from execution fees
@@ -29,7 +29,7 @@ In addition to standard gas fees, Taurus implements consensus storage fees:
 
 ### Balance Management
 
-When working with smart contracts on Taurus, be aware that:
+When working with smart contracts on Auto EVM, be aware that:
 
 1. Contracts cannot be fully emptied due to ED requirements
 2. The minimum balance (ED) will always remain in the contract
@@ -76,15 +76,15 @@ Contract state balance: 0.01 TAI3
 
 1. Balance Management:
    - Ethereum: No minimum balance requirement
-   - Taurus: Requires ED maintenance
+   - Auto EVM: Requires ED maintenance
 
 2. Fee Structure:
    - Ethereum: Gas fees only
-   - Taurus: Gas fees + consensus storage fees
+   - Auto EVM: Gas fees + consensus storage fees
 
 3. Contract Behavior:
    - Ethereum: Contracts can be fully emptied
-   - Taurus: ED must remain in contracts
+   - Auto EVM: ED must remain in contracts
 
 ## Tools and Verification
 
