@@ -8,12 +8,16 @@ While Auto EVM strives to maintain EVM compatibility, there are some important d
 
 ### Existential Deposit (ED)
 
-The Existential Deposit is a minimum balance that must be maintained in any account or contract to keep it alive on the network.
+The Existential Deposit is a minimum balance threshold that affects how accounts handle native token balances on the network.
 
 - Current ED value: 0.000001 TAI3
-- Applies to both user accounts and smart contracts
-- Cannot be withdrawn or transferred out
-- Prevents dust accounts and maintains network efficiency
+- For user accounts (EOAs):
+    - Accounts that drop below ED are reaped (removed from state)
+    - Prevents dust accounts and maintains network efficiency
+- For smart contracts:
+    - ED only impacts contracts that handle native token balances
+    - Many contracts (e.g., ERC20 tokens) don't interact with native tokens and are unaffected
+    - When a contract's balance exceeds ED, that amount becomes reserved
 
 ### Consensus Storage Fees
 
@@ -22,18 +26,19 @@ In addition to standard gas fees, Auto EVM implements consensus storage fees:
 - Applied to transactions that modify state
 - Separate from execution fees
 - Deducted from the sender's account
-- Scale with the size of state changes
+- Scale with the size of call data
 - Not currently visible in BlockScout UI
 
 ## Impact on Smart Contracts
 
 ### Balance Management
 
-When working with smart contracts on Auto EVM, be aware that:
+1. Contracts with native token balances cannot be fully emptied due to ED requirements
 
-1. Contracts cannot be fully emptied due to ED requirements
-2. The minimum balance (ED) will always remain in the contract
-3. The maximum withdrawable amount from a contract is: `total_balance - ED`
+> **Note:** This affects contracts that maintain native token balances (e.g., faucets, DEX contracts)
+
+2. The maximum withdrawable amount from the account is: `total_balance - ED`
+
 
 ### Example Scenarios
 
