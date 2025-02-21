@@ -1,5 +1,6 @@
 export default {
     introduction: 'Introduction',
+    transaction_fees: "Account Balances and Transaction Fees",
     general_information: 'Developer Tools',
     metamask: 'Setting up MetaMask',
     faucet: 'Faucet (get tAI3 testnet tokens)',

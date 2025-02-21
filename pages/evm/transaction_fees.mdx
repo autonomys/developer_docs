@@ -1,0 +1,120 @@
+# Account Balances and Transaction Fees on Auto EVM
+
+## Introduction
+
+While Auto EVM strives to maintain EVM compatibility, there are some important differences that developers should understand regarding account balances and transaction fees. These differences stem from Auto EVM's Substrate-based architecture and affect how balances are managed and fees are calculated.
+
+## Key Concepts
+
+### Existential Deposit (ED)
+
+The Existential Deposit is a minimum balance threshold that affects how accounts handle native token balances on the network.
+
+- Current ED value: 0.000001 TAI3
+- For user accounts (EOAs):
+    - Accounts that drop below ED are reaped (removed from state)
+    - Prevents dust accounts and maintains network efficiency
+- For smart contracts:
+    - ED only impacts contracts that handle native token balances
+    - Many contracts (e.g., ERC20 tokens) don't interact with native tokens and are unaffected
+    - When a contract's balance exceeds ED, that amount becomes reserved
+
+### Consensus Storage Fees
+
+In addition to standard gas fees, Auto EVM implements consensus storage fees:
+
+- Applied to transactions that modify state
+- Separate from execution fees
+- Deducted from the sender's account
+- Scale with the size of call data
+- Not currently visible in BlockScout UI
+
+## Impact on Smart Contracts
+
+### Balance Management
+
+1. Contracts with native token balances cannot be fully emptied due to ED requirements
+
+> **Note:** This affects contracts that maintain native token balances (e.g., faucets, DEX contracts)
+
+2. The maximum withdrawable amount from the account is: `total_balance - ED`
+
+
+### Example Scenarios
+
+**Deposit and Withdrawal:**
+```
+Initial deposit: 0.01 TAI3
+Available for withdrawal: 0.009999 TAI3 (due to ED)
+Contract state balance: 0.01 TAI3
+```
+
+**Fee Deduction:**
+- Transaction fees (execution + storage) are deducted from the sender's account
+- The contract's internal accounting may show different values than the actual on-chain balance
+
+## Best Practices
+
+### Smart Contract Development
+
+1. Account for ED in withdrawal functions:
+   - Always leave the ED amount in the contract
+   - Check for sufficient balance above ED before transfers
+
+2. Fee Handling:
+   - Consider both execution and storage fees in transaction planning
+   - Add buffer for storage fees in critical operations
+
+### Testing Considerations
+
+1. Test withdrawal edge cases:
+   - Attempt to withdraw full balance
+   - Verify behavior with amounts close to ED
+   - Check contract state after failed withdrawals
+
+2. Balance Verification:
+   - Use RPC calls to verify actual available balance
+   - Compare contract state with on-chain state
+   - Account for ED in balance calculations
+
+## Differences from Ethereum
+
+1. Balance Management:
+   - Ethereum: No minimum balance requirement
+   - Auto EVM: Requires ED maintenance
+
+2. Fee Structure:
+   - Ethereum: Gas fees only
+   - Auto EVM: Gas fees + consensus storage fees
+
+3. Contract Behavior:
+   - Ethereum: Contracts can be fully emptied
+   - Auto EVM: ED must remain in contracts
+
+## Tools and Verification
+
+### Checking Balances
+
+To verify actual available balances:
+- Use Polkadot.js interface
+- Query contract state directly
+- Account for ED and storage fees in calculations
+
+### Transaction Planning
+
+When planning transactions:
+1. Calculate required fees (execution + storage)
+2. Ensure sufficient balance above ED
+3. Add buffer for potential storage fee variations
+
+## Common Issues and Solutions
+
+1. "Insufficient Balance" errors:
+   - Check if attempting to withdraw below ED
+   - Verify sufficient balance for fees
+   - Consider storage fees in calculations
+
+2. Balance Discrepancies:
+   - Compare BlockScout UI with actual RPC calls
+   - Account for storage fees in calculations
+   - Remember ED requirements
