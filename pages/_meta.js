@@ -12,6 +12,7 @@ export default {
       }
     },
     introduction: "Introduction",
+    hackathon: "HackSecret5 Hackathon",
     application_examples: 'Example Applications',
     auto_agents_framework: 'Autonomys Agents Framework',
     sdk: 'Auto SDK',
