@@ -2,6 +2,10 @@
 
 [**Foundry**](https://book.getfoundry.sh/) is a tool that allows you to easily write, test and deploy smart contracts on any EVM-compatible blockchain.
 
+### EVM Version Compatibility
+
+Auto EVM is compatible with most EVM versions but doesn't support some features introduced in newer versions like **"Paris"** or **"Shanghai"**. When using development tools, you may need to specify an EVM version explicitly. Supported versions: **"Istanbul"**, **"London"**. 
+
 ### Getting started
 
  > *Note:* Foundryup does not currently support `PowerShell` or `Cmd`, so if you're on Windows, you will need to install and use [Git BASH](https://gitforwindows.org/) or [WSL](https://learn.microsoft.com/en-us/windows/wsl/install) as your terminal.
@@ -23,7 +27,7 @@
 
     ```
     // SPDX-License-Identifier: UNLICENSED
-    pragma solidity ^0.8.13;
+    pragma solidity ^0.8.1;
 
     contract Counter {
         uint256 public number;
@@ -122,7 +126,7 @@
 
     # Deployment
     deploy:
-	    @forge create Counter --private-key ${PRIVATE_KEY} --rpc-url ${RPC_URL}
+	    @forge create Counter --private-key ${PRIVATE_KEY} --rpc-url ${RPC_URL} --evm-version london
     ```
 
     We're importing the values for a `PRIVATE_KEY` and `RPC_URL` from the `.env` file. This allows us to run `make build` for building the project, and `make deploy` for deploying the project, pointing to the provided RPC, and using the provided `PRIVATE_KEY`. Let’s run `make build` to ensure it’s working properly.

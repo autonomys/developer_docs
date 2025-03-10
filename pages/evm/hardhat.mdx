@@ -2,6 +2,10 @@
 
 [**Hardhat**](https://hardhat.org/docs) is a tool that facilitates building, testing and deploying on the Ethereum Virtual Machine. It helps developers manage and automate the recurring tasks that are inherent to the process of building smart contracts and dApps, and allows them to easily introduce more functionality around this workflow. This includes compiling and testing at the very core. Flexible deployment options also allow you to point to the Autonomys EVM domain RPC to deploy your contracts and dApps.
 
+### EVM Version Compatibility
+
+Auto EVM is compatible with most EVM versions but doesn't support some features introduced in newer versions like **"Paris"** or **"Shanghai"**. When using development tools, you may need to specify an EVM version explicitly. Supported versions: **"Istanbul"**, **"London"**. 
+
 ### Getting started
 
 **Prerequisites**
@@ -116,7 +120,16 @@ Everything is working as expected so we’re ready for deployment!
 ```
 require("@nomicfoundation/hardhat-toolbox");
 module.exports = {
-solidity: "0.8.19",
+solidity: {
+    compilers: [
+        {
+            version: "0.8.17",
+            settings: {
+            evmVersion: "london"
+            }
+        }
+        ]
+},
 networks: {
     subspace: {
     url: "https://nova-0.taurus.subspace.network/ws",
