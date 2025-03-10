@@ -23,6 +23,15 @@ Developers can currently choose to build using the:
 
 You will soon be able to build your own local custom virtual machines.
 
+### Transaction Security
+The Autonomys Network uses a nonce system to prevent transaction replay attacks:
+
+- Each account has an integer nonce value that increases by one with every on-chain transaction
+- Signed transactions must include the correct nonce value to be accepted
+- Transactions with incorrect nonce values are rejected, preventing replay attacks
+- For security, new accounts' default nonce value is set to the current block number (rather than 0)
+- This ensures if an account is reaped and later re-created, previous transactions remain invalid
+
 ## [Auto SDK](/sdk)
 
 ### Key features:

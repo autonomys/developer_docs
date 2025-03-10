@@ -12,6 +12,10 @@ title: Auto EVM
 
 This guide provides simple instructions for setting up a remote development environment, and assumes you have a basic understanding of or experience with Ethereum Virtual Machine (EVM) development.
 
+### EVM Version Compatibility
+
+Auto EVM is compatible with most EVM versions but doesn't support some features introduced in newer versions like **"Paris"** or **"Shanghai"**. When using development tools, you may need to specify an EVM version explicitly. Supported versions: **"Istanbul"**, **"London"**. 
+
 #### Set up a MetaMask wallet (or any other EVM-compatible wallet) and connect it to our custom EVM
 
 ```
@@ -36,7 +40,21 @@ If anything above is unfamiliar to you, explore our full guide over the followin
 
 > *Note:* Do **not** tip when submitting transactions in an attempt to accelerate them. Autonomys' transaction queue operates differently from Ethereum's. Including a tip alongside gas fees leads to the possibility of two transactions sharing the same nonce. This could result in dual charges for gas fees—once for the execution and storage in the first transaction, and once for storage in the second transaction.
 
-### *Known issue: gas estimation*
+### Gas Estimation Limitations
+The `eth_estimateGas` RPC call may not provide completely accurate estimates in **Auto EVM** domain for the following reasons:
+
+- Consensus chain storage fees may not be fully accounted for in estimates
+- The RPC cannot determine which transaction format the caller will use:
+   - pallet-evm or pallet-ethereum call
+   - pallet-evm create or create2 call
+   - Any of the 3 supported pallet-ethereum transaction formats
+
+While improvements to the gas estimation are being implemented, developers should consider the following:
+
+- Add a buffer to estimated gas values for important transactions
+- If you encounter consistent gas estimation issues, please contact us so we can adjust our estimation algorithms
+
+#### *Known issue: gas estimation*
 
 When deploying smart contracts to our EVM-compatible **Auto EVM** domain, you may encounter an error related to gas estimation, typically presenting as:
 

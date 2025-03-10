@@ -2,6 +2,16 @@
 
 [**Remix**](https://remix-ide.readthedocs.io/en/latest/) is a tool that allows you to easily write, test and deploy smart contracts on any EVM-compatible blockchain.
 
+### EVM Version Compatibility
+
+Auto EVM is compatible with most EVM versions but doesn't support some features introduced in newer versions like **"Paris"** or **"Shanghai"**. When using development tools, you may need to specify an EVM version explicitly. Supported versions: **"Istanbul"**, **"London"**. 
+
+**In Remix, set the EVM version in the Solidity compiler settings:**
+
+Go to the "Solidity compiler" tab
+Click on "Advanced Configurations"
+Set "EVM Version" to **"london"** or **"istanbul"**
+
 ### Getting started
 
 1. Navigate to the [Remix website](https://remix.ethereum.org). You will see a file explorer and interface for creating new workspaces, integrations with GitHub, Gist, IPFS, HTTPS, preloaded templates, and plugins. Create a new workspace by clicking on the + sign next to `WORKSPACES`.
