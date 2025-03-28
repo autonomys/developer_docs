@@ -8,5 +8,6 @@ export default {
     remix: 'Remix Guide',
     foundry: 'Foundry Guide',
     hardhat: 'HardHat Guide',
-    local: 'Local Development'
+    local: 'Local Development',
+    the_graph: 'Query On-chain Data with The Graph',
   }
