@@ -9,5 +9,5 @@ export default {
     foundry: 'Foundry Guide',
     hardhat: 'HardHat Guide',
     local: 'Local Development',
-    the_graph: "Query On-chain Data with The Graph",
+    the_graph: 'Query On-chain Data with The Graph',
   }
