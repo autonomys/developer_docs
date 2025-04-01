@@ -15,15 +15,17 @@ export default {
         data-modal-disclaimer="This is a custom LLM for Autonomys Network with access to all documentation, forum and discord threads. Since this is AI technology please use your best judgment."
         async
       />
-      <script async src="https://www.googletagmanager.com/gtag/js?id=G-N417BD8BLW"></script>
-      <script>
-        {`
-          window.dataLayer = window.dataLayer || [];
-          function gtag(){dataLayer.push(arguments);}
-          gtag('js', new Date());
-          gtag('config', 'G-N417BD8BLW');
-        `}
-      </script>
+      <script async src="https://www.googletagmanager.com/gtag/js?id=G-VVFHKM3JJF"></script>
+      <script
+        dangerouslySetInnerHTML={{
+          __html: `
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', 'G-VVFHKM3JJF');
+          `
+        }}
+      />
     </>
   ),
   project: {
