@@ -16,14 +16,16 @@ export default {
         async
       />
       <script async src="https://www.googletagmanager.com/gtag/js?id=G-N417BD8BLW"></script>
-      <script>
-        {`
-          window.dataLayer = window.dataLayer || [];
-          function gtag(){dataLayer.push(arguments);}
-          gtag('js', new Date());
-          gtag('config', 'G-N417BD8BLW');
-        `}
-      </script>
+      <script
+        dangerouslySetInnerHTML={{
+          __html: `
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', 'G-N417BD8BLW');
+          `
+        }}
+      />
     </>
   ),
   project: {

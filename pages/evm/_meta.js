@@ -9,6 +9,6 @@ export default {
     foundry: 'Foundry Guide',
     hardhat: 'HardHat Guide',
     local: 'Local Development',
-    
-    NFT_guide: 'Minting and Sending NFTs'
+    the_graph: 'Query On-chain Data with The Graph',
+    NFT_guide: 'Minting and Sending NFTs',
   }
