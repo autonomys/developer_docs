@@ -50,21 +50,21 @@ Indexers like The Graph create a queryable data layer specifically tracking even
 
 7. Install **Graph CLI** using provided commands. You can use `yarn`, `npm`, `pnpm`, or `bun`. 
 
-8. Initialize the subgraph by running `graph init autonomys-subgraph`. This will create a boilerplate subgraph code. 
+8. Initialize the subgraph by running `graph init autonomys-subgraph`. This will create a boilerplate subgraph project. 
 During the initialization, you will need to specify a few things:
 - Network (Autonomys)
 - Subgraph slug (feel free to use the default name)
 - Directory to create the subgraph in (feel free to use the default directory)
 - Smart contact address (the address of your smart contract deployed on Autonomys Taurus EVM domain)
-- ABI file(path)
+- ABI file (path)
 - Start block (feel free to use the default value)
 - Contract name
-- Index contacts events as entities (true or false value)
+- Index contract events as entities (true or false value)
 
      ![the-graph-8](/developers/the-graph-8.png)
 
 > Tip: you can find the contract ABI by looking at the `token_metadata` file. 
-E.g. if you're using Remix IDE, find your contract metadata file, collaps it on the `abi` line 7, copy the entire `abi` including the square brakets **[]** and save it into a `json` file on your PR. 
+E.g. if you're using Remix IDE, find your contract metadata file, collapse it on the `abi` line 7, copy the entire `abi` including the square brakets **[]** and save it into a `json` file on your PR. 
 
     ![the-graph-9](/developers/the-graph-9.png)
 
@@ -72,7 +72,7 @@ E.g. if you're using Remix IDE, find your contract metadata file, collaps it on 
 
 9. Run `graph auth` to authenticate the project and provide your deploy key which you can find on the **Subgraph Dashboard**.
 
-10. Cd into the directory by doing `cd project_name` and run `graph codegen && graph build` to build the project, you will see the `build/subgraph.yaml` file being created.  
+10. Enter the directory with `cd project_name` and run `graph codegen && graph build` to build the project, you will see the `build/subgraph.yaml` file being created.  
 
     ![the-graph-11](/developers/the-graph-11.png)
 
@@ -80,15 +80,15 @@ E.g. if you're using Remix IDE, find your contract metadata file, collaps it on 
 
     ![the-graph-12](/developers/the-graph-12.png)
 
-12. Proceed back to the **Graph Studio**, the status would change to **Deployed**. 
+12. Proceed back to the **Graph Studio**, the status will change to **Deployed**. 
 
     ![the-graph-13](/developers/the-graph-13.png)
 
-13. The new tabs **Playground**, **Endpoints**, **Logs** would now be accessible to you! You would find usage examples of quering the data, accessing the data via API, and can test queries in the **Playground** without leaving the studio!
+13. The new tabs **Playground**, **Endpoints**, **Logs** will now be accessible to you! You can find usage examples of querying the data, accessing the data via API, and can test queries in the **Playground** without leaving the studio!
 
     ![the-graph-14](/developers/the-graph-14.png)
 
-Congratulations, you've successfully setup and configured subgraph for your application! 
+Congratulations, you've successfully setup and configured a subgraph for your application! 
 
 
 
