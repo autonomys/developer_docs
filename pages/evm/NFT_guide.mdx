@@ -1,12 +1,12 @@
 ---
-title: Sending NFTs
+title: Minting and Sending NFTs
 ---
 
 ## Sending NFTs
 
 > *Note:* NFT minting and transfers are currently available exclusively on the **Taurus** testnet using the Autonomys NFT contract deployed at `0x505c243ec05dF81bC33295fF7C135D4D98063Da5`.
 
-This guide walks you through sending NFTs on Autonomys using Remix, a Metamask-connected wallet, and the Eternal Mint platform.
+This guide walks you through sending NFTs on Autonomys using [Remix](https://remix.ethereum.org/), a [Metamask-connected wallet](https://metamask.io/), and the [Eternal Mint](https://eternalmint.xyz/) platform.
 
 ---
 
@@ -16,7 +16,7 @@ Autonomys NFTs offer a significant advantage over traditional NFT infrastructure
 
 > **Unlike platforms that rely on IPFS**, Autonomys stores NFT's metadata and digital assets directly on **[Auto Drive](https://ai3.storage/)**, our permanent decentralized storage.
 
-- 🔒 Your NFT metadata is **never at risk of disappearing** due to expired IPFS pins.
+- 🔒 Both your NFT **metadata and digital asset** (e.g., image, music file) are **never at risk of disappearing** due to expired IPFS pins.
 - 🌐 Each NFT is linked to a **permanent Autodrive CID** that ensures long-term storage.
 - 🚫 No third-party dependency for metadata — your NFT will never go offline.
 
@@ -31,8 +31,18 @@ This guide assumes you have experience with MetaMask and Remix.
 ### Step 1: Mint Your NFT
 
 1. Visit [Eternal Mint](https://eternalmint.xyz/).
-2. Mint your NFT.
-3. Once minted, **copy your NFT’s Token ID** — you’ll need it to send the NFT.
+![NFT-mint-1](/developers/NFT-guide/NFT-mint-1.png)
+2. Connect the Wallet of your choice.
+![NFT-mint-2](/developers/NFT-guide/NFT-mint-2.png)
+3. Mint your NFT by filling in the following fields:
+- **Name**: The title of your NFT.
+- **Supply**: The number of editions you'd like to mint.
+- **External Link**: (Optional) A link to an external website or resource.
+- **Description**: A brief explanation or story behind your NFT.
+- **Upload Image**: The visual or media file representing your NFT (e.g., image, GIF, video).
+![NFT-mint-3](/developers/NFT-guide/NFT-mint-3.png)
+4. Once minted, **copy your NFT’s Token ID** — you’ll need it to send the NFT.
+
 
 ---
 
@@ -51,8 +61,8 @@ This guide assumes you have experience with MetaMask and Remix.
 
 1. In Remix, navigate to the **Deploy & Run Transactions** panel.
 2. Set the Environment to **Injected Provider - MetaMask**.
-3. Connect your MetaMask wallet that’s configured to the **tAI3.0** testnet.
-
+3. Connect your MetaMask wallet that’s configured to the **tAI3.0** testnet. 
+For more detailed instructions, check out our [guide on connecting Remix to the Taurus testnet](/evm//remix).
 ![NFT-guide-2](/developers/NFT-guide/NFT-guide-2.png)
 
 ---
@@ -61,7 +71,6 @@ This guide assumes you have experience with MetaMask and Remix.
 
 - If deploying a new contract: Click **Deploy** and confirm in MetaMask.
 - If using the existing NFT contract: Paste the deployed contract address into the `At Address` field and click **At Address**.
-
 ![NFT-guide-3](/developers/NFT-guide/NFT-guide-3.png)
 
 ---
@@ -77,18 +86,25 @@ Scroll down to the **Deployed Contracts** section and find the `safeTransferFrom
 - `data`: Optional; use `0x` if not needed
 
 Click **transact** and confirm the transaction in MetaMask.
-
 ![NFT-guide-4](/developers/NFT-guide/NFT-guide-4.png)
 
 ---
 
 ### Verification
 
-After the transaction is mined, the NFT will appear in the recipient’s wallet. You can verify the transfer using:
+After the transaction, the NFT will appear in the recipient’s wallet. You can verify the transfer using the [Block explorer for the Autonomys testnet](https://blockscout.taurus.autonomys.xyz/)
 
-- Eternal Mint (search by Token ID)
-- [Block explorer for the Autonomys testnet](https://blockscout.taurus.autonomys.xyz/)
+**Here's how**:
 
+1. Open the transaction on Blockscout.
+2. Click on **"Token Transfers"** to view the minted token details.
+![NFT-check-1](/developers/NFT-guide/NFT-check-1.png)
+
+**OR**
+
+1. Go to the **"Tokens"** tab.
+2. Select **"NFTs"** to see your newly minted NFT listed there!
+![NFT-check-2](/developers/NFT-guide/NFT-check-2.png)
 ---
 
 ### Troubleshooting

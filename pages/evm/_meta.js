@@ -8,5 +8,6 @@ export default {
     remix: 'Remix Guide',
     foundry: 'Foundry Guide',
     hardhat: 'HardHat Guide',
-    local: 'Local Development'
+    local: 'Local Development',
+    NFT_guide: 'Minting and Sending NFTs'
   }
