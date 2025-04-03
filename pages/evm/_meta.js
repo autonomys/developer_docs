@@ -9,5 +9,6 @@ export default {
     foundry: 'Foundry Guide',
     hardhat: 'HardHat Guide',
     local: 'Local Development',
+    
     NFT_guide: 'Minting and Sending NFTs'
   }
