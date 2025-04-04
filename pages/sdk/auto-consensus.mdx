@@ -50,7 +50,7 @@ Many functions in the `auto-consensus` package require an `api` object as a para
 import { createConnection } from '@autonomys/auto-utils';
 
 async function getApiInstance() {
-  const endpoint = 'wss://rpc-0.taurus.subspace.network/ws';
+  const endpoint = 'wss://rpc.taurus.autonomys.xyz/ws';
   const api = await createConnection(endpoint);
   return api;
 }
