@@ -90,6 +90,108 @@ E.g. if you're using Remix IDE, find your contract metadata file, collapse it on
 
 Congratulations, you've successfully setup and configured a subgraph for your application! 
 
+### Querying data in your smart contract
+
+Subgraphs are primarily designed to index and query events emitted by smart contracts. 
+
+1. Let's make some slight changes to the `Counter` contract we've introduced in the [Foundry guide](/evm/foundry.mdx) and modify functions to emit events. 
 
 
+```solidity
+// SPDX-License-Identifier: UNLICENSED
+pragma solidity ^0.8.13;
+
+contract Counter {
+    uint256 public number;
+    
+    event NumberSet(uint256 newNumber);
+    event NumberIncremented(uint256 newNumber);
+    event NumberDecremented(uint256 newNumber);
+    
+    function setNumber(uint256 newNumber) public {
+        number = newNumber;
+        emit NumberSet(number);
+    }
+    
+    function increment() public {
+        number++;
+        emit NumberIncremented(number);
+    }
+    
+    function decrement() public {
+        number--;
+        emit NumberDecremented(number);
+    }
+}
+```
+
+> Note: This will affect the contract ABI, make sure to change it and upgrade your Subgraph application.
+
+2. Then we'll change the `Counter` contract state and set the number to `5` by running `cast send YOUR_CONTRACT_ADDRESS "setNumber(uint256)" 5 --rpc-url https://auto-evm.taurus.autonomys.xyz/ws --private-key YOUR_KEY`
+
+3. Let's trigger one more event in the `Counter` contract by calling the `increment()` function. We can do that by running `cast send YOUR_CONTRACT_ADDRESS "increment()" --rpc-url https://auto-evm.taurus.autonomys.xyz/ws --private-key YOUR_KEY`
+
+4. With two events emitted, let's proceed to **The Graph** playground and **query them**!
+
+5. Open the **Graph Playground** tab where you try running the following queries:
+
+    #### Query to Get All NumberSet Events
+    ```bash
+    {
+        numberSets(first: 10, orderBy: blockTimestamp, orderDirection: desc) {
+            id
+            newNumber
+            blockTimestamp
+            blockNumber
+            transactionHash
+        }
+    }
+    ```
+
+    #### Query to Get All Increment Events
+
+    ```bash
+    {
+        numberIncrementeds(first: 10, orderBy: blockTimestamp, orderDirection: desc) {
+            id
+            newNumber
+            blockTimestamp
+            blockNumber
+            transactionHash
+        }
+    }
+    ```
+
+    #### Get All Events (Set, Increment, Decrement) in Chronological Order 
+
+    ```bash
+    {
+        numberSets(orderBy: blockTimestamp) {
+            id
+            newNumber
+            blockTimestamp
+            blockNumber
+            transactionHash
+            __typename
+        }
+        numberIncrementeds(orderBy: blockTimestamp) {
+            id
+            newNumber
+            blockTimestamp
+            blockNumber
+            transactionHash
+            __typename
+        }
+        numberDecrementeds(orderBy: blockTimestamp) {
+            id
+            newNumber
+            blockTimestamp
+            blockNumber
+            transactionHash
+            __typename
+        }
+    }
+    ```
+
+> Tip: you can also run queries directly from the terminal using `cURL` or `gql`. You can find the **Example Usage** under the **Endpoints** tab. 
 
