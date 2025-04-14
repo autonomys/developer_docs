@@ -10,4 +10,5 @@ export default {
     hardhat: 'HardHat Guide',
     local: 'Local Development',
     the_graph: 'Query On-chain Data with The Graph',
+    NFT_guide: 'Minting and Sending NFTs',
   }
