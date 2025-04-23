@@ -1,0 +1,59 @@
+# How to Swap tAI3 for WAI3 on the Taurus Testnet
+
+Auto EVM tAI3 on Taurus is the same as ETH on the Ethereum network. This means that it is not an ERC-20 token which is sometimes a requirement for certain use-cases.
+
+Fortunately there is an ERC-20 contract on Taurus Auto EVM which allows you to "wrap" the tokens. This guide walks us through how to do that.
+
+## The Contract
+
+The WAI3 contract can be found at `0x205E735a2C73228fA13EeB70720C7841BDf65EDB` and you can view the contract code here: https://blockscout.taurus.autonomys.xyz/token/0x205E735a2C73228fA13EeB70720C7841BDf65EDB?tab=contract. Note you can also check out transfer activity and holders on the relevant tabs.
+
+![wai](/developers/wai3/wai3-1.png)
+
+## Swapping tAI3 for WAI3
+
+We will use MetaMask today though any EVM compatible wallet should work. First, make sure you have the Taurus Auto EVM network added to MetaMask. Skip this step if you have already done it.
+
+The quickest way to add the network is to use this button at the bottom of Blockscout (use the contract link above):
+
+![wai](/developers/wai3/wai3-2.png)
+
+Once that's done you should be able to see your Auto EVM tAI3 balance on MetaMask when you select the network.
+
+![wai](/developers/wai3/wai3-3.png)
+
+To convert some tAI3 to WAI3 you just need to send it to the contract. You will see a warning that you are about to send to a token contract. This is expected.
+
+![wai](/developers/wai3/wai3-4.png)
+
+Once you've accepted the warning you can click on "Continue".
+
+NOTE: You may need to increase the gas fee if you see a failure when executing the transaction. If all has gone well you should end up seeing the contract interaction in the MetaMask Activity tab.
+
+![wai](/developers/wai3/wai3-5.png)
+
+To view your WAI3 you will need to add the token contract by importing it in MetaMask.
+
+![wai](/developers/wai3/wai3-6.png)
+
+Enter the WAI3 contract address and you will be able to see your balance under the Tokens tab in MetaMask.
+
+![wai](/developers/wai3/wai3-7.png)
+
+## Unwrapping WAI3
+
+To unwrap your WAI3 tokens (convert them back to the original tAI3 tokens), you'll need to interact with the `withdraw` function in the [WAI3 contract](https://blockscout.taurus.autonomys.xyz/token/0x205E735a2C73228fA13EeB70720C7841BDf65EDB?tab=write_contract). Here's how to do it.
+
+First, make sure you have your wallet holding the WAI3 connected to the contract linked above. Ensure you are on the "Write" tab of the contract and look for the `withdraw` method.
+
+![wai](/developers/wai3/wai3-8.png)
+
+Enter the amount you want to unwrap as a parameter. The value entered needs to be in Shannons - the Autonomys equivalent of Ethereum's wei. The Blockscout UI has a button `10^18` to automatically add the extra 18 zeroes required to convert between the two.
+
+![wai](/developers/wai3/wai3-9.png)
+
+Once you're ready, hit the "Write" button and approve the transaction in your wallet. You should now see the WAI3 has ben converted back to native tAI3.
+
+![wai](/developers/wai3/wai3-10.png)
+
+![wai](/developers/wai3/wai3-11.png)

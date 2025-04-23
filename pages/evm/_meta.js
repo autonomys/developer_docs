@@ -10,5 +10,6 @@ export default {
     hardhat: 'HardHat Guide',
     local: 'Local Development',
     the_graph: 'Query On-chain Data with The Graph',
+    wrapping_ai3: "Wrapping AI3 on Taurus",
     NFT_guide: 'Minting and Sending NFTs',
   }
