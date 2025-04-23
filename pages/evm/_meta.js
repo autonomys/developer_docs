@@ -11,5 +11,6 @@ export default {
     local: 'Local Development',
     the_graph: 'Query On-chain Data with The Graph',
     wrapping_ai3: "Wrapping AI3 on Taurus",
+    bridge: "Bridge",
     NFT_guide: 'Minting and Sending NFTs',
   }
