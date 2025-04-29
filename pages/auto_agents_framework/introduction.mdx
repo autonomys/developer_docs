@@ -5,7 +5,7 @@ description: Autonomys Agents is an experimental framework for building AI agent
 
 ## Autonomys Agents: A framework for building autonomous AI agents
 
-Autonomys Agents is an experimental framework for building AI agents. Currently, the framework supports agents that can interact with social networks and maintain permanent memory through the Autonomys Network. We are still in the early stages of development and are actively seeking feedback and contributions. We will be rapidly adding many more workflows and features.
+Autonomys Agents is an experimental framework for building AI agents. Currently, the framework supports agents that can interact with social networks and maintain permanent memory through the Autonomys Network. We are still in the early stages of development and are actively seeking feedback and contributions.
 
 > [GitHub Repo](https://github.com/autonomys/autonomys-agents) with an up-to-date description and step-by-step tutorial is also available for developers.
 
@@ -17,75 +17,180 @@ Autonomys Agents is an experimental framework for building AI agents. Currently,
 
 ## Features
 
-**Autonomys Agents** (**Auto Agents**) are truly autonomous on-chain AI agents capable of dynamic functionality, verifiable interaction, and permanent, censorship-resistant memory through the Autonomys Network.
+**Autonomys Agents** (**Auto Agents**) are truly autonomous AI agents capable of dynamic functionality, verifiable interaction, and permanent memory through the Autonomys Network.
 
 - 🤖 Autonomous social media engagement
 - 🧠 Permanent agent memory storage
-- 🔄 Built-in workflow system
+- 🔄 Pre-configured Agent Structure: Ready-to-use template for autonomous agents
+- 🛠️ API Server: Built-in HTTP/2 server for agent communication
 - 🐦 X/Twitter integration (with more platforms planned)
 - 🎭 Customizable agent personalities
-- 🛠️ Extensible tool system
 
 ### Prerequisites
 
 - NodeJS version 20.18.1 or newer
-- Yarn version 1.22.19 or newer
-- API key for one or multiple LLMs (supported model providers: Anthropic, OpenAI, Llama, DeepSeek (**NEW**))
+- OpenSSL (for certificate generation)
+- API key for one or multiple LLMs (supported model providers: Anthropic, OpenAI, Llama, DeepSeek, etc.)
+- [AutoDrive API Key](https://ai3.storage/) (optional, for experience management)
 
-## Build an Auto Agent
+## Installation
 
-### Getting started
+There are three ways to build an agent with Autonomys:
 
-Visit the [Autonomys Agents GitHub Repo](https://github.com/autonomys/autonomys-agents).
+1. [Using the agent-os NPM package](https://www.npmjs.com/package/@autonomys/agent-os) (recommended)
 
-1. **Set up a development environment**
+  Using the dedicated NPM package makes it very simple to create an agent project. 
+  Run `npm install @autonomys/agent-os` to install the package and then do `agent-os init <name-of-agent>` to create an agent and `agent-os config --credentials` to configure the credentials.   
 
+2. [Using the Agent Template Repository](https://github.com/autonomys/autonomys-agent-template)
+
+  All you need to do in order to use the Agent Template Repository is to clone the repo and install the packages by doing `npm install`. Refer to the [web-cli interface](/auto_agents_framework/introduction#web-cli-interface-for-agent-template) section manual that comes with the template to speed up your development. 
+
+3. [Using the original Git repository](https://github.com/autonomys/autonomys-agents)
+
+  You can clone the original GitHub repo and start building your agents using the steps below. 
+
+## Getting Started
+
+1. Install dependencies:
+
+   ```bash
+   yarn install
+   ```
+
+   - Windows users will need to install Visual Studio C++ Redistributable. They can be found here: https://aka.ms/vs/17/release/vc_redist.x64.exe
+
+2. Create a character configuration:
+
+   ```bash
+   yarn create-character your_character_name
+   ```
+
+   This will create a new character with the necessary configuration files based on the example template.
+
+3. Configure your character:
+
+   - Edit `characters/your_character_name/config/.env` with your API keys and credentials
+   - Customize `characters/your_character_name/config/config.yaml` for agent behavior
+   - Define personality in `characters/your_character_name/config/your_character_name.yaml`
+
+4. Generate SSL certificates (required for API server):
+
+   ```bash
+   yarn generate-certs
+   ```
+
+5. Run the agent:
+
+   ```bash
+      cd <to/agent/project>
+      yarn start <your_character_name>
+   ```
+
+   If you have stored workspace files (`characters`, `certs`, and `.cookies` directories) in a custom location, use the `--workspace` argument with the absolute path to your desired directory:
+
+   ```bash
+   # Specify a workspace path
+   yarn start your_character_name --workspace=/path/to/workspace
+
+   # Run in headless mode (no API server)
+   yarn start your_character_name --headless
+   ```
+
+## Running Multiple Characters
+
+You can run multiple characters simultaneously, each with their own configuration and personality:
+
+1. Create multiple character configurations:
+
+   ```bash
+   yarn create-character alice
+   yarn create-character bob
+   ```
+
+2. Configure each character separately with different personalities and API settings.
+
+3. Run each character in a separate terminal session:
+
+   ```bash
+   # Terminal 1
+   yarn start alice
+
+   # Terminal 2
+   yarn start bob
+   ```
+
+4. Each character will:
+   - Have its own isolated memory and experience
+   - Run its own API server on the specified port
+   - Execute tasks according to its unique schedule and personality
+
+## Docker Deployment
+
+You can also run your agents using Docker. This provides isolation and makes it easy to run multiple agents simultaneously.
+
+### Prerequisites
+
+- Docker installed on your system ([Installation Guide](https://docs.docker.com/get-docker/))
+- Docker Compose Plugin required ([Compose Plugin Installation](https://docs.docker.com/compose/install/))
+- Character configuration set up (follow steps from the Getting Started section)
+
+### Running with Docker
+
+1. **Generate your character's docker-compose file**
+
+First make the script executable:
 ```bash
-git clone https://github.com/autonomys/autonomys-agents
-cd autonomys-agents
-yarn install
+chmod +x ./generate-compose.sh
 ```
 
-> Windows users will need to install Visual Studio C++ Redistributable. It can be found here: https://aka.ms/vs/17/release/vc_redist.x64.exe
-
-
-2. **Create agent character**
-
-Characters are agent personalities with key behavioral traits, areas of knowledge, and engagement guidelines.
-
-```
-yarn create-character <your-character-name>
+Then generate the compose file:
+```bash
+./generate-compose.sh <your-character-name> [HOST_PORT] [API_PORT]
 ```
 
-3. **Setup character config**
+Examples:
+```bash
+# Run Alice on port 3011 with API port on 3011
+./generate-compose.sh Alice 3011 3011
 
-- All character configs are stored in `characters/<your-character-name>/config`.
-- Update `.env` with applicable environment variables.
-- Update `config.yaml` with applicable configuration.
-- Update `<your-character-name>.yaml` with applicable personality configuration.
+# Run Bob on port 3012 with API port on 3011
+./generate-compose.sh Bob 3012 3011
+```
 
-4. **Generate Agent API**
+2. **Manage the Docker container**
 
-The Agent API uses HTTP/2 protocol exclusively, requiring SSL certificates. Generate these by running `yarn generate-certs`
+Build and start the container:
+```bash
+docker compose -f docker-compose-{character-name}.yml up -d
+```
 
-5. **Run your character**
+Stop and remove the container:
+```bash
+docker compose -f docker-compose-{character-name}.yml down
+```
 
-- For dev purposes in watch mode: `yarn dev <your-character-name>`
-- For production build and run: `yarn start <your-character-name>`
+View container logs:
+```bash
+docker compose -f docker-compose-{character-name}.yml logs -f
+```
 
-6. **Run your character in headless (no API) mode**
+Access container shell:
+```bash
+docker exec -it autonomys-agent-{character-name} bash
+```
 
-- For dev purposes in watch mode: `yarn dev <your-character-name> --headless`
-- For production build and run: `yarn start <your-character-name> --headless`
+## Web CLI Interface (for agent-template)
 
-### Interactive Web CLI Interface
-The framework includes an interactive web-based interface for managing and monitoring your AI agent. To start the interface:
+The agent template includes an interactive web-based interface for managing and monitoring your AI agent.
 
-#### Installation
+### Installation
 
 1. **Install Dependencies**
 
-`cd web-cli && yarn`
+```bash
+cd web-cli && yarn
+```
 
 2. **Configure Agent API**
 
@@ -100,9 +205,12 @@ CORS_ALLOWED_ORIGINS=http://localhost:3000,http://localhost:3001
 
 3. **Configure Web CLI**
 
-`cp .env.sample .env`
+```bash
+cp .env.sample .env
+```
 
 4. **Update Web CLI Environment**
+
 Edit the .env file with your configuration:
 
 ```
@@ -113,48 +221,157 @@ REACT_APP_API_TOKEN: The same token used in your agent configuration
 
 5. **Start the Web Interface**
 
-`yarn start`
+```bash
+yarn start
+```
 
+## Extending the Agent
 
-#### Running with dev:all (Web-CLI And Agent)
+You can extend your agent by adding custom tools and integrating with other services.
 
-The dev:all command launches both the main application and web interface concurrently:
+### Custom Tools
 
-`yarn dev:all <your-character-name>`
+Custom tools are built using the DynamicStructuredTool class from LangChain, which provides:
 
-This command:
+- **Type-safe inputs**: Define your tool's parameters using Zod schemas
+- **Self-documenting**: Tools describe themselves to the LLM for appropriate use
+- **Structured outputs**: Return consistent data structures from your tools
 
-- Starts your agent with the specified character
-- Launches the web interface configured for that character
-- Automatically uses the character's API port from its .env file
-- Provides color-coded output from both processes
+#### Example Tool Implementation
 
-### Examples
+Here's an example of how to create a custom tool:
 
-The following examples demonstrate the use of the framework and are available:
+```javascript
+import { createLogger } from '@autonomys/agent-core';
+import { DynamicStructuredTool } from '@langchain/core/tools';
+import { z } from 'zod';
 
-- [Twitter Agent](https://github.com/autonomys/autonomys-agents/blob/main/examples/twitterAgent/README.md)
-- [Multi Personality](https://github.com/autonomys/autonomys-agents/blob/main/examples/multiPersonality/README.md)
+// Create a logger for your tool
+const logger = createLogger('custom-tool');
 
-### Character system
+/**
+ * Creates a custom tool for your agent
+ * @param config - Configuration options for your tool
+ * @returns A DynamicStructuredTool instance
+ */
+export const createCustomTool = (config: any) => {
+  return new DynamicStructuredTool({
+    name: 'custom_tool_name',
+    description: `
+    Description of what your tool does.
+    USE THIS WHEN:
+    - Specify when the agent should use this tool
+    - Add clear usage guidelines
+    OUTPUT: Describe what the tool returns
+    `,
+    schema: z.object({
+      // Define your input parameters using Zod
+      parameter1: z.string().describe('Description of parameter1'),
+      parameter2: z.number().describe('Description of parameter2'),
+      parameter3: z.boolean().optional().describe('Optional parameter'),
+
+      // For enum parameters:
+      parameter4: z
+        .enum(['option1', 'option2', 'option3'])
+        .default('option1')
+        .describe('Parameter with predefined options'),
+    }),
+    func: async ({ parameter1, parameter2, parameter3, parameter4 }) => {
+      try {
+        // Log the function call
+        logger.info('Custom tool called with parameters', {
+          parameter1,
+          parameter2,
+          parameter3,
+          parameter4,
+        });
+
+        // Implement your tool logic here
+        // ...
+
+        // Return a structured response
+        return {
+          success: true,
+          result: {
+            message: 'Operation completed successfully',
+            data: {
+              // Your output data
+            },
+          },
+        };
+      } catch (error) {
+        // Log and handle errors
+        logger.error('Error in custom tool:', error);
+        return {
+          success: false,
+          error: error instanceof Error ? error.message : 'Unknown error',
+        };
+      }
+    },
+  });
+};
+```
+
+### Using MCP Tools
+
+Model Context Protocol (MCP) tools provide a standardized way to integrate external services with your agent. Here's an example for Notion integration:
+
+```javascript
+import { createMcpClientTool } from '@autonomys/agent-core';
+import { StdioServerParameters } from '@modelcontextprotocol/sdk/client/stdio.js';
+import { StructuredToolInterface } from '@langchain/core/tools';
+
+export const createNotionTools = async (
+  integrationSecret: string,
+): Promise<StructuredToolInterface[]> => {
+  const notionServerParams: StdioServerParameters = {
+    command: process.execPath,
+    args: ['node_modules/.bin/notion-mcp-server'],
+    env: {
+      OPENAPI_MCP_HEADERS: `{\"Authorization\": \"Bearer ${integrationSecret}\", \"Notion-Version\": \"2022-06-28\" }`,
+    },
+  };
+  const tools = await createMcpClientTool('notion-mcp', '0.0.1', notionServerParams);
+  return tools;
+};
+```
+
+### Installing Pre-Built Tools
+
+You can easily install pre-built tools from the Autonomys registry using the agent-os CLI:
+
+```bash
+# Search for available tools
+agent-os search <search-term>
+
+# Install a tool
+agent-os install <tool-name>
+
+# Install specific version
+agent-os install <tool-name> -v <version>
+```
+
+After installation, import and register the tool:
+
+```javascript
+import { createTool } from './tools/<tool-name>';
+
+// Add it to your agent's tools
+const agent = new Agent({
+  tools: [createTool(), ...otherTools],
+  // other agent configuration
+});
+```
+
+## Character System
 
 The framework uses a **YAML-based character system** that allows you to create and run different AI personalities.
 
-#### Creating characters
-
-1. Character related files are stored in `characters/{your-character-name}/`
-2. Create new characters by running the `create-character.ts` script:
-
-```
-# Create a new character
-yarn create-character your_character
-```
-
-3. Configure character
+### Character Configuration
 
 Each character file is a YAML configuration with the following structure:
 
-```
+```yaml
 name: 'Joy Builder'
 
 goal: |
@@ -196,41 +413,10 @@ words_to_avoid:
     - Disruption
 ```
 
-### Context Size Management
+## Integration Capabilities
 
-The orchestrator includes a message pruning system to manage the LLM's context window size. This is important because LLMs have a limited context window, and long conversations need to be summarized to stay within these limits while retaining important information.
+### X/Twitter Integration
 
-The pruning system works through two main parameters:
-
-- `maxQueueSize` (default: 50): The maximum number of messages to keep before triggering a summarization
-- `maxWindowSummary` (default: 10): How many of the most recent messages to keep after summarization
-
-Here's how the pruning process works:
-
-1. When the number of messages exceeds maxQueueSize, the summarization is triggered
-2. The system creates a summary of messages from index 1 to maxWindowSummary
-3. After summarization, the new message queue will contain:
-  - The original first message
-  - The new summary message
-  - All messages from index maxWindowSummary onwards
-
-You can configure these parameters when creating the orchestrator:
-
-```
-const runner = await getOrchestratorRunner(character, {
-  pruningParameters: {
-    maxWindowSummary: 10, // Keep 10 most recent messages after summarization
-    maxQueueSize: 50, // Trigger summarization when reaching 50 messages
-  },
-  // ... other configuration options
-});
-```
-
-This ensures your agent can maintain long-running conversations while keeping the most relevant context within the LLM's context window limits.
-
-### Workflows
-
-#### X/Twitter
 The X/Twitter workflow enables agents to perform the following actions autonomously:
 
 - Monitor X (formerly Twitter) for relevant discussions
@@ -240,45 +426,59 @@ The X/Twitter workflow enables agents to perform the following actions autonomou
 - Maintain a consistent personality
 - Store interactions in permanent memory
 
-The Auto Agents Framework will soon support additional workflows/integrations. 
+### Autonomys Network Integration
 
-### Autonomys Network integration
+The framework integrates with the Autonomys Network for:
+- Permanent memory storage
+- Persistent agent memory across sessions
+- Verifiable interaction history
+- Cross-agent memory sharing
+- Decentralized agent identity
 
-The Auto Agents Framework integrates with the Autonomys Network for:
-   - Permanent memory storage
-   - Persistent agent memory across sessions
-   - Verifiable interaction history
-   - Cross-agent memory sharing
-   - Decentralized agent identity
+#### Setting Up Autonomys Network
 
-#### To use this feature
-
-1. Configure your `AUTO_DRIVE_API_KEY` in `.env` (obtain from https://ai3.storage). 
+1. Configure your `AUTO_DRIVE_API_KEY` in `.env` (obtain from https://ai3.storage)
 2. Enable Auto Drive uploading in `config.yaml`
 3. Provide your Taurus EVM wallet details (PRIVATE_KEY) and Agent Memory Contract Address (CONTRACT_ADDRESS) in `.env`
 4. Make sure your Taurus EVM wallet has funds. A faucet can be found at https://subspacefaucet.com/
 5. Provide encryption password in `.env` (optional, leave empty to not encrypt the agent memories)
 
-### Resurrection
+### Resurrection (Memory Recovery)
 
-To resurrect memories from the Autonomys Network, run the following command:
+To resurrect memories from the Autonomys Network:
 
-Options
-`-o, --output`: (Optional) The directory where memories will be saved. Defaults to ./memories
-`-n, --number`: (Optional) Number of memories to fetch. If not specified, fetches all memories
-`--help`: Show help menu with all available options
+```bash
+# Using agent-os CLI
+agent-os resurrect <character-name>
+
+# Using agent template
+yarn resurrect <character-name>
+```
+
+Options:
+- `-o, --output`: (Optional) The directory where memories will be saved. Defaults to ./memories
+- `-n, --number`: (Optional) Number of memories to fetch. If not specified, fetches all memories
+- `--help`: Show help menu with all available options
 
 Examples:
 
-```yaml
-yarn resurrect your_character_name                                  # Fetch all memories to ./memories/
-yarn resurrect your_character_name -n 1000                           # Fetch 1000 memories to ./memories/
-yarn resurrect your_character_name -o ./memories/my-agent -n 1000    # Fetch 1000 memories to specified directory
-yarn resurrect your_character_name --output ./custom/path            # Fetch all memories to custom directory
-yarn resurrect --help               
+```bash
+# Fetch all memories to ./memories/
+yarn resurrect your_character_name                                  
+
+# Fetch 1000 memories to ./memories/
+yarn resurrect your_character_name -n 1000                           
+
+# Fetch 1000 memories to specified directory
+yarn resurrect your_character_name -o ./memories/my-agent -n 1000    
+
+# Fetch all memories to custom directory
+yarn resurrect your_character_name --output ./custom/path            
 ```
 
-### Development resources
+## Development Resources
 
-- [Auto SDK documentation](/sdk)
-- [Auto Agents Framework repository](https://github.com/autonomys/autonomys-agents)
+- [Autonomys Documentation](https://docs.autonomys.io)
+- [Agent-os CLI & NPM package](https://github.com/autonomys/agent-os)
+- [Autonomys Agent Template](https://github.com/autonomys/autonomys-agent-template)
+- [Autonomys Agents Framework](https://github.com/autonomys/autonomys-agents)
