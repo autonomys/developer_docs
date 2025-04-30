@@ -1,0 +1,152 @@
+---
+title: AgentOS
+description: Getting Started with Autonomys Agents Framework with AgentOS
+---
+
+Using the dedicated NPM package makes it very simple to create an agent project. 
+
+1. Run `npm install @autonomys/agent-os` to install the package. 
+2. Run `agent-os init <name-of-agent>` to create an agent. 
+3. To configure the credentials (optional) run `agent-os config --credentials`.
+
+## Installing Tools with AgentOS
+
+### Install the latest version
+`agent-os install <tool-name>`
+
+### Install a specific version
+`agent-os install <tool-name> -v <version>`
+
+### Install using a Content ID (CID)
+`agent-os install <tool-name> --cid <cid>`
+
+## Publish a Tool
+### Publish a tool to the registry
+`agent-os publish <tool-path>`
+
+### Upload to Auto Drive without updating the registry
+`agent-os publish <tool-path> --no-registry`
+
+## Search for Tools
+### Search for tools in the registry
+`agent-os search <search-term>`
+
+### Show detailed information in search results
+`agent-os search <search-term> -d`
+
+## Tool Inquiry
+### Get information about a tool
+`agent-os tool -n <tool-name>`
+
+### Get information about a specific version
+`agent-os tool -n <tool-name> -v <version>`
+
+### Perform a specific action on a tool
+`agent-os tool -n <tool-name> -a <action>`
+
+### Example: Get metadata for a specific version
+`agent-os tool -n slack-tool -v 1.0.0 -a metadata`
+
+## Sample Tool Example
+
+Below is a complete example of how to create, use, and publish a simple tool for Autonomys agents.
+
+First, create a new directory for your tool:
+```
+mkdir weather-tool
+cd weather-tool
+```
+
+Create a manifest.json file:
+
+```
+{
+  "name": "weather-tool",
+  "version": "1.0.0",
+  "description": "A tool for fetching weather data",
+  "author": "Your Name",
+  "main": "index.ts",
+  "dependencies": {
+    "@langchain/core": "^0.1.0",
+    "zod": "^3.22.4",
+    "axios": "^1.6.0"
+  },
+  "keywords": ["weather", "forecast", "api"]
+}
+```
+
+Then create the main index.ts file:
+```
+import { DynamicStructuredTool } from "@langchain/core/tools";
+import { z } from "zod";
+import axios from "axios";
+
+/**
+ * A tool that fetches current weather data for a given location
+ */
+export const createWeatherTool = (apiKey: string) => new DynamicStructuredTool({
+  name: "get_weather",
+  description: "Get current weather for a location",
+  schema: z.object({
+    location: z.string().describe("The city and country, e.g., 'London, UK'"),
+    units: z.enum(["metric", "imperial"]).optional()
+      .describe("Temperature units (metric or imperial). Default: metric")
+  }),
+  func: async ({ location, units = "metric" }) => {
+    try {
+      // API key is now passed as a parameter to the tool creator function
+      const url = `https://api.example.com/weather?q=${encodeURIComponent(location)}&units=${units}&appid=${apiKey}`;
+      
+      const response = await axios.get(url);
+      const data = response.data;
+      
+      return JSON.stringify({
+        location: location,
+        temperature: data.main.temp,
+        description: data.weather[0].description,
+        humidity: data.main.humidity,
+        windSpeed: data.wind.speed
+      });
+    } catch (error) {
+      return `Error fetching weather: ${error.message}`;
+    }
+  }
+});
+
+// Export the tools creation function for the Autonomys agent system
+export const createTools = (apiKey: string) => {
+  return [createWeatherTool(apiKey)];
+};
+
+// Default export
+export default { createTools };
+```
+
+When you're ready to publish:
+
+```
+# Navigate to your tool directory
+cd weather-tool
+
+# Publish to the registry
+agent-os publish .
+```
+
+After publishing your tool, you can install it using:
+
+`agent-os install weather-tool`
+
+Then, in your agent code, you can import and use the tool:
+
+```
+import { createWeatherTool } from './tools/weather-tool';
+
+// Get the weather tool with your API key
+const weatherTool = createWeatherTool('your-api-key-here');
+
+// Add it to your agent's tools
+const agent = new <Agent-Instantiation>({
+  tools: [weatherTool, ...otherTools],
+  // other agent configuration
+});
+```

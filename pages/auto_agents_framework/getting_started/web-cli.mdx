@@ -1,0 +1,51 @@
+---
+title: Web-CLI
+description: Getting Started with Autonomys Agents Framework via Web-CLI
+---
+
+The web interface is available for you if you're using the [**agent template**](https://github.com/autonomys/autonomys-agent-template)
+
+## Web CLI Interface (for agent-template)
+
+The agent template includes an interactive web-based interface for managing and monitoring your AI agent.
+
+### Installation
+
+1. **Install Dependencies**
+
+```bash
+cd web-cli && yarn
+```
+
+2. **Configure Agent API**
+
+In your agent character's .env file, add these API settings:
+
+```
+API_PORT=3010
+API_TOKEN=your_api_token_min_32_chars_long_for_security
+ENABLE_AUTH=true
+CORS_ALLOWED_ORIGINS=http://localhost:3000,http://localhost:3001 
+```
+
+3. **Configure Web CLI**
+
+```bash
+cp .env.sample .env
+```
+
+4. **Update Web CLI Environment**
+
+Edit the .env file with your configuration:
+
+```
+PORT: The port for running the Web CLI interface
+REACT_APP_API_BASE_URL: Your Agent API address (e.g., http://localhost:3010/api)
+REACT_APP_API_TOKEN: The same token used in your agent configuration
+```
+
+5. **Start the Web Interface**
+
+```bash
+yarn start
+```

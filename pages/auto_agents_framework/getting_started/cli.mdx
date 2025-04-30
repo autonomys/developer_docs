@@ -1,0 +1,134 @@
+---
+title: CLI
+description: Getting Started with Autonomys Agents Framework via CLI
+---
+
+## Getting Started
+
+1. Install dependencies:
+
+   ```bash
+   yarn install
+   ```
+
+   - Windows users will need to install Visual Studio C++ Redistributable. They can be found here: https://aka.ms/vs/17/release/vc_redist.x64.exe
+
+2. Create a character configuration:
+
+   ```bash
+   yarn create-character your_character_name
+   ```
+
+   This will create a new character with the necessary configuration files based on the example template.
+
+3. Configure your character:
+
+   - Edit `characters/your_character_name/config/.env` with your API keys and credentials
+   - Customize `characters/your_character_name/config/config.yaml` for agent behavior
+   - Define personality in `characters/your_character_name/config/your_character_name.yaml`
+
+4. Generate SSL certificates (required for API server):
+
+   ```bash
+   yarn generate-certs
+   ```
+
+5. Run the agent:
+
+   ```bash
+      cd <to/agent/project>
+      yarn start <your_character_name>
+   ```
+
+   If you have stored workspace files (`characters`, `certs`, and `.cookies` directories) in a custom location, use the `--workspace` argument with the absolute path to your desired directory:
+
+   ```bash
+   # Specify a workspace path
+   yarn start your_character_name --workspace=/path/to/workspace
+
+   # Run in headless mode (no API server)
+   yarn start your_character_name --headless
+   ```
+
+## Running Multiple Characters
+
+You can run multiple characters simultaneously, each with their own configuration and personality:
+
+1. Create multiple character configurations:
+
+   ```bash
+   yarn create-character alice
+   yarn create-character bob
+   ```
+
+2. Configure each character separately with different personalities and API settings.
+
+3. Run each character in a separate terminal session:
+
+   ```bash
+   # Terminal 1
+   yarn start alice
+
+   # Terminal 2
+   yarn start bob
+   ```
+
+4. Each character will:
+   - Have its own isolated memory and experience
+   - Run its own API server on the specified port
+   - Execute tasks according to its unique schedule and personality
+
+## Docker Deployment
+
+You can also run your agents using Docker. This provides isolation and makes it easy to run multiple agents simultaneously.
+
+### Prerequisites
+
+- Docker installed on your system ([Installation Guide](https://docs.docker.com/get-docker/))
+- Docker Compose Plugin required ([Compose Plugin Installation](https://docs.docker.com/compose/install/))
+- Character configuration set up (follow steps from the Getting Started section)
+
+### Running with Docker
+
+1. **Generate your character's docker-compose file**
+
+First make the script executable:
+```bash
+chmod +x ./generate-compose.sh
+```
+
+Then generate the compose file:
+```bash
+./generate-compose.sh <your-character-name> [HOST_PORT] [API_PORT]
+```
+
+Examples:
+```bash
+# Run Alice on port 3011 with API port on 3011
+./generate-compose.sh Alice 3011 3011
+
+# Run Bob on port 3012 with API port on 3011
+./generate-compose.sh Bob 3012 3011
+```
+
+2. **Manage the Docker container**
+
+Build and start the container:
+```bash
+docker compose -f docker-compose-{character-name}.yml up -d
+```
+
+Stop and remove the container:
+```bash
+docker compose -f docker-compose-{character-name}.yml down
+```
+
+View container logs:
+```bash
+docker compose -f docker-compose-{character-name}.yml logs -f
+```
+
+Access container shell:
+```bash
+docker exec -it autonomys-agent-{character-name} bash
+```
