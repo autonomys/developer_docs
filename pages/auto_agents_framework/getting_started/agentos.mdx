@@ -12,46 +12,80 @@ Using the dedicated NPM package makes it very simple to create an agent project.
 ## Installing Tools with AgentOS
 
 ### Install the latest version
-`agent-os install <tool-name>`
+
+```bash
+agent-os install <tool-name>
+```
 
 ### Install a specific version
-`agent-os install <tool-name> -v <version>`
+
+```bash
+agent-os install <tool-name> -v <version>
+```
 
 ### Install using a Content ID (CID)
-`agent-os install <tool-name> --cid <cid>`
+
+```bash
+agent-os install <tool-name> --cid <cid>
+```
 
 ## Publish a Tool
 ### Publish a tool to the registry
-`agent-os publish <tool-path>`
+
+```bash
+agent-os publish <tool-path>
+```
 
 ### Upload to Auto Drive without updating the registry
-`agent-os publish <tool-path> --no-registry`
+
+```bash
+agent-os publish <tool-path> --no-registry
+```
 
 ## Search for Tools
 ### Search for tools in the registry
-`agent-os search <search-term>`
+
+```bash
+agent-os search <search-term>
+```
 
 ### Show detailed information in search results
-`agent-os search <search-term> -d`
+
+```bash
+agent-os search <search-term> -d
+```
 
 ## Tool Inquiry
 ### Get information about a tool
-`agent-os tool -n <tool-name>`
+
+```bash
+agent-os tool -n <tool-name>
+```
 
 ### Get information about a specific version
-`agent-os tool -n <tool-name> -v <version>`
+
+```bash
+agent-os tool -n <tool-name> -v <version>
+```
 
 ### Perform a specific action on a tool
-`agent-os tool -n <tool-name> -a <action>`
+```bash
+```bash
+agent-os tool -n <tool-name> -a <action>
+```
 
 ### Example: Get metadata for a specific version
-`agent-os tool -n slack-tool -v 1.0.0 -a metadata`
+
+```bash
+agent-os tool -n slack-tool -v 1.0.0 -a metadata
+```
 
 ## Sample Tool Example
 
 Below is a complete example of how to create, use, and publish a simple tool for Autonomys agents.
 
 First, create a new directory for your tool:
+
 ```bash
 mkdir weather-tool
 cd weather-tool
@@ -134,7 +168,9 @@ agent-os publish .
 
 After publishing your tool, you can install it using:
 
-`agent-os install weather-tool`
+```bash
+agent-os install weather-tool
+```
 
 Then, in your agent code, you can import and use the tool:
 
