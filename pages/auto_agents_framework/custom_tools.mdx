@@ -9,7 +9,7 @@ You can extend your agent by adding custom tools and integrating with other serv
 
 ### Custom Tools
 
-Custom tools are built using the DynamicStructuredTool class from LangChain, which provides:
+Custom tools are built using the `DynamicStructuredTool` class from LangChain, which provides:
 
 - **Type-safe inputs**: Define your tool's parameters using Zod schemas
 - **Self-documenting**: Tools describe themselves to the LLM for appropriate use
@@ -92,7 +92,7 @@ export const createCustomTool = (config: any) => {
 
 ### Using MCP Tools
 
-Model Context Protocol (MCP) tools provide a standardized way to integrate external services with your agent. Here's an example for Notion integration:
+[Model Context Protocol (MCP)](https://docs.anthropic.com/en/docs/agents-and-tools/mcp) tools provide a standardized way to integrate external services with your agent. Here's an example for Notion integration:
 
 ```javascript
 import { createMcpClientTool } from '@autonomys/agent-core';

@@ -2,7 +2,7 @@
 title: AgentOS
 description: Getting Started with Autonomys Agents Framework with AgentOS
 ---
-
+## Getting Started with Autonomys Agents Framework with AgentOS
 Using the dedicated NPM package makes it very simple to create an agent project. 
 
 1. Run `npm install @autonomys/agent-os` to install the package. 
@@ -52,14 +52,14 @@ Using the dedicated NPM package makes it very simple to create an agent project.
 Below is a complete example of how to create, use, and publish a simple tool for Autonomys agents.
 
 First, create a new directory for your tool:
-```
+```bash
 mkdir weather-tool
 cd weather-tool
 ```
 
 Create a manifest.json file:
 
-```
+```json
 {
   "name": "weather-tool",
   "version": "1.0.0",
@@ -76,7 +76,7 @@ Create a manifest.json file:
 ```
 
 Then create the main index.ts file:
-```
+```javascript
 import { DynamicStructuredTool } from "@langchain/core/tools";
 import { z } from "zod";
 import axios from "axios";
@@ -124,7 +124,7 @@ export default { createTools };
 
 When you're ready to publish:
 
-```
+```bash
 # Navigate to your tool directory
 cd weather-tool
 
@@ -138,7 +138,7 @@ After publishing your tool, you can install it using:
 
 Then, in your agent code, you can import and use the tool:
 
-```
+```javascript
 import { createWeatherTool } from './tools/weather-tool';
 
 // Get the weather tool with your API key
