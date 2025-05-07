@@ -1,4 +1,6 @@
-## Foundry Guide
+---
+title: Foundry Guide
+---
 
 [**Foundry**](https://book.getfoundry.sh/) is a tool that allows you to easily write, test and deploy smart contracts on any EVM-compatible blockchain.
 
@@ -15,11 +17,11 @@ Auto EVM is compatible with most EVM versions but doesn't support some features 
     curl -L https://foundry.paradigm.xyz | bash
     ```
 
-2. Once installed, create a project. Let’s name it `hello_autonomys`. To initialize the project, run:
+2. Once installed, create a project. Let's name it `hello_autonomys`. To initialize the project, run:
     ```bash
     forge init hello_autonomys
     ```
-   `cd` into the `hello_autonomys` directory to see the project’s structure.
+   `cd` into the `hello_autonomys` directory to see the project's structure.
 
     ![Foundry-1](/developers/Foundry-1.png)
 
@@ -46,7 +48,7 @@ Auto EVM is compatible with most EVM versions but doesn't support some features 
     }
     ```
 
-4. Let’s make sure that all the functions are working properly by adding some tests to the `Counter.t.sol` test file, and checking if they pass. In our tests, we first set the initial value of `number` to 2, before checking if the `increment()` function increases the value by 1 and if `decrement()` decreases the value by 1.
+4. Let's make sure that all the functions are working properly by adding some tests to the `Counter.t.sol` test file, and checking if they pass. In our tests, we first set the initial value of `number` to 2, before checking if the `increment()` function increases the value by 1 and if `decrement()` decreases the value by 1.
 
     ```
     // SPDX-License-Identifier: UNLICENSED
@@ -80,7 +82,7 @@ Auto EVM is compatible with most EVM versions but doesn't support some features 
     }
     ```
 
-5. Let’s build the project by running: 
+5. Let's build the project by running: 
 
     ```bash
     forge build
@@ -100,7 +102,7 @@ Auto EVM is compatible with most EVM versions but doesn't support some features 
     - Connect a wallet that has a sufficient balance of tAI3 to cover the gas fees.
     - Set an environment variable we will use later.
 
-    To make our lives easier, let’s create a new `Makefile` as well as a `.env` file at the root of our project. `.env` files are typically used to store environment variables for your application. They are particularly useful for managing settings that change between deployment environments (e.g., development, testing, staging, and production), and for storing sensitive information. Environment variables can include database connection details, API keys, external resource URIs, or other configuration variables that might change depending on the environment in which the application is running. In our case, we would use it to point to our Auto-EVM RPC URL:
+    To make our lives easier, let's create a new `Makefile` as well as a `.env` file at the root of our project. `.env` files are typically used to store environment variables for your application. They are particularly useful for managing settings that change between deployment environments (e.g., development, testing, staging, and production), and for storing sensitive information. Environment variables can include database connection details, API keys, external resource URIs, or other configuration variables that might change depending on the environment in which the application is running. In our case, we would use it to point to our Auto-EVM RPC URL:
 
     ```bash
     RPC_URL=https://auto-evm.taurus.autonomys.xyz/ws
@@ -109,12 +111,12 @@ Auto EVM is compatible with most EVM versions but doesn't support some features 
     And then set a private key for the EVM-compatible wallet:
 
     ```bash
-    PRIVATE_KEY=”your_private_key_value”
+    PRIVATE_KEY="your_private_key_value"
     ```
     
     > *Note:* `.env` files should not be committed to your source control (like Git), especially when they contain sensitive data, like your private key. To prevent this, add `.env` to your `.gitignore` file. This helps to keep sensitive keys secure and avoids the risk of exposing them in the application's code or version control history.
 
-    In the `Makefile`, let’s create shortcuts to the main features of the application:
+    In the `Makefile`, let's create shortcuts to the main features of the application:
 
     ```bash
     # include .env file and export its env vars
@@ -129,7 +131,7 @@ Auto EVM is compatible with most EVM versions but doesn't support some features 
 	    @forge create Counter --private-key ${PRIVATE_KEY} --rpc-url ${RPC_URL} --evm-version london
     ```
 
-    We're importing the values for a `PRIVATE_KEY` and `RPC_URL` from the `.env` file. This allows us to run `make build` for building the project, and `make deploy` for deploying the project, pointing to the provided RPC, and using the provided `PRIVATE_KEY`. Let’s run `make build` to ensure it’s working properly.
+    We're importing the values for a `PRIVATE_KEY` and `RPC_URL` from the `.env` file. This allows us to run `make build` for building the project, and `make deploy` for deploying the project, pointing to the provided RPC, and using the provided `PRIVATE_KEY`. Let's run `make build` to ensure it's working properly.
 
     ![Foundry-3](/developers/Foundry-3.png)
 
@@ -139,6 +141,6 @@ Auto EVM is compatible with most EVM versions but doesn't support some features 
     make deploy
     ```
 
-    > *Note:* Do not tip when submitting transactions in an attempt to accelerate them as this could result in dual charges for gas fees. When deploying smart contracts to our Auto EVM domain, you may encounter an error related to gas estimation, typically presenting as: `"No manual gas limit set"` or `"Gas estimation failed"`. For more information and solutions, visit the [Auto EVM Introduction](/evm/introduction).
+    > *Note:* Do not tip when submitting transactions in an attempt to accelerate them as this could result in dual charges for gas fees. When deploying smart contracts to our Auto EVM domain, you may encounter an error related to gas estimation, typically presenting as: "No manual gas limit set" or "Gas estimation failed". For more information and solutions, visit the [Auto EVM Introduction](/evm/introduction).
 
 Congratulations, you've successfully deployed your smart contract on the Auto EVM!

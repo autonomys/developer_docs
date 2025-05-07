@@ -1,3 +1,7 @@
+---
+title: Hardhat Guide
+---
+
 ## Hardhat Guide
 
 [**Hardhat**](https://hardhat.org/docs) is a tool that facilitates building, testing and deploying on the Ethereum Virtual Machine. It helps developers manage and automate the recurring tasks that are inherent to the process of building smart contracts and dApps, and allows them to easily introduce more functionality around this workflow. This includes compiling and testing at the very core. Flexible deployment options also allow you to point to the Autonomys EVM domain RPC to deploy your contracts and dApps.
@@ -34,7 +38,7 @@ You'll be prompted to answer some questions. Select `Create a JavaScript Project
 
 ![Hardhat-3](/developers/Hardhat-3.png)
 
-4. Change the name of your contract in `Lock.sol` (`Counter`), the name of the token (`AutonomysTestToken`) and the token symbol (`AI3test`). As an example, let’s add a simple smart contract that has three functions: `setNumber()`, `increment()` and `decrement()`.
+4. Change the name of your contract in `Lock.sol` (`Counter`), the name of the token (`AutonomysTestToken`) and the token symbol (`AI3test`). As an example, let's add a simple smart contract that has three functions: `setNumber()`, `increment()` and `decrement()`.
 
 ```
 // SPDX-License-Identifier: UNLICENSED
@@ -61,7 +65,7 @@ contract Counter is ERC20 {
 }
 ```
 
-For consistency, let’s also rename 'Lock.sol' to `Counter.sol`.
+For consistency, let's also rename 'Lock.sol' to `Counter.sol`.
 
 
 5. Before proceeding with deployment, thoroughly test your smart contracts for correctness, as mistakes can lead to unforeseen gas costs. To test the contract, open the `Lock.js` file in the `test` folder, and replace the internals of the file with the following code:
@@ -113,7 +117,7 @@ For consistency, let's also rename `Lock.js` to `CounterTest.js`.
 
  ![Hardhat-4](/developers/Hardhat-4.png)
 
-Everything is working as expected so we’re ready for deployment!
+Everything is working as expected so we're ready for deployment!
 
 8. To deploy the contract, we need to set a deployment network for `hardhat`. Open the `hardhat.config.js` file and add the Taurus testnet to the list of networks: 
 
