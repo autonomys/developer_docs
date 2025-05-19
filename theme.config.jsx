@@ -2,38 +2,51 @@ import { useEffect } from 'react';
 import { useTheme } from 'next-themes';
 import { CustomFooter } from './components/customFooter';
 import { CustomNavbar } from './components/customNavbar';
+import { useConfig } from 'nextra-theme-docs';
 
 export default {
-  head: (
-    <>
-      <script
-        src="https://widget.kapa.ai/kapa-widget.bundle.js"
-        data-website-id="125444e5-cd06-4812-b4e2-3cf33cd3f6fa"
-        data-project-name="Autonomys Network"
-        data-project-color="#f2f2f5"
-        data-project-logo="https://i.postimg.cc/BQjSkRPy/Autonomys-small-light.png"
-        data-modal-disclaimer="This is a custom LLM for Autonomys Network with access to all documentation, forum and discord threads. Since this is AI technology please use your best judgment."
-        async
-      />
-      <script async src="https://www.googletagmanager.com/gtag/js?id=G-N417BD8BLW"></script>
-      <script
-        dangerouslySetInnerHTML={{
-          __html: `
-            window.dataLayer = window.dataLayer || [];
-            function gtag(){dataLayer.push(arguments);}
-            gtag('js', new Date());
-            gtag('config', 'G-N417BD8BLW');
-          `
-        }}
-      />
-      <link
-        rel="icon"
-        type="image/png"
-        sizes="32x32"
-        href="/favicon.png"
-      />
-    </>
-  ),
+  head: () => {
+    const { frontMatter } = useConfig();
+    return (
+      <>
+        {/* Dynamic page title based on frontMatter.title */}
+        <title>
+          {frontMatter.title
+            ? `Autonomys Developer Hub – ${frontMatter.title}`
+            : 'Autonomys Developer Hub'}
+        </title>
+        {/* Kapa AI widget script */}
+        <script
+          src="https://widget.kapa.ai/kapa-widget.bundle.js"
+          data-website-id="125444e5-cd06-4812-b4e2-3cf33cd3f6fa"
+          data-project-name="Autonomys Network"
+          data-project-color="#f2f2f5"
+          data-project-logo="https://i.postimg.cc/BQjSkRPy/Autonomys-small-light.png"
+          data-modal-disclaimer="This is a custom LLM for Autonomys Network with access to all documentation, forum and discord threads. Since this is AI technology please use your best judgment."
+          async
+        />
+        {/* Google Analytics script */}
+        <script async src="https://www.googletagmanager.com/gtag/js?id=G-N417BD8BLW"></script>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              window.dataLayer = window.dataLayer || [];
+              function gtag(){dataLayer.push(arguments);}
+              gtag('js', new Date());
+              gtag('config', 'G-N417BD8BLW');
+            `
+          }}
+        />
+        {/* Favicon */}
+        <link
+          rel="icon"
+          type="image/png"
+          sizes="32x32"
+          href="/favicon.png"
+        />
+      </>
+    );
+  },
   project: {
     link: 'https://autonomys.xyz',
     icon: (
@@ -55,12 +68,6 @@ export default {
     hiddenPages: ['/'], // Hide the sidebar only on the landing page
   },
   docsRepositoryBase: 'https://github.com/autonomys/developer_docs/blob/main',
-  useNextSeoProps() {
-    return {
-      titleTemplate: '%s - Autonomys Network Developer Documentation',
-      defaultTitle: 'Autonomys Network Developer Documentation'
-    };
-  },
   logo: (
     <>
       <img
