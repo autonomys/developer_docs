@@ -12,7 +12,7 @@ export default {
         {/* Dynamic page title based on frontMatter.title */}
         <title>
           {frontMatter.title
-            ? `Autonomys Developer Hub – ${frontMatter.title}`
+            ? `${frontMatter.title}`
             : 'Autonomys Developer Hub'}
         </title>
         {/* Kapa AI widget script */}
