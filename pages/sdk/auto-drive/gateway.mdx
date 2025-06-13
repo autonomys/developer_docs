@@ -1,0 +1,90 @@
+# Auto Drive Gateway
+
+## What is Auto Drive Gateway?
+
+Auto Gateway is a unified gateway solution designed for seamlessly accessing files or folders permanently stored on the Autonomys Mainnet & Taurus testnet through a single, streamlined interface. The gateway is available [here](https://gateway.autonomys.xyz/).
+
+![Auto-Gateway-1](/developers/Auto-Gateway-1.png)
+
+## How Gateways Work
+
+In decentralized storage systems, files are identified by their Content Identifier (CID) rather than traditional file paths. A gateway acts as a bridge between the decentralized network and standard web protocols, allowing you to access stored content using familiar HTTP requests.
+
+Think of it as a web interface that translates CIDs into downloadable files - similar to how IPFS gateways work, but specifically designed for the Autonomys network.
+
+## When to Use Auto Drive Gateway
+
+### Direct File Access
+- **Public file sharing**: Share files with others who don't have the Auto Drive SDK
+- **Web integration**: Embed files directly in websites using standard HTML tags
+- **Browser downloads**: Allow users to download files directly through their browser
+- **CDN-like functionality**: Serve static assets like images, documents, or media files
+
+### Development & Testing
+- **Quick verification**: Quickly check if your uploads were successful
+- **Debugging**: Verify file integrity without writing code
+- **Prototyping**: Access files during development without implementing full SDK integration
+
+### Integration Scenarios
+- **Third-party applications**: Enable other services to access your stored files
+- **API responses**: Return direct download links in your API responses
+- **Mobile apps**: Simple file access without complex SDK integration
+
+## Gateway Endpoints
+
+### Retrieve File by CID
+```
+GET /file/:cid
+```
+Retrieves a file based on its Content Identifier (CID).
+
+**Responses:**
+- `200 OK`: Successfully retrieves and serves the requested file
+- `302 Redirect`: Redirects to `/folder/:cid` if the CID corresponds to a folder
+- `404 Not Found`: If no file is found for the provided CID
+
+### Retrieve Folder by CID
+```
+GET /folder/:cid
+```
+Retrieves a folder based on its Content Identifier (CID).
+
+**Responses:**
+- `200 OK`: Successfully retrieves and serves the requested folder
+- `302 Redirect`: Redirects to `/file/:cid` if the CID corresponds to a file  
+- `404 Not Found`: If no folder is found for the provided CID
+
+## Usage Examples
+
+### Direct Browser Access
+```
+https://gateway.autonomys.xyz/file/your-file-cid-here
+```
+
+### HTML Integration
+```html
+<!-- Display an image -->
+<img src="https://gateway.autonomys.xyz/file/your-image-cid" alt="My Image">
+
+<!-- Download link -->
+<a href="https://gateway.autonomys.xyz/file/your-document-cid" download>Download Document</a>
+```
+
+### API Response
+```javascript
+const response = {
+  filename: "document.pdf",
+  downloadUrl: `https://gateway.autonomys.xyz/file/${fileCid}`,
+  size: 1024000
+}
+```
+
+## Finding Your CIDs
+
+To use the gateway, you'll need the CID of your uploaded file or folder. You can find CIDs:
+
+1. In your [Auto Drive Dashboard](https://ai3.storage/) after uploading files
+2. From the return value of SDK upload functions
+3. In your application logs where upload responses are recorded
+
+Simply enter your CID in the gateway interface or construct the URL directly for programmatic access.

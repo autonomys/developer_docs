@@ -1,0 +1,115 @@
+# Auto-Drive API Reference
+
+## Overview
+
+Auto-Drive provides REST APIs for interacting with the Autonomys decentralized storage network. The APIs handle file operations, metadata management, and subscription services.
+
+## API Documentation
+
+The complete API documentation with all function signatures is available [here](https://mainnet.auto-drive.autonomys.xyz/api/docs).
+
+![Auto-Drive-API-1](/developers/Auto-Drive-API-1.png)
+
+## Authentication
+
+All API requests require authentication using one of these methods:
+
+### API Key Authentication (Recommended)
+Include your API key in the request headers:
+
+```http
+Authorization: Bearer your-api-key
+X-Auth-Provider: apikey
+```
+
+### JWT Token Authentication
+For advanced use cases, JWT tokens are supported:
+
+```http
+Authorization: Bearer your-jwt-token
+X-Auth-Provider: jwt
+```
+
+> **Security Note:** Keep your API keys secure and never share them with unauthorized parties.
+
+## Auto-Drive Services
+
+Auto-Drive consists of two main services:
+
+### 1. Auto-Drive Storage API
+Handles all file operations and object management:
+- **File uploads** (single and multipart)
+- **Object metadata management** 
+- **Access control and permissions**
+- **Subscription management**
+
+### 2. Auto-Drive Download Gateway
+Provides optimized file download capabilities:
+- **Direct file downloads**
+- **Asynchronous downloads**
+- **Bandwidth optimization**
+
+## API Endpoints Structure
+
+The API is organized into several main categories:
+
+### Subscriptions Endpoints
+- `GET /subscriptions/info` - Get subscription information
+- `GET /subscriptions/credits` - Check pending upload/download credits
+- Manage your account subscription and view usage statistics
+
+### Upload Endpoints
+- `POST /uploads/file` - Upload single files
+- `POST /uploads/folder` - Upload folders and directories
+- `POST /uploads/multipart` - Multipart uploads for large files
+- Progress tracking and upload management
+
+### Objects Endpoints
+- `GET /objects` - List your uploaded objects
+- `GET /objects/search` - Search objects by name or CID
+- `POST /objects/share` - Share objects and manage permissions
+- Object metadata management and access control
+
+### Download Endpoints
+- `GET /downloads/{cid}` - Download files by CID
+- `GET /downloads/stream/{cid}` - Streaming downloads
+- Support for password-protected downloads
+
+## Base URLs
+
+- **Mainnet**: `https://mainnet.auto-drive.autonomys.xyz`
+- **Taurus Testnet**: `https://taurus.auto-drive.autonomys.xyz`
+
+## Response Format
+
+All API responses follow a consistent JSON format with appropriate HTTP status codes. Error responses include detailed error messages to help with debugging.
+
+## Rate Limits
+
+API usage is subject to your subscription limits:
+- **Upload limit**: 100MB per month (default)
+- **Download limit**: 5GB per month (default)
+
+Check your current limits using the subscription endpoints or in the Auto-Drive dashboard.
+
+## Making Direct API Calls
+
+You can make direct HTTP requests to the API endpoints:
+
+```bash
+# Example: Get subscription info
+curl -X GET "https://mainnet.auto-drive.autonomys.xyz/subscriptions/info" \
+  -H "Authorization: Bearer your-api-key" \
+  -H "X-Auth-Provider: apikey"
+```
+
+```bash
+# Example: Upload a file
+curl -X POST "https://mainnet.auto-drive.autonomys.xyz/uploads/file" \
+  -H "Authorization: Bearer your-api-key" \
+  -H "X-Auth-Provider: apikey" \
+  -H "Content-Type: multipart/form-data" \
+  -F "file=@path/to/your/file.txt"
+```
+
+For detailed endpoint specifications, request/response schemas, and interactive testing, visit the [complete API documentation](https://mainnet.auto-drive.autonomys.xyz/api/docs).
