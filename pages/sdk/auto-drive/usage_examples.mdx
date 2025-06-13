@@ -1,0 +1,158 @@
+# Auto-Drive Usage Examples
+
+## 1. Uploading a file from a filepath (not available in browser)
+
+```typescript
+import { fs,createAutoDriveApi } from '@autonomys/auto-drive'
+import { NetworkId } from '@autonomys/auto-utils'
+
+const api = createAutoDriveApi({ apiKey: 'your-api-key', network: NetworkId.TAURUS }) // Initialize your API instance with API key
+const filePath = 'path/to/your/file.txt' // Specify the path to your file
+const options = {
+  password: 'your-encryption-password', // Optional: specify a password for encryption
+  compression: true,
+  // an optional callback useful for large file uploads
+  onProgress?: (progress: number) => {
+    console.log(`The upload is completed is ${progress}% completed`)
+  }
+}
+
+const cid = await fs.uploadFileFromFilepath(api, filePath, options)
+
+console.log(`The file is uploaded and its cid is ${cid}`)
+```
+
+## 2. Uploading a file using File interface 
+
+```typescript
+import { uploadFileFromInput, createAutoDriveApi } from '@autonomys/auto-drive'
+import { NetworkId } from '@autonomys/auto-utils'
+
+const api = createAutoDriveApi({ apiKey: 'your-api-key', network: NetworkId.TAURUS }) // Initialize your API instance with API key
+
+// e.g Get File from object from HTML event
+const file: File = e.target.value // Substitute with your file
+const options = {
+  password: 'your-encryption-password', // Optional: specify a password for encryption
+  compression: true,
+}
+const cid = await api.uploadFileFromInput(file, options)
+
+console.log(`The file is uploaded and its cid is ${cid}`)
+```
+
+## 3. Uploading a folder (not available in browser)
+
+```typescript
+import { createAutoDriveApi, fs } from '@autonomys/auto-drive'
+import { NetworkId } from '@autonomys/auto-utils'
+
+const api = createAutoDriveApi({ apiKey: 'your-api-key', network: NetworkId.TAURUS }) // Initialize your API instance with API key
+const folderPath = 'path/to/your/folder' // Specify the path to your folder
+
+const options = {
+  uploadChunkSize: 1024 * 1024, // Optional: specify the chunk size for uploads
+  password: 'your-encryption-password', // Optional: If folder is encrypted
+  // an optional callback useful for large file uploads
+  onProgress: (progress: number) => {
+    console.log(`The upload is completed is ${progress}% completed`)
+  },
+}
+
+const folderCID = await fs.uploadFolderFromFolderPath(api, folderPath, options)
+
+console.log(`The folder is uploaded and its cid is ${folderCID}`)
+```
+
+## 4. Uploading a file from a custom interface with `GenericFile`
+
+```typescript
+import { createAutoDriveApi } from '@autonomys/auto-drive'
+import { NetworkId } from '@autonomys/auto-utils'
+
+const api = createAutoDriveApi({ apiKey: 'your-api-key', network: NetworkId.TAURUS }) // Initialize your API instance with API key
+const buffer = Buffer.from(...);
+const genericFile = {
+  read: async function *() {
+    yield buffer
+  },
+  name: "autonomys-whitepaper.pdf",
+  mimeType: "application/pdf",
+  size: 1234556,
+  path: "autonomys-whitepaper.pdf"
+}
+
+const options = {
+  password: 'your-encryption-password', // Optional: specify a password for encryption
+  compression: true,
+  // an optional callback useful for large file uploads
+  onProgress?: (progress: number) => {
+    console.log(`The upload is completed is ${progress}% completed`)
+  }
+}
+
+const cid = api.uploadFile(genericFile, options)
+
+console.log(`The file is uploaded and its cid is ${cid}`)
+```
+
+## 5. Downloading files
+
+```typescript
+import { createAutoDriveApi } from '@autonomys/auto-drive'
+import { NetworkId } from '@autonomys/auto-utils'
+
+const api = createAutoDriveApi({ apiKey: 'your-api-key', network: NetworkId.TAURUS }) // Initialize your API instance with API key
+
+try {
+  const cid = '..'
+  const stream = await api.downloadFile(cid)
+  let file = Buffer.alloc(0)
+  for await (const chunk of stream) {
+    file = Buffer.concat([file, chunk])
+  }
+  console.log('File downloaded successfully:', stream)
+} catch (error) {
+  console.error('Error downloading file:', error)
+}
+```
+
+## 6. Creating shareable download link
+
+```typescript
+import { createAutoDriveApi } from '@autonomys/auto-drive'
+import { NetworkId } from '@autonomys/auto-utils'
+
+const api = createAutoDriveApi({ apiKey: 'your-api-key', network: NetworkId.TAURUS }) // Initialize your API instance with API key
+
+try {
+  const cid = 'your-file-cid'
+  const publicUrl = await api.publishObject(cid)
+  console.log('Public download URL:', publicUrl)
+} catch (error) {
+  console.error('Error publishing object:', error)
+}
+```
+
+## 7. Example usage of `getMyFiles`
+
+Here is an example of how to use the `getMyFiles` method to retrieve the root directories:
+
+```typescript
+import { createAutoDriveApi } from '@autonomys/auto-drive'
+import { NetworkId } from '@autonomys/auto-utils'
+
+const api = createAutoDriveApi({ apiKey: 'your-api-key', network: NetworkId.TAURUS }) // Initialize your API instance with API key
+
+try {
+  for (let i = 0; i < 10; i++) {
+    const myFiles = await api.getMyFiles(i, 100)
+    console.log(`Retrieved ${myFiles.rows.length} files of ${myFiles.totalCount} total`)
+    for (const file of myFiles.rows) {
+      console.log(`${file.name} - ${file.headCid}: ${file.size}`)
+    }
+  }
+} catch (error) {
+  console.error('Error downloading file:', error)
+}
+```

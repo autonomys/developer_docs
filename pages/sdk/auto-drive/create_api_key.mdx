@@ -1,0 +1,78 @@
+# Creating Your Auto-Drive API Key
+
+## Authentication Overview
+
+All requests to the Auto-Drive APIs require authentication using an API key. The API key is a string that authenticates your requests to the Auto-Drive APIs.
+
+## Step-by-Step Guide to Create an API Key
+
+### 1. Access Auto-Drive Dashboard
+
+1. Open [Auto Drive](https://ai3.storage/)
+2. Sign in via Google, Discord, GitHub or Wallet
+
+   ![Auto-Drive-1](/developers/Auto-Drive-1.png)
+
+### 2. Navigate to Developer Section
+
+1. Once you're logged in, click on the **developers** section in the left sidebar menu
+2. In the developers section, click on **'Create API Key'**
+3. Read the modal message and click on generate
+
+### 3. Alternative Method - Via Profile
+
+You can also create an API key through your profile:
+
+1. Click on `Profile` in the dashboard
+2. Create your API key from the profile section
+
+   ![Auto-Drive-4](/developers/Auto-Drive-4.png)
+
+## Understanding Your Dashboard
+
+Once logged in, your Dashboard will show:
+
+- Your upload limit (currently **20MB** per month on mainnet and **100MB** per month on Taurus testnet)  
+- Your download limit (currently **5GB** per month on both mainnet and Taurus testnet)  
+- A list of **uploaded files** and their **CIDs**
+- Options to **Download**, **Share** or **Remove** each file
+
+![Auto-Drive-2](/developers/Auto-Drive-2.png)
+
+> *Note:* Removing a file does not delete it from the DSN as it is permanent storage. It only removes the file from your Dashboard.
+
+## Using Your API Key
+
+Once you have your API key, you can use it to authenticate your requests:
+
+```typescript
+import { createAutoDriveApi } from '@autonomys/auto-drive'
+import { NetworkId } from '@autonomys/auto-utils'
+
+const api = createAutoDriveApi({
+  apiKey: 'your-api-key-here',
+  network: NetworkId.TAURUS // or NetworkId.MAINNET
+})
+```
+
+## Network Selection
+
+Auto Drive is available on both:
+- **Mainnet** (`NetworkId.MAINNET`) - Production environment
+- **Taurus Testnet** (`NetworkId.TAURUS`) - Testing environment
+
+Choose the appropriate network based on your needs.
+
+## Security Best Practices
+
+- Keep your API key secure and never commit it to version control
+- Use environment variables to store your API key
+- Regenerate your API key if you suspect it has been compromised
+
+## Next Steps
+
+With your API key created, you can now:
+- Install the Auto-Drive SDK
+- Start uploading and downloading files
+- Explore the full API reference
+- Try the usage examples
