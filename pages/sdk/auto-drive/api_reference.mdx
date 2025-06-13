@@ -15,26 +15,26 @@ The complete API documentation with all function signatures is available [here](
 The API is organized into several main categories:
 
 ### Subscriptions Endpoints
+- Manage your account subscription and view usage statistics
 - `GET /subscriptions/info` - Get subscription information
 - `GET /subscriptions/credits` - Check pending upload/download credits
-- Manage your account subscription and view usage statistics
 
 ### Upload Endpoints
+- Progress tracking and upload management
 - `POST /uploads/file` - Upload single files
 - `POST /uploads/folder` - Upload folders and directories
 - `POST /uploads/multipart` - Multipart uploads for large files
-- Progress tracking and upload management
 
 ### Objects Endpoints
+- Object metadata management and access control
 - `GET /objects` - List your uploaded objects
 - `GET /objects/search` - Search objects by name or CID
 - `POST /objects/share` - Share objects and manage permissions
-- Object metadata management and access control
 
 ### Download Endpoints
+- Support for password-protected downloads
 - `GET /downloads/{cid}` - Download files by CID
 - `GET /downloads/stream/{cid}` - Streaming downloads
-- Support for password-protected downloads
 
 ## Base URLs
 
