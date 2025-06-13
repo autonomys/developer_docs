@@ -1,6 +1,6 @@
 # Auto-Drive Usage Examples
 
-## 1. Uploading a file from a filepath (Not available in browser)
+## 1. Uploading a file from a filepath (not available in browser)
 
 ```typescript
 import { fs,createAutoDriveApi } from '@autonomys/auto-drive'
@@ -22,7 +22,7 @@ const cid = await fs.uploadFileFromFilepath(api, filePath, options)
 console.log(`The file is uploaded and its cid is ${cid}`)
 ```
 
-## 2. Uploading a file using FILE interface 
+## 2. Uploading a file using File interface 
 
 ```typescript
 import { uploadFileFromInput, createAutoDriveApi } from '@autonomys/auto-drive'
@@ -41,7 +41,7 @@ const cid = await api.uploadFileFromInput(file, options)
 console.log(`The file is uploaded and its cid is ${cid}`)
 ```
 
-## 3. Uploading a folder (Not available in browser)
+## 3. Uploading a folder (not available in browser)
 
 ```typescript
 import { createAutoDriveApi, fs } from '@autonomys/auto-drive'
@@ -136,7 +136,7 @@ try {
 
 ## 7. Example usage of `getMyFiles`
 
-Here is an example of how to use the getMyFiles method to retrieve the root directories:
+Here is an example of how to use the `getMyFiles` method to retrieve the root directories:
 
 ```typescript
 import { createAutoDriveApi } from '@autonomys/auto-drive'
