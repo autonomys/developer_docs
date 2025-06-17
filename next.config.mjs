@@ -9,4 +9,14 @@ const withNextra = nextra({
   }
 })
 
-export default withNextra()
+export default withNextra({
+  async redirects() {
+    return [
+      {
+        source: '/sdk/auto-drive',
+        destination: '/sdk/auto-drive/overview_setup',
+        permanent: true,
+      }
+    ]
+  }
+})
