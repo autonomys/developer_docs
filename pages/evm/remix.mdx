@@ -28,32 +28,37 @@ Set "EVM Version" to **"london"** or **"istanbul"**
 
  ![Remix-3](/developers/Remix-3.png)
 
-4. Change the name of your contract (`Counter`), the name of the token (`AutonomysTestToken`), and the token symbol (`AI3test`). As an example, let's add a simple smart contract that has three functions: `setNumber()`, `increment()` and `decrement()`.
+4. As an example, let's add a simple smart contract that has four functions: `setNumber(number)`, `get()`, `increment()` and `decrement()`.
 
- ```
-  // SPDX-License-Identifier: MIT
- pragma solidity ^0.8.9;
+```bash
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.19;
 
- import '@openzeppelin/contracts/token/ERC20/ERC20.sol';
+contract Counter {
+    uint256 private counter;
 
- contract Counter is ERC20 {
-     constructor() ERC20("AutonomysTestToken", "AI3test") {}
+    // Set the counter to a specific value
+    function set(uint256 _value) public {
+        counter = _value;
+    }
 
-     uint256 public number;
+    // Increase the counter by 1
+    function increase() public {
+        counter += 1;
+    }
 
-     function setNumber(uint256 newNumber) public {
-         number = newNumber;
-     }
+    // Decrease the counter by 1
+    function decrease() public {
+        require(counter > 0, "Counter cannot go below zero");
+        counter -= 1;
+    }
 
-     function increment() public {
-         number++;
-     }
-
-     function decrement() public {
-         number--;
-     }
-  }
- ```
+    // Get the current counter value
+    function get() public view returns (uint256) {
+        return counter;
+    }
+}
+```
 
  ![Remix-4](/developers/Remix-4.png)
 
