@@ -1,0 +1,215 @@
+# Auto-Drive S3 Layer Guide
+
+## Overview
+
+Auto-Drive provides an S3-compatible API layer that allows you to interact with decentralized storage using standard AWS S3 SDK commands. This layer abstracts the complexity of blockchain storage while maintaining familiar S3 patterns.
+
+## How It Works
+Auto-Drive maintains an object_mappings table in the database that maps S3 object keys to Content Identifiers (CIDs). When you upload via S3 API, the system:
+
+1. Stores the file content on the decentralized network (DSN)
+2. Records the key-to-CID mapping in the database
+3. Returns the CID as the ETag for S3 compatibility
+4. Enables cross-API access between S3 and Auto-Drive APIs
+
+
+## Key Features
+
+### 1. **Standard S3 SDK Compatibility**
+
+- Use official AWS S3 SDK (`@aws-sdk/client-s3`)
+- Supports all major S3 operations: `PutObject`, `GetObject`, `HeadObject`, multipart uploads (`CreateMultipartUploadCommand`, `UploadPartCommand` & `CompleteMultipartUploadCommand`)
+- No code changes required for existing S3 applications
+
+### 2. **Enhanced Metadata Support**
+
+```typescript
+// Compression and encryption metadata
+const command = new PutObjectCommand({
+  Bucket: "http://localhost:3000/s3",
+  Key: "file.txt",
+  Body: buffer,
+  Metadata: {
+    compression: "ZLIB",
+    encryption: "AES_256_GCM",
+  },
+});
+```
+
+### 3. **Range Requests**
+
+- Partial file downloads supported
+- Standard HTTP Range headers
+
+```typescript
+const command = new GetObjectCommand({
+  Bucket: bucket,
+  Key: key,
+  Range: "bytes=0-9", // Download first 10 bytes
+});
+```
+
+### 4. **Multipart Upload Support**
+
+- Full multipart upload workflow
+- Create → Upload Parts → Complete pattern
+- Automatic chunking for large files
+
+```typescript
+// Complete multipart upload example
+const key = "large-file.txt";
+const fileContent = Buffer.from("Large file content...");
+
+// Step 1: Create multipart upload
+const createCommand = new CreateMultipartUploadCommand({
+  Bucket: "http://localhost:3000/s3",
+  Key: key,
+});
+const createResult = await s3Client.send(createCommand);
+const uploadId = createResult.UploadId!;
+
+// Step 2: Upload parts
+const uploadPartCommand = new UploadPartCommand({
+  Bucket: "http://localhost:3000/s3",
+  Key: key,
+  UploadId: uploadId,
+  PartNumber: 1,
+  Body: fileContent,
+});
+const partResult = await s3Client.send(uploadPartCommand);
+
+
+// Step 3: Complete multipart upload
+const completeCommand = new CompleteMultipartUploadCommand({
+  Bucket: "http://localhost:3000/s3",
+  Key: key,
+  UploadId: uploadId,
+  MultipartUpload: {
+    Parts: [
+      {
+        ETag: partResult.ETag!,
+        PartNumber: 1,
+      },
+    ],
+  },
+});
+const completeResult = await s3Client.send(completeCommand);
+```
+
+## Configuration
+
+### Client Setup
+
+```typescript
+const s3Client = new S3Client({
+  region: "us-east-1",
+  credentials: {
+    accessKeyId: "your-auto-drive-api-key", // Your Auto-Drive API key
+    secretAccessKey: "", // Always empty for Auto-Drive
+  },
+  bucketEndpoint: true, // Required for custom endpoints
+});
+```
+
+### Endpoint Configuration
+
+```typescript
+// The "Bucket" parameter becomes part of the endpoint URL
+const Bucket = `${baseURL}/s3`; // e.g., "http://localhost:3000/s3"
+// No actual S3 bucket is created - it's just URL routing
+```
+
+- Base URL: http://localhost:3000/s3 (development)
+- Bucket name becomes the full endpoint path
+- No actual bucket concept - uses path-based routing
+
+## Authentication
+
+- Uses Auto-Drive API key-based authentication
+- Integrates with Auto-Drive's user management system
+- API key goes in accessKeyId, secretAccessKey remains empty
+- Supports the same authentication as the Auto-Drive API
+
+## File Ownership & Access
+
+- **Cross-API compatibility**: Files uploaded via S3 API are accessible through Auto-Drive API and vice versa
+- **Centralized ownership**: File ownership is tracked centrally, not per-API
+- **Content deduplication**: Multiple users uploading identical content will share the same underlying CID
+- **Shared access**: If different users upload the same file via different APIs, both can access it through either API
+
+## Storage Characteristics
+
+### Content Addressing
+
+- Files are stored using Content Identifiers (CIDs)
+- ETag returned is the actual CID of the uploaded content
+- Immutable storage - same content always produces same CID
+
+### Decentralized Backend
+
+- Files stored on the DSN of Autonomys Network (available on Autonomys Mainnet, Taurus Testnet)
+- Automatic replication and redundancy
+- No single point of failure
+
+## Migrating from AWS S3
+
+For developers moving from traditional AWS S3:
+
+1. **Update endpoint** to Auto-Drive server URL
+2. **Change credentials** to use Auto-Drive API key (with empty secret)
+3. **Set bucketEndpoint**: true in S3Client configuration
+4. **Handle longer response times** due to blockchain network latency
+5. **Expect CIDs as ETags** instead of MD5 hashes
+6. **Update bucket references** to use full endpoint URLs
+7. **Test multipart uploads** as they may behave slightly differently
+
+```typescript
+// Before (AWS S3)
+const s3Client = new S3Client({
+  region: "us-east-1",
+  credentials: {
+    accessKeyId: "AKIA...",
+    secretAccessKey: "abc123...",
+  },
+});
+
+// After (Auto-Drive)
+const s3Client = new S3Client({
+  region: "us-east-1",
+  credentials: {
+    accessKeyId: "your-auto-drive-api-key",
+    secretAccessKey: "",
+  },
+  bucketEndpoint: true,
+});
+```
+
+## Limitations & Considerations
+
+### Performance
+
+- The DSN (on-chain) storage has higher latency than traditional S3
+- Multipart uploads recommended for files > 5MB
+- Range requests may have different performance characteristics
+
+### Compatibility Notes
+
+- Not all S3 features supported (e.g., versioning, lifecycle policies)
+- Custom metadata handling for compression/encryption
+- Bucket operations are virtual (no actual bucket creation)
+
+## Best Practices
+
+1. **Use Multipart Uploads** for files larger than 5MB
+2. **Leverage Range Requests** for partial file access
+3. **Include Compression/Encryption** metadata when needed
+4. **Handle ETags as CIDs** for content verification
+5. **Implement Retry Logic** for blockchain network delays
+
+## Error Handling
+
+- Standard S3 error responses
+- Additional blockchain-specific error codes
+- Network timeouts may be longer than traditional S3
+
+This S3 layer provides a familiar interface while leveraging the benefits of decentralized storage, making it easy to migrate existing S3-based applications to Auto-Drive.
