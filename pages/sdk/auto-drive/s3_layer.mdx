@@ -1,16 +1,16 @@
-# Auto-Drive S3 Layer Guide
+# Auto Drive S3 Layer Guide
 
 ## Overview
 
-Auto-Drive provides an S3-compatible API layer that allows you to interact with decentralized storage using standard AWS S3 SDK commands. This layer abstracts the complexity of blockchain storage while maintaining familiar S3 patterns.
+Auto Drive provides an S3-compatible API layer that allows you to interact with decentralized storage using standard AWS S3 SDK commands. This layer abstracts the complexity of blockchain storage while maintaining familiar S3 patterns.
 
 ## How It Works
-Auto-Drive maintains an object_mappings table in the database that maps S3 object keys to Content Identifiers (CIDs). When you upload via S3 API, the system:
+Auto Drive maintains an object_mappings table in the database that maps S3 object keys to Content Identifiers (CIDs). When you upload via S3 API, the system:
 
 1. Stores the file content on the decentralized network (DSN)
 2. Records the key-to-CID mapping in the database
 3. Returns the CID as the ETag for S3 compatibility
-4. Enables cross-API access between S3 and Auto-Drive APIs
+4. Enables cross-API access between S3 and Auto Drive APIs
 
 
 ## Key Features
@@ -104,8 +104,8 @@ const completeResult = await s3Client.send(completeCommand);
 const s3Client = new S3Client({
   region: "us-east-1",
   credentials: {
-    accessKeyId: "your-auto-drive-api-key", // Your Auto-Drive API key
-    secretAccessKey: "", // Always empty for Auto-Drive
+    accessKeyId: "your-auto-drive-api-key", // Your Auto Drive API key
+    secretAccessKey: "", // Always empty for Auto Drive
   },
   bucketEndpoint: true, // Required for custom endpoints
 });
@@ -125,14 +125,14 @@ const Bucket = `${baseURL}/s3`; // e.g., "http://localhost:3000/s3"
 
 ## Authentication
 
-- Uses Auto-Drive API key-based authentication
-- Integrates with Auto-Drive's user management system
+- Uses Auto Drive API key-based authentication
+- Integrates with Auto Drive's user management system
 - API key goes in accessKeyId, secretAccessKey remains empty
-- Supports the same authentication as the Auto-Drive API
+- Supports the same authentication as the Auto Drive API
 
 ## File Ownership & Access
 
-- **Cross-API compatibility**: Files uploaded via S3 API are accessible through Auto-Drive API and vice versa
+- **Cross-API compatibility**: Files uploaded via S3 API are accessible through Auto Drive API and vice versa
 - **Centralized ownership**: File ownership is tracked centrally, not per-API
 - **Content deduplication**: Multiple users uploading identical content will share the same underlying CID
 - **Shared access**: If different users upload the same file via different APIs, both can access it through either API
@@ -155,8 +155,8 @@ const Bucket = `${baseURL}/s3`; // e.g., "http://localhost:3000/s3"
 
 For developers moving from traditional AWS S3:
 
-1. **Update endpoint** to Auto-Drive server URL
-2. **Change credentials** to use Auto-Drive API key (with empty secret)
+1. **Update endpoint** to Auto Drive server URL
+2. **Change credentials** to use Auto Drive API key (with empty secret)
 3. **Set bucketEndpoint**: true in S3Client configuration
 4. **Handle longer response times** due to blockchain network latency
 5. **Expect CIDs as ETags** instead of MD5 hashes
@@ -173,7 +173,7 @@ const s3Client = new S3Client({
   },
 });
 
-// After (Auto-Drive)
+// After (Auto Drive)
 const s3Client = new S3Client({
   region: "us-east-1",
   credentials: {
@@ -212,4 +212,4 @@ const s3Client = new S3Client({
 - Additional blockchain-specific error codes
 - Network timeouts may be longer than traditional S3
 
-This S3 layer provides a familiar interface while leveraging the benefits of decentralized storage, making it easy to migrate existing S3-based applications to Auto-Drive.
+This S3 layer provides a familiar interface while leveraging the benefits of decentralized storage, making it easy to migrate existing S3-based applications to Auto Drive.
