@@ -1,18 +1,43 @@
-# How to Swap tAI3 for WAI3 on the Taurus Testnet
+# How to Wrap AI3 Tokens (Mainnet and Taurus Testnet)
 
-Auto EVM tAI3 on Taurus is the same as ETH on the Ethereum network. This means that it is not an ERC-20 token which is sometimes a requirement for certain use-cases.
+Native AI3 tokens on Auto EVM are similar to ETH on the Ethereum network - they are not ERC-20 tokens, which is sometimes a requirement for certain use-cases.
 
-Fortunately there is an ERC-20 contract on Taurus Auto EVM which allows you to "wrap" the tokens. This guide walks us through how to do that.
+Fortunately, there are ERC-20 contracts on both mainnet and testnet Auto EVM that allow you to "wrap" your tokens. This guide walks you through how to do that.
 
-## The Contract
+## The Contracts
 
-The WAI3 contract can be found at `0x205E735a2C73228fA13EeB70720C7841BDf65EDB` and you can view the contract code here: https://blockscout.taurus.autonomys.xyz/token/0x205E735a2C73228fA13EeB70720C7841BDf65EDB?tab=contract. Note you can also check out transfer activity and holders on the relevant tabs.
+### Mainnet WAI3 Contract
 
-![wai](/developers/wai3/wai3-1.png)
+**Mainnet** WAI3 Contract: `0x7ba06C7374566c68495f7e4690093521F6B991bb`.
 
-## Swapping tAI3 for WAI3
+View contract: https://explorer.auto-evm.mainnet.autonomys.xyz/token/0x7ba06C7374566c68495f7e4690093521F6B991bb
 
-We will use MetaMask today though any EVM compatible wallet should work. First, make sure you have the Taurus Auto EVM network added to MetaMask. Skip this step if you have already done it.
+### Taurus Testnet WAI3 Contract
+
+**Taurus Testnet** WAI3 Contract: `0x205E735a2C73228fA13EeB70720C7841BDf65EDB`. 
+
+View contract: https://blockscout.taurus.autonomys.xyz/token/0x205E735a2C73228fA13EeB70720C7841BDf65EDB?tab=contract
+
+
+## Wrapping AI3 for WAI3
+
+We will use MetaMask for this guide, though any EVM compatible wallet should work. First, make sure you have the appropriate Auto EVM network added to MetaMask.
+
+```
+Network Name: Autonomys EVM
+New RPC URL: https://auto-evm.mainnet.autonomys.xyz/ws
+Chain ID: 870
+Currency Symbol: AI3
+```
+
+Auto EVM is also available on the Taurus testnet
+
+```
+Network Name: Autonomys EVM
+New RPC URL: https://auto-evm.taurus.autonomys.xyz/ws
+Chain ID: 490000
+Currency Symbol: tAI3
+```
 
 The quickest way to add the network is to use this button at the bottom of Blockscout (use the contract link above):
 
@@ -42,7 +67,7 @@ Enter the WAI3 contract address and you will be able to see your balance under t
 
 ## Unwrapping WAI3
 
-To unwrap your WAI3 tokens (convert them back to the original tAI3 tokens), you'll need to interact with the `withdraw` function in the [WAI3 contract](https://blockscout.taurus.autonomys.xyz/token/0x205E735a2C73228fA13EeB70720C7841BDf65EDB?tab=write_contract). Here's how to do it.
+To unwrap your WAI3 tokens (convert them back to the original tAI3 tokens), you'll need to interact with the `withdraw` function in the **[WAI3 contract](#the-contracts)**. Here's how to do it.
 
 First, make sure you have your wallet holding the WAI3 connected to the contract linked above. Ensure you are on the "Write" tab of the contract and look for the `withdraw` method.
 
