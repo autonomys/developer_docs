@@ -127,7 +127,7 @@ const Bucket = `${baseURL}/s3`; // e.g., "http://localhost:3000/s3"
 
 - Uses Auto Drive API key-based authentication
 - Integrates with Auto Drive's user management system
-- API key goes in accessKeyId, secretAccessKey remains empty
+- API key goes in `accessKeyId`, `secretAccessKey` remains empty
 - Supports the same authentication as the Auto Drive API
 
 ## File Ownership & Access
@@ -147,7 +147,7 @@ const Bucket = `${baseURL}/s3`; // e.g., "http://localhost:3000/s3"
 
 ### Decentralized Backend
 
-- Files stored on the DSN of Autonomys Network (available on Autonomys Mainnet, Taurus Testnet)
+- Files stored on the DSN of Autonomys Network (available on Autonomys Mainnet & Testnet)
 - Automatic replication and redundancy
 - No single point of failure
 
@@ -157,7 +157,7 @@ For developers moving from traditional AWS S3:
 
 1. **Update endpoint** to Auto Drive server URL
 2. **Change credentials** to use Auto Drive API key (with empty secret)
-3. **Set bucketEndpoint**: true in S3Client configuration
+3. **Set `bucketEndpoint`**: true in S3Client configuration
 4. **Handle longer response times** due to blockchain network latency
 5. **Expect CIDs as ETags** instead of MD5 hashes
 6. **Update bucket references** to use full endpoint URLs
