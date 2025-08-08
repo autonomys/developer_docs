@@ -26,7 +26,7 @@ Auto Drive maintains an object_mappings table in the database that maps S3 objec
 ```typescript
 // Compression and encryption metadata
 const command = new PutObjectCommand({
-  Bucket: "http://localhost:3000/s3",
+  Bucket: "https://public.auto-drive.autonomys.xyz/api/s3",
   Key: "file.txt",
   Body: buffer,
   Metadata: {
@@ -62,7 +62,7 @@ const fileContent = Buffer.from("Large file content...");
 
 // Step 1: Create multipart upload
 const createCommand = new CreateMultipartUploadCommand({
-  Bucket: "http://localhost:3000/s3",
+  Bucket: "https://public.auto-drive.autonomys.xyz/api/s3",
   Key: key,
 });
 const createResult = await s3Client.send(createCommand);
@@ -70,7 +70,7 @@ const uploadId = createResult.UploadId!;
 
 // Step 2: Upload parts
 const uploadPartCommand = new UploadPartCommand({
-  Bucket: "http://localhost:3000/s3",
+  Bucket: "https://public.auto-drive.autonomys.xyz/api/s3",
   Key: key,
   UploadId: uploadId,
   PartNumber: 1,
@@ -81,7 +81,7 @@ const partResult = await s3Client.send(uploadPartCommand);
 
 // Step 3: Complete multipart upload
 const completeCommand = new CompleteMultipartUploadCommand({
-  Bucket: "http://localhost:3000/s3",
+  Bucket: "https://public.auto-drive.autonomys.xyz/api/s3",
   Key: key,
   UploadId: uploadId,
   MultipartUpload: {
@@ -115,10 +115,11 @@ const s3Client = new S3Client({
 
 ```typescript
 // The "Bucket" parameter becomes part of the endpoint URL
-const Bucket = `${baseURL}/s3`; // e.g., "http://localhost:3000/s3"
+const Bucket = `${baseURL}/s3`; // e.g., "https://public.auto-drive.autonomys.xyz/api/s3"
 // No actual S3 bucket is created - it's just URL routing
 ```
-
+- Mainnet: `https://public.auto-drive.autonomys.xyz/api/s3`
+- Taurus Testnet: `https://public.taurus.auto-drive.autonomys.xyz/api/s3`
 - Base URL: http://localhost:3000/s3 (development)
 - Bucket name becomes the full endpoint path
 - No actual bucket concept - uses path-based routing
