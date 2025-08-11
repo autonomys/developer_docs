@@ -2,7 +2,9 @@
 
 ## Overview
 
-Auto Drive provides an S3-compatible API layer that allows you to interact with decentralized storage using standard AWS S3 SDK commands. This layer abstracts the complexity of blockchain storage while maintaining familiar S3 patterns.
+**Auto Drive** provides an **S3-compatible API layer** that allows you to interact with **decentralized storage(DSN)** using standard **Amazon Web Services Simple Storage Service (AWS S3)** SDK commands. This bridges the gap between familiar cloud storage patterns and next-generation decentralized infrastructure, giving developers the best of both worlds: the **reliability and developer experience of S3 APIs** with the **permanence and censorship-resistance** of decentralized storage.
+
+For those unfamiliar, [Amazon Web Services Simple Storage Service (AWS S3)](https://aws.amazon.com/s3/) is an industry-standard object storage service that powers much of the modern web's file storage needs. **Auto Drive** maintains complete compatibility with S3's APIs while storing your data on a **decentralized network** instead of **centralized servers**.
 
 ## How It Works
 Auto Drive maintains an object_mappings table in the database that maps S3 object keys to Content Identifiers (CIDs). When you upload via S3 API, the system:
