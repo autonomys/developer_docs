@@ -3,6 +3,7 @@ export default {
     'auto-consensus': 'Auto Consensus',
     'auto-drive': 'Auto Drive',
     'auto-utils': 'Auto Utils',
-    'auto-xdm': 'Auto XDM'
+    'auto-xdm': 'Auto XDM',
+    'polkadot-api': "Polkadot API"
   }
   
