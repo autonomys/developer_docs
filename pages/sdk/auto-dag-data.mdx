@@ -1,0 +1,259 @@
+# Auto DAG Data Package
+
+## Introduction
+
+The `@autonomys/auto-dag-data` package provides utilities for creating and managing IPLD DAGs (InterPlanetary Linked Data Directed Acyclic Graphs) for files and folders. It facilitates chunking large files, handling metadata, and creating folder structures suitable for distributed storage systems like IPFS.
+
+> **Note**: This package is an ES Module package and is designed to work with ESM applications. Check [this tutorial](https://dev.to/mangadev/set-up-a-backend-nodejs-typescript-jest-using-es-modules-1530) for guidance on setting up an ES module application.
+
+## Features
+
+- **File Chunking and DAG Creation**: Efficiently split large files into smaller chunks and create IPLD DAGs.
+- **Folder Structure Creation**: Generate IPLD DAGs for directory structures.
+- **Metadata Handling**: Add and manage metadata for files and folders.
+- **CID Management**: Utilities for working with Content Identifiers (CIDs).
+- **TypeScript Support**: Fully typed for enhanced developer experience.
+
+## Installation
+
+Install the package via `npm` or `yarn`:
+
+```bash
+# Using npm
+npm install @autonomys/auto-dag-data
+
+# Using yarn
+yarn add @autonomys/auto-dag-data
+```
+
+## Importing
+
+Import the `auto-dag-data` functions you need into your project:
+
+```typescript
+// Import specific functions
+import { processFileToIPLDFormat, processFolderToIPLDFormat, cidOfNode } from '@autonomys/auto-dag-data';
+
+// Or import everything
+import * as dagData from '@autonomys/auto-dag-data';
+```
+
+## Available Functions
+
+> **Note**: All asynchronous functions return a `Promise` and should be used with `await` for proper execution flow. Wrap asynchronous calls in `try...catch` blocks to handle potential errors gracefully.
+
+### File Processing
+
+- `processFileToIPLDFormat(blockstore, fileStream, fileSize, fileName): CID`: Creates an IPLD DAG from a file stream.
+
+### Folder Processing
+
+- `processFolderToIPLDFormat(blockstore, childCIDs, folderName, folderSize): CID`: Generates an IPLD DAG from a folder structure.
+
+### CID Utilities
+
+- `cidOfNode(node): CID`: Creates a CID from an IPLD node.
+- `cidToString(cid): string`: Converts a CID to its string representation.
+- `stringToCid(cidString): CID`: Parses a CID string back into a CID object.
+
+### Node Operations
+
+- `encodeNode(node): Uint8Array`: Encodes an IPLD node to bytes.
+- `decodeNode(bytes): IPLDNode`: Decodes bytes back into an IPLD node.
+
+### Metadata Management
+
+- `createMetadataNode(metadata): IPLDNode`: Creates a metadata node from metadata object.
+- `processMetadataToIPLDFormat(blockstore, metadata): CID`: Processes metadata into IPLD format.
+
+## Usage Examples
+
+### 1. Creating an IPLD DAG from a File
+
+Process a file into IPLD format for distributed storage:
+
+```typescript
+import { processFileToIPLDFormat, cidToString } from '@autonomys/auto-dag-data';
+import { MemoryBlockstore } from 'blockstore-core/memory';
+import fs from 'fs';
+
+(async () => {
+  const fileStream = fs.createReadStream('path/to/your/file.txt');
+  const fileSize = fs.statSync('path/to/your/file.txt').size;
+
+  const blockstore = new MemoryBlockstore();
+  const fileCID = await processFileToIPLDFormat(blockstore, fileStream, fileSize, 'file.txt');
+  
+  const cidString = cidToString(fileCID);
+  console.log(`File CID: ${cidString}`);
+})();
+```
+
+### 2. Creating an IPLD DAG from a Folder
+
+Generate an IPLD DAG from a directory structure:
+
+```typescript
+import { processFolderToIPLDFormat, decodeNode, cidToString } from '@autonomys/auto-dag-data';
+import { MemoryBlockstore } from 'blockstore-core/memory';
+import { CID } from 'multiformats';
+
+(async () => {
+  // Example child CIDs from files in the folder
+  const childCIDs: CID[] = [
+    /* array of CIDs from folder contents */
+  ];
+  const folderName = 'my-folder';
+  const folderSize = 1024; // total size of all children
+
+  const blockstore = new MemoryBlockstore();
+  const folderCID = await processFolderToIPLDFormat(blockstore, childCIDs, folderName, folderSize);
+
+  const node = await decodeNode(await blockstore.get(folderCID));
+  const cidString = cidToString(folderCID);
+  console.log(`Folder CID: ${cidString}`);
+})();
+```
+
+### 3. Working with CIDs
+
+Convert between CID objects and strings:
+
+```typescript
+import { cidOfNode, cidToString, stringToCid } from '@autonomys/auto-dag-data';
+
+(async () => {
+  // Assuming you have an IPLD node
+  const cid = cidOfNode(someNode);
+
+  // Convert CID to string for storage or transmission
+  const cidString = cidToString(cid);
+  console.log(`CID as string: ${cidString}`);
+
+  // Parse string back into CID object
+  const parsedCID = stringToCid(cidString);
+  console.log('CID object:', parsedCID);
+})();
+```
+
+### 4. Encoding and Decoding Nodes
+
+Handle IPLD node serialization:
+
+```typescript
+import { encodeNode, decodeNode } from '@autonomys/auto-dag-data';
+
+(async () => {
+  // Encode a node for storage
+  const encodedNode = encodeNode(someNode);
+  console.log('Encoded node:', encodedNode);
+
+  // Decode node from storage
+  const decodedNode = decodeNode(encodedNode);
+  console.log('Decoded node:', decodedNode);
+})();
+```
+
+### 5. Handling Metadata
+
+Create and process metadata for your files:
+
+```typescript
+import { createMetadataNode, processMetadataToIPLDFormat, cidToString } from '@autonomys/auto-dag-data';
+import { MemoryBlockstore } from 'blockstore-core/memory';
+
+(async () => {
+  const metadata = {
+    name: 'My File',
+    description: 'This is a sample file',
+    created: new Date().toISOString(),
+    // ... other metadata fields
+  };
+
+  // Create metadata node
+  const metadataNode = createMetadataNode(metadata);
+
+  // Process metadata to IPLD format
+  const blockstore = new MemoryBlockstore();
+  const metadataCID = await processMetadataToIPLDFormat(blockstore, metadata);
+  
+  const cidString = cidToString(metadataCID);
+  console.log(`Metadata CID: ${cidString}`);
+})();
+```
+
+### 6. Complete File Processing Example
+
+Full example of processing a file and extracting its CID:
+
+```typescript
+import { processFileToIPLDFormat, cidToString } from '@autonomys/auto-dag-data';
+import { MemoryBlockstore } from 'blockstore-core/memory';
+import fs from 'fs';
+
+(async () => {
+  try {
+    const filePath = 'path/to/your/file.txt';
+    const fileStream = fs.createReadStream(filePath);
+    const fileStats = fs.statSync(filePath);
+    
+    const blockstore = new MemoryBlockstore();
+    const cid = await processFileToIPLDFormat(
+      blockstore, 
+      fileStream, 
+      fileStats.size, 
+      'file.txt'
+    );
+
+    const cidString = cidToString(cid);
+    console.log(`Successfully processed file. CID: ${cidString}`);
+    
+  } catch (error) {
+    console.error('Error processing file:', error);
+  }
+})();
+```
+
+## Best Practices
+
+### Error Handling
+
+Always wrap asynchronous operations in try-catch blocks:
+
+```typescript
+try {
+  const cid = await processFileToIPLDFormat(blockstore, stream, size, name);
+  // Handle success
+} catch (error) {
+  console.error('Processing failed:', error);
+  // Handle error appropriately
+}
+```
+
+### Blockstore Management
+
+Use appropriate blockstore implementations based on your needs:
+
+```typescript
+// For temporary operations
+import { MemoryBlockstore } from 'blockstore-core/memory';
+const tempBlockstore = new MemoryBlockstore();
+
+// For persistent storage
+import { FsBlockstore } from 'blockstore-fs';
+const persistentBlockstore = new FsBlockstore('./blocks');
+```
+
+### Resource Cleanup
+
+Ensure proper cleanup of resources when working with file streams:
+
+```typescript
+const stream = fs.createReadStream(filePath);
+try {
+  const cid = await processFileToIPLDFormat(blockstore, stream, size, name);
+  // Process result
+} finally {
+  stream.destroy(); // Clean up stream
+}
+```
