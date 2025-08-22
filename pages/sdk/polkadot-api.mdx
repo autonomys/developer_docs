@@ -1,0 +1,222 @@
+# Understanding the Polkadot API for Auto SDK Development
+
+## Introduction
+
+While the Auto SDK provides convenient, high-level functions for common tasks on the Autonomys Network, many advanced use cases require direct interaction with the underlying blockchain through the **Polkadot API**. The Autonomys Network is built on Substrate (the same framework as Polkadot), which means it inherits the powerful `@polkadot/api` interface for blockchain interactions.
+
+> **For newcomers**: If you're just starting with blockchain development, think of the Auto SDK as a friendly toolkit for common tasks, while the Polkadot API is the comprehensive "power user" interface that gives you access to everything the blockchain can do.
+
+## Why You Need the Polkadot API
+
+The Auto SDK covers many essential operations, but there are numerous scenarios where you'll need to access blockchain data and functionality that isn't wrapped by the SDK:
+
+### Chain State Queries
+- **Block information**: Current block number, timestamps, block hashes
+- **Network fees**: Transaction fees, storage costs, operational parameters
+- **Account data**: Balances, nonces, detailed account information
+- **System parameters**: Network constants, runtime version, chain specifications
+
+### Advanced Transaction Handling
+- **Fee estimation**: Calculate exact transaction costs before submission
+- **Complex extrinsics**: Multi-signature operations, batched transactions
+- **Event filtering**: Listen for specific blockchain events beyond basic success/failure
+- **Custom pallets**: Interact with specialized blockchain modules
+
+### Real-time Monitoring
+- **Block subscriptions**: Monitor new blocks and their contents
+- **State changes**: Watch for changes in specific storage items
+- **Network status**: Monitor node health, peer connections, sync status
+
+## Essential Polkadot API Documentation
+
+The **[Polkadot.js API Documentation](https://polkadot.js.org/docs/api)** is your comprehensive resource for understanding blockchain interactions. Key sections include:
+
+- **[API Basics](https://polkadot.js.org/docs/api/start/basics)**: Connection setup and fundamental concepts
+- **[Query Methods](https://polkadot.js.org/docs/api/start/api.query)**: Reading blockchain state
+- **[RPC Calls](https://polkadot.js.org/docs/api/start/api.rpc)**: Direct node communication
+- **[Subscription Patterns](https://polkadot.js.org/docs/api/start/api.query.subs)**: Real-time data monitoring
+
+## Installation and Setup
+
+The Polkadot API works alongside the Auto SDK. Install both packages:
+
+```bash
+npm install @polkadot/api @autonomys/auto-utils
+```
+
+Import both in your project:
+
+```typescript
+// Auto SDK for high-level operations
+import { activate, activateWallet } from '@autonomys/auto-utils';
+
+// Polkadot API for direct blockchain access
+import { ApiPromise, WsProvider } from '@polkadot/api';
+```
+
+## Common Use Cases and Examples
+
+### 1. Getting Network Information and Fees
+
+This example shows how to retrieve transaction fees and timestamps - information not available through the Auto SDK:
+
+```typescript
+import { ApiPromise, WsProvider } from '@polkadot/api';
+
+async function getNetworkInfo() {
+  // Connect to the Autonomys Network
+  const api = await ApiPromise.create({
+    provider: new WsProvider('wss://rpc-0.mainnet.subspace.network/ws')
+  });
+
+  try {
+    // Get current block header
+    const header = await api.rpc.chain.getHeader();
+    const blockNumber = header.number.toNumber();
+    
+    // Get current timestamp
+    const timestamp = (await api.query.timestamp.now()).toNumber();
+    
+    // Get transaction fees
+    const fee = await api.query.transactionFees.transactionByteFee();
+    
+    console.log('Block number:', blockNumber);
+    console.log('Timestamp:', new Date(timestamp).toISOString());
+    console.log('Current fee:', fee.current.toString());
+    console.log('Next fee:', fee.next.toString());
+    
+  } finally {
+    await api.disconnect();
+  }
+}
+```
+
+### 2. Account Balance and Nonce Queries
+
+```typescript
+async function getAccountDetails(accountAddress) {
+  const api = await ApiPromise.create({
+    provider: new WsProvider('wss://rpc-0.gemini-3h.subspace.network/ws')
+  });
+
+  try {
+    // Get account balance
+    const balance = await api.query.system.account(accountAddress);
+    
+    console.log('Free balance:', balance.data.free.toString());
+    console.log('Reserved balance:', balance.data.reserved.toString());
+    console.log('Account nonce:', balance.nonce.toString());
+    
+  } finally {
+    await api.disconnect();
+  }
+}
+```
+
+### 3. Fee Estimation Before Transaction
+
+```typescript
+import { activateWallet } from '@autonomys/auto-utils';
+import { ApiPromise } from '@polkadot/api';
+
+async function estimateTransactionFee(recipientAddress, amount) {
+  // Use Auto SDK to get wallet and API
+  const { api, accounts } = await activateWallet({
+    uri: '//Alice',
+    networkId: 'mainnet'
+  });
+  
+  const sender = accounts[0];
+  
+  // Create transaction
+  const transfer = api.tx.balances.transfer(recipientAddress, amount);
+  
+  // Estimate fees using Polkadot API
+  const info = await transfer.paymentInfo(sender.address);
+  
+  console.log(`Estimated fee: ${info.partialFee.toString()}`);
+  console.log(`Transaction weight: ${info.weight.toString()}`);
+  
+  await api.disconnect();
+}
+```
+
+### 4. Monitoring Blockchain Events
+
+```typescript
+async function monitorBlocks() {
+  const api = await ApiPromise.create({
+    provider: new WsProvider('wss://rpc-0.gemini-3h.subspace.network/ws')
+  });
+
+  // Subscribe to new blocks
+  const unsubscribe = await api.rpc.chain.subscribeNewHeads((header) => {
+    console.log(`New block #${header.number} with hash ${header.hash}`);
+  });
+
+  // Subscribe to balance changes for specific account
+  const accountAddress = 'your-account-address';
+  const unsubBalance = await api.query.system.account(accountAddress, (balance) => {
+    console.log('Balance updated:', balance.data.free.toString());
+  });
+
+  // Clean up subscriptions
+  setTimeout(() => {
+    unsubscribe();
+    unsubBalance();
+    api.disconnect();
+  }, 30000); // Stop after 30 seconds
+}
+```
+
+## Integration Patterns with Auto SDK
+
+### Combining Auto SDK with Polkadot API
+
+```typescript
+import { activateWallet } from '@autonomys/auto-utils';
+import { ApiPromise } from '@polkadot/api';
+
+async function advancedWalletOperations() {
+  // Use Auto SDK for wallet setup
+  const { api, accounts } = await activateWallet({
+    mnemonic: 'your mnemonic phrase here',
+    networkId: 'mainneth'
+  });
+  
+  const account = accounts[0];
+  
+  // Use Polkadot API for advanced queries
+  const accountInfo = await api.query.system.account(account.address);
+  const currentFees = await api.query.transactionFees.transactionByteFee();
+  
+  console.log(`Account: ${account.address}`);
+  console.log(`Balance: ${accountInfo.data.free.toString()}`);
+  console.log(`Current fee rate: ${currentFees.current.toString()}`);
+  
+  // The api instance from Auto SDK is a full Polkadot API instance
+  // You can use all Polkadot API methods on it
+  const blockHash = await api.rpc.chain.getBlockHash();
+  console.log(`Latest block hash: ${blockHash}`);
+  
+  await api.disconnect();
+}
+```
+
+## When to Use Auto SDK vs. Polkadot API
+
+### Use Auto SDK for:
+- ✅ Wallet creation and management
+- ✅ Basic token transfers
+- ✅ File uploads to Auto Drive
+- ✅ Auto ID operations
+- ✅ Network connection setup
+- ✅ Common utility functions
+
+### Use Polkadot API for:
+- ✅ Fee calculations and estimations
+- ✅ Block and timestamp queries
+- ✅ Custom pallet interactions
+- ✅ Advanced transaction types
+- ✅ Real-time blockchain monitoring
+- ✅ Complex state queries
