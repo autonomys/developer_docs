@@ -12,7 +12,10 @@
   },
   "scripts": {
     "dev": "next",
+    "prebuild": "node scripts/combineDocs.js",
     "build": "next build",
+    "prevercel-build": "node scripts/combineDocs.js",
+    "vercel-build": "next build",
     "start": "next start",
     "combine-docs": "node scripts/combineDocs.js"
   },
