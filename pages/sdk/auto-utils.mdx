@@ -137,7 +137,7 @@ import { activateWallet } from '@autonomys/auto-utils';
 
   const { api, accounts } = await activateWallet({
     mnemonic,
-    networkId: 'taurus', // Optional: specify the network ID
+    networkId: 'chronos', // Optional: specify the network ID
   });
 
   const account = accounts[0];
@@ -175,7 +175,7 @@ import { activateWallet } from '@autonomys/auto-utils';
 import { activate, mockWallets, getMockWallet } from '@autonomys/auto-utils';
 
 (async () => {
-  const api = await activate({ networkId: 'taurus' });
+  const api = await activate({ networkId: 'chronos' });
 
   const wallets = await mockWallets({}, api);
   const aliceWallet = getMockWallet('Alice', wallets);
@@ -206,7 +206,7 @@ networks.forEach((network) => {
 ```typescript
 import { getNetworkDetails } from '@autonomys/auto-utils';
 
-const network = getNetworkDetails({ networkId: 'taurus' });
+const network = getNetworkDetails({ networkId: 'chronos' });
 console.log(`Network Name: ${network.name}`);
 console.log(`RPC URLs: ${network.rpcUrls.join(', ')}`);
 ```
@@ -216,7 +216,7 @@ console.log(`RPC URLs: ${network.rpcUrls.join(', ')}`);
 ```typescript
 import { getNetworkDomainDetails } from '@autonomys/auto-utils';
 
-const domain = getNetworkDomainDetails({ domainId: '1', networkId: 'taurus' });
+const domain = getNetworkDomainDetails({ domainId: '1', networkId: 'chronos' });
 console.log(`Domain Name: ${domain.name}`);
 console.log(`RPC URLs: ${domain.rpcUrls.join(', ')}`);
 ```
@@ -267,7 +267,7 @@ console.log(`Concatenated Result: ${new TextDecoder().decode(concatenated)}`);
 import { activate } from '@autonomys/auto-utils';
 
 (async () => {
-  const api = await activate({ networkId: 'taurus' });
+  const api = await activate({ networkId: 'chronos' });
 
   console.log('API connected');
 
@@ -284,7 +284,7 @@ import { activate } from '@autonomys/auto-utils';
 import { activateDomain } from '@autonomys/auto-utils';
 
 (async () => {
-  const api = await activateDomain({ domainId: '1', networkId: 'taurus' });
+  const api = await activateDomain({ domainId: '1', networkId: 'chronos' });
 
   console.log('Domain API connected');
 
