@@ -134,9 +134,9 @@ contract Counter {
 
 > Note: This will affect the contract ABI, make sure to change it and upgrade your Subgraph application.
 
-2. Then we'll change the `Counter` contract state and set the number to `5` by running `cast send YOUR_CONTRACT_ADDRESS "setNumber(uint256)" 5 --rpc-url https://auto-evm-0.chronos.autonomys.xyz/ws --private-key YOUR_KEY`
+2. Then we'll change the `Counter` contract state and set the number to `5` by running `cast send YOUR_CONTRACT_ADDRESS "setNumber(uint256)" 5 --rpc-url https://auto-evm.chronos.autonomys.xyz/ws --private-key YOUR_KEY`
 
-3. Let's trigger one more event in the `Counter` contract by calling the `increment()` function. We can do that by running `cast send YOUR_CONTRACT_ADDRESS "increment()" --rpc-url https://auto-evm-0.chronos.autonomys.xyz/ws --private-key YOUR_KEY`
+3. Let's trigger one more event in the `Counter` contract by calling the `increment()` function. We can do that by running `cast send YOUR_CONTRACT_ADDRESS "increment()" --rpc-url https://auto-evm.chronos.autonomys.xyz/ws --private-key YOUR_KEY`
 
 4. With two events emitted, let's proceed to **The Graph** playground and **query them**!
 
