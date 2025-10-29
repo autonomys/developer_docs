@@ -65,13 +65,13 @@ import { NetworkId } from '@autonomys/auto-utils'
 
 ## Network Configuration
 
-As [Auto Drive](https://ai3.storage) is available on both Mainnet and the Taurus testnet, you need to configure the network when using the package:
+[Auto Drive](https://ai3.storage) is available on Mainnet. To connect to it, you need to configure the network using `auto-utils` package:
 
 ```ts
 import { NetworkId } from '@autonomys/auto-utils'
 
 const api = createAutoDriveApi({
   apiKey: 'your-api-key',
-  network: NetworkId.TAURUS | NetworkId.MAINNET
+  network: NetworkId.MAINNET
 })
 ```
