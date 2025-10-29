@@ -75,7 +75,7 @@ description: Permanent Distributed Storage
 
 Whether you’re building a super dApp or Auto Agent, archiving important data, or hosting files for the web3 world, Auto Drive offers a seamless, developer-friendly solution.
 
-![Auto-Drive](/developers/Auto-Drive-2.png)
+![Auto-Drive](/developers/Auto-Drive-1.png)
 
 ### Key features
 
@@ -97,7 +97,7 @@ Whether you’re building a super dApp or Auto Agent, archiving important data, 
 
 **Auto Drive** is the future of distributed storage. Whether you’re safeguarding critical data or building the next web3 innovation, Auto Drive is here to make it easier, faster and more secure.
 
-**[Start building](http://develop.autonomys.xyz/sdk/auto-drive)**
+**[Start building](http://develop.autonomys.xyz/sdk/auto-drive/overview_setup)**
 
 
 ---
@@ -115,7 +115,7 @@ You can extend your agent by adding custom tools and integrating with other serv
 
 ### Custom Tools
 
-Custom tools are built using the DynamicStructuredTool class from LangChain, which provides:
+Custom tools are built using the \`DynamicStructuredTool\` class from LangChain, which provides:
 
 - **Type-safe inputs**: Define your tool's parameters using Zod schemas
 - **Self-documenting**: Tools describe themselves to the LLM for appropriate use
@@ -198,7 +198,7 @@ export const createCustomTool = (config: any) => \{
 
 ### Using MCP Tools
 
-Model Context Protocol (MCP) tools provide a standardized way to integrate external services with your agent. Here's an example for Notion integration:
+[Model Context Protocol (MCP)](https://docs.anthropic.com/en/docs/agents-and-tools/mcp) tools provide a standardized way to integrate external services with your agent. Here's an example for Notion integration:
 
 \`\`\`javascript
 import \{ createMcpClientTool \} from '@autonomys/agent-core';
@@ -255,7 +255,7 @@ const agent = new Agent(\{
 title: AgentOS
 description: Getting Started with Autonomys Agents Framework with AgentOS
 ---
-
+## Getting Started with Autonomys Agents Framework with AgentOS
 Using the dedicated NPM package makes it very simple to create an agent project. 
 
 1. Run \`npm install @autonomys/agent-os\` to install the package. 
@@ -265,54 +265,88 @@ Using the dedicated NPM package makes it very simple to create an agent project.
 ## Installing Tools with AgentOS
 
 ### Install the latest version
-\`agent-os install <tool-name>\`
+
+\`\`\`bash
+agent-os install <tool-name>
+\`\`\`
 
 ### Install a specific version
-\`agent-os install <tool-name> -v <version>\`
+
+\`\`\`bash
+agent-os install <tool-name> -v <version>
+\`\`\`
 
 ### Install using a Content ID (CID)
-\`agent-os install <tool-name> --cid <cid>\`
+
+\`\`\`bash
+agent-os install <tool-name> --cid <cid>
+\`\`\`
 
 ## Publish a Tool
 ### Publish a tool to the registry
-\`agent-os publish <tool-path>\`
+
+\`\`\`bash
+agent-os publish <tool-path>
+\`\`\`
 
 ### Upload to Auto Drive without updating the registry
-\`agent-os publish <tool-path> --no-registry\`
+
+\`\`\`bash
+agent-os publish <tool-path> --no-registry
+\`\`\`
 
 ## Search for Tools
 ### Search for tools in the registry
-\`agent-os search <search-term>\`
+
+\`\`\`bash
+agent-os search <search-term>
+\`\`\`
 
 ### Show detailed information in search results
-\`agent-os search <search-term> -d\`
+
+\`\`\`bash
+agent-os search <search-term> -d
+\`\`\`
 
 ## Tool Inquiry
 ### Get information about a tool
-\`agent-os tool -n <tool-name>\`
+
+\`\`\`bash
+agent-os tool -n <tool-name>
+\`\`\`
 
 ### Get information about a specific version
-\`agent-os tool -n <tool-name> -v <version>\`
+
+\`\`\`bash
+agent-os tool -n <tool-name> -v <version>
+\`\`\`
 
 ### Perform a specific action on a tool
-\`agent-os tool -n <tool-name> -a <action>\`
+\`\`\`bash
+\`\`\`bash
+agent-os tool -n <tool-name> -a <action>
+\`\`\`
 
 ### Example: Get metadata for a specific version
-\`agent-os tool -n slack-tool -v 1.0.0 -a metadata\`
+
+\`\`\`bash
+agent-os tool -n slack-tool -v 1.0.0 -a metadata
+\`\`\`
 
 ## Sample Tool Example
 
 Below is a complete example of how to create, use, and publish a simple tool for Autonomys agents.
 
 First, create a new directory for your tool:
-\`\`\`
+
+\`\`\`bash
 mkdir weather-tool
 cd weather-tool
 \`\`\`
 
 Create a manifest.json file:
 
-\`\`\`
+\`\`\`json
 \{
   "name": "weather-tool",
   "version": "1.0.0",
@@ -329,7 +363,7 @@ Create a manifest.json file:
 \`\`\`
 
 Then create the main index.ts file:
-\`\`\`
+\`\`\`javascript
 import \{ DynamicStructuredTool \} from "@langchain/core/tools";
 import \{ z \} from "zod";
 import axios from "axios";
@@ -377,7 +411,7 @@ export default \{ createTools \};
 
 When you're ready to publish:
 
-\`\`\`
+\`\`\`bash
 # Navigate to your tool directory
 cd weather-tool
 
@@ -387,11 +421,13 @@ agent-os publish .
 
 After publishing your tool, you can install it using:
 
-\`agent-os install weather-tool\`
+\`\`\`bash
+agent-os install weather-tool
+\`\`\`
 
 Then, in your agent code, you can import and use the tool:
 
-\`\`\`
+\`\`\`javascript
 import \{ createWeatherTool \} from './tools/weather-tool';
 
 // Get the weather tool with your API key
@@ -414,7 +450,7 @@ title: CLI
 description: Getting Started with Autonomys Agents Framework via CLI
 ---
 
-## Getting Started
+## Getting Started with Autonomys Agents Framework via CLI
 
 1. Install dependencies:
 
@@ -422,7 +458,7 @@ description: Getting Started with Autonomys Agents Framework via CLI
    yarn install
    \`\`\`
 
-   - Windows users will need to install Visual Studio C++ Redistributable. They can be found here: https://aka.ms/vs/17/release/vc_redist.x64.exe
+   - Windows users will need to install Visual Studio C++ Redistributable. It can be found here: https://aka.ms/vs/17/release/vc_redist.x64.exe
 
 2. Create a character configuration:
 
@@ -552,7 +588,7 @@ docker exec -it autonomys-agent-\{character-name\} bash
 title: Web-CLI
 description: Getting Started with Autonomys Agents Framework via Web-CLI
 ---
-
+## Getting Started with Autonomys Agents Framework via Web CLI
 The web interface is available for you if you're using the [**agent template**](https://github.com/autonomys/autonomys-agent-template)
 
 ## Web CLI Interface (for agent-template)
@@ -644,18 +680,24 @@ Autonomys Agents is an experimental framework for building AI agents. Currently,
 
 There are three ways to build an agent with Autonomys:
 
-1. [Using the agent-os NPM package](https://www.npmjs.com/package/@autonomys/agent-os) (recommended)
+### AgentOS NPM Package (recommended)
+
+  [Using the agent-os NPM package](https://www.npmjs.com/package/@autonomys/agent-os).
 
   Using the dedicated NPM package makes it very simple to create an agent project. 
-  Run \`npm install @autonomys/agent-os\` to install the package and then do \`agent-os init <name-of-agent>\` to create an agent and \`agent-os config --credentials\` to configure the credentials.   
 
-2. [Using the Agent Template Repository](https://github.com/autonomys/autonomys-agent-template)
+  Refer to the [AgentOS page](/auto_agents_framework/getting_started/agentos) for detailed instructions. 
 
-  All you need to do in order to use the Agent Template Repository is to clone the repo and install the packages by doing \`npm install\`. Refer to the [web-cli interface](/auto_agents_framework/getting_started/web-cli) section manual that comes with the template to speed up your development. 
+### Agent Template Repository
+  [Using the Agent Template Repository](https://github.com/autonomys/autonomys-agent-template).
 
-3. [Using the original Git repository](https://github.com/autonomys/autonomys-agents)
+  Refer to the [web-cli interface manual](/auto_agents_framework/getting_started/web-cli) that comes with the template to speed up your development. 
 
-  You can clone the original GitHub repo and start building your agents. Refer to [this page](/auto_agents_framework/getting_started/cli) to learn more about the available commands.  
+### Original Git Repository
+
+  [Using the original Git repository](https://github.com/autonomys/autonomys-agents).
+
+  Clone the original GitHub repo and start building your agents. Refer to [the CLI page](/auto_agents_framework/getting_started/cli) to learn more about the available commands.  
 
 
 ## Character System
@@ -734,8 +776,8 @@ The framework integrates with the Autonomys Network for:
 
 1. Configure your \`AUTO_DRIVE_API_KEY\` in \`.env\` (obtain from https://ai3.storage)
 2. Enable Auto Drive uploading in \`config.yaml\`
-3. Provide your Taurus EVM wallet details (PRIVATE_KEY) and Agent Memory Contract Address (CONTRACT_ADDRESS) in \`.env\`
-4. Make sure your Taurus EVM wallet has funds. A faucet can be found at https://subspacefaucet.com/
+3. Provide your Chronos EVM wallet details (PRIVATE_KEY) and Agent Memory Contract Address (CONTRACT_ADDRESS) in \`.env\`
+4. Make sure your Chronos EVM wallet has funds. A faucet can be found at https://subspacefaucet.com/
 5. Provide encryption password in \`.env\` (optional, leave empty to not encrypt the agent memories)
 
 ### Resurrection (Memory Recovery)
@@ -876,7 +918,7 @@ Click **transact** and confirm the transaction in MetaMask.
 
 ### Verification
 
-After the minting, the NFT will appear in the recipient’s wallet. You can verify the transfer using the [Block explorer for the Autonomys testnet](https://blockscout.taurus.autonomys.xyz/)
+After the minting, the NFT will appear in the recipient’s wallet. You can verify the transfer using the [Block explorer for the Autonomys testnet](https://explorer.auto-evm.chronos.autonomys.xyz//)
 
 **Here's how**:
 
@@ -906,36 +948,72 @@ After the minting, the NFT will appear in the recipient’s wallet. You can veri
 
 ### File: evm/block_explorer.mdx
 
+---
+title: Auto EVM Block Explorer (BlockScout)
+---
+
 ## Auto EVM Block Explorer (BlockScout)
 
-This early version of the **[Auto EVM domain block explorer](https://blockscout.taurus.autonomys.xyz/)** provides a clear, user-friendly visualization of Autonomys-specific statistics relevant to farmers and developers.
+The **[Auto EVM domain block explorer](https://explorer.auto-evm.mainnet.autonomys.xyz/)** provides a clear, user-friendly visualization of Autonomys-specific statistics relevant to developers.
 
-Toggle between **all available networks** and the **Auto EVM** at the top of the page.
+ ![BlockExplorer-1](/developers/Auto-EVM-Block-Explorer.png)
 
- ![BlockExplorer-1](/developers/BlockExplorer-1.png)
+## Chronos Auto EVM Block Explorer
+
+**[Chronos Auto EVM](https://explorer.auto-evm.chronos.autonomys.xyz//)** domain block explorer. 
+
+ ![BlockExplorer-2](/developers/BlockExplorer-1.png)
 
 
 ---
 
 ### File: evm/bridge.mdx
 
-# Bridging Now Possible on the Taurus Testnet
+---
+title: Bridging Assets
+---
 
-We're excited to announce the deployment of a new HyperLane-based bridge, developed in collaboration with our infrastructure partner Protofire. This bridge is now live on the Auto EVM domain of our Taurus testnet and accessible here: https://bridge.taurus.autonomys.xyz/
+# Bridging Assets with Autonomys
+
+We're excited to announce the deployment of Hyperlane-based bridges, developed in collaboration with our infrastructure partner Protofire. These bridges are now live on both mainnet and testnet environments.
 
 ![bridge](/developers/bridge-1.png)
 
-Bridges are critical infrastructure components for robust blockchain networks, enabling users to seamlessly access liquidity and applications across different blockchain ecosystems. With the launch of this HyperLane bridge, Autonomys users can now effortlessly transfer assets between the Taurus Auto EVM and Ethereum's Sepolia testnet, unlocking a broader range of possibilities and interactions.
+Bridges are critical infrastructure components for robust blockchain networks, enabling users to seamlessly access liquidity and applications across different blockchain ecosystems. With these Hyperlane bridges, Autonomys users can effortlessly transfer assets between networks, unlocking a broader range of possibilities and interactions.
 
-For those actively participating in our ongoing Game of Domains challenge -Crossing the Narrow Sea - you may already have a balance on Taurus Auto EVM. This means you’re ready to jump right in and begin bridging your tokens over to Sepolia Ethereum without any additional steps.
+## Available Bridges
 
-We encourage everyone in the community to explore this bridge and experiment with its capabilities. Your feedback is crucial as we continue to refine and improve our infrastructure.
+### Mainnet Bridge
 
-Get involved and experience the power of seamless interoperability!
+**URL:** https://bridge.mainnet.autonomys.xyz/
+
+The mainnet bridge connects Autonomys mainnet with:
+- Ethereum mainnet
+- Binance Smart Chain mainnet
+
+### Chronos Testnet Bridge  
+
+**URL:** https://bridge.chronos.autonomys.xyz/
+
+The testnet bridge connects the Chronos Auto EVM domain with:
+- Ethereum's Sepolia testnet
+- Binance Smart Chain testnet
+
+This testnet environment is perfect for developers and users to experiment with cross-chain functionality without risking mainnet assets.
+
+## Get Started
+
+We encourage everyone in the community to explore these bridges and experiment with their capabilities. Your feedback is crucial as we continue to refine and improve our infrastructure.
+
+Experience the power of seamless interoperability across blockchain networks!
 
 ---
 
 ### File: evm/faucet.mdx
+
+---
+title: Discord Faucet (get tAI3 testnet tokens)
+---
 
 ## Discord Faucet (get tAI3 testnet tokens)
 
@@ -985,7 +1063,9 @@ An ambassador-built web-faucet is available via the link: https://faucet.farmine
 
 ### File: evm/foundry.mdx
 
-## Foundry Guide
+---
+title: Foundry Guide
+---
 
 [**Foundry**](https://book.getfoundry.sh/) is a tool that allows you to easily write, test and deploy smart contracts on any EVM-compatible blockchain.
 
@@ -1002,11 +1082,11 @@ Auto EVM is compatible with most EVM versions but doesn't support some features 
     curl -L https://foundry.paradigm.xyz | bash
     \`\`\`
 
-2. Once installed, create a project. Let’s name it \`hello_autonomys\`. To initialize the project, run:
+2. Once installed, create a project. Let's name it \`hello_autonomys\`. To initialize the project, run:
     \`\`\`bash
     forge init hello_autonomys
     \`\`\`
-   \`cd\` into the \`hello_autonomys\` directory to see the project’s structure.
+   \`cd\` into the \`hello_autonomys\` directory to see the project's structure.
 
     ![Foundry-1](/developers/Foundry-1.png)
 
@@ -1033,7 +1113,7 @@ Auto EVM is compatible with most EVM versions but doesn't support some features 
     \}
     \`\`\`
 
-4. Let’s make sure that all the functions are working properly by adding some tests to the \`Counter.t.sol\` test file, and checking if they pass. In our tests, we first set the initial value of \`number\` to 2, before checking if the \`increment()\` function increases the value by 1 and if \`decrement()\` decreases the value by 1.
+4. Let's make sure that all the functions are working properly by adding some tests to the \`Counter.t.sol\` test file, and checking if they pass. In our tests, we first set the initial value of \`number\` to 2, before checking if the \`increment()\` function increases the value by 1 and if \`decrement()\` decreases the value by 1.
 
     \`\`\`
     // SPDX-License-Identifier: UNLICENSED
@@ -1067,7 +1147,7 @@ Auto EVM is compatible with most EVM versions but doesn't support some features 
     \}
     \`\`\`
 
-5. Let’s build the project by running: 
+5. Let's build the project by running: 
 
     \`\`\`bash
     forge build
@@ -1087,21 +1167,21 @@ Auto EVM is compatible with most EVM versions but doesn't support some features 
     - Connect a wallet that has a sufficient balance of tAI3 to cover the gas fees.
     - Set an environment variable we will use later.
 
-    To make our lives easier, let’s create a new \`Makefile\` as well as a \`.env\` file at the root of our project. \`.env\` files are typically used to store environment variables for your application. They are particularly useful for managing settings that change between deployment environments (e.g., development, testing, staging, and production), and for storing sensitive information. Environment variables can include database connection details, API keys, external resource URIs, or other configuration variables that might change depending on the environment in which the application is running. In our case, we would use it to point to our Auto-EVM RPC URL:
+    To make our lives easier, let's create a new \`Makefile\` as well as a \`.env\` file at the root of our project. \`.env\` files are typically used to store environment variables for your application. They are particularly useful for managing settings that change between deployment environments (e.g., development, testing, staging, and production), and for storing sensitive information. Environment variables can include database connection details, API keys, external resource URIs, or other configuration variables that might change depending on the environment in which the application is running. In our case, we would use it to point to our Auto-EVM RPC URL:
 
     \`\`\`bash
-    RPC_URL=https://auto-evm.taurus.autonomys.xyz/ws
+    RPC_URL=https://auto-evm.chronos.autonomys.xyz/ws
     \`\`\`
 
     And then set a private key for the EVM-compatible wallet:
 
     \`\`\`bash
-    PRIVATE_KEY=”your_private_key_value”
+    PRIVATE_KEY="your_private_key_value"
     \`\`\`
     
     > *Note:* \`.env\` files should not be committed to your source control (like Git), especially when they contain sensitive data, like your private key. To prevent this, add \`.env\` to your \`.gitignore\` file. This helps to keep sensitive keys secure and avoids the risk of exposing them in the application's code or version control history.
 
-    In the \`Makefile\`, let’s create shortcuts to the main features of the application:
+    In the \`Makefile\`, let's create shortcuts to the main features of the application:
 
     \`\`\`bash
     # include .env file and export its env vars
@@ -1116,7 +1196,7 @@ Auto EVM is compatible with most EVM versions but doesn't support some features 
 	    @forge create Counter --private-key \$\{PRIVATE_KEY\} --rpc-url \$\{RPC_URL\} --evm-version london
     \`\`\`
 
-    We're importing the values for a \`PRIVATE_KEY\` and \`RPC_URL\` from the \`.env\` file. This allows us to run \`make build\` for building the project, and \`make deploy\` for deploying the project, pointing to the provided RPC, and using the provided \`PRIVATE_KEY\`. Let’s run \`make build\` to ensure it’s working properly.
+    We're importing the values for a \`PRIVATE_KEY\` and \`RPC_URL\` from the \`.env\` file. This allows us to run \`make build\` for building the project, and \`make deploy\` for deploying the project, pointing to the provided RPC, and using the provided \`PRIVATE_KEY\`. Let's run \`make build\` to ensure it's working properly.
 
     ![Foundry-3](/developers/Foundry-3.png)
 
@@ -1126,7 +1206,7 @@ Auto EVM is compatible with most EVM versions but doesn't support some features 
     make deploy
     \`\`\`
 
-    > *Note:* Do not tip when submitting transactions in an attempt to accelerate them as this could result in dual charges for gas fees. When deploying smart contracts to our Auto EVM domain, you may encounter an error related to gas estimation, typically presenting as: \`"No manual gas limit set"\` or \`"Gas estimation failed"\`. For more information and solutions, visit the [Auto EVM Introduction](/evm/introduction).
+    > *Note:* Do not tip when submitting transactions in an attempt to accelerate them as this could result in dual charges for gas fees. When deploying smart contracts to our Auto EVM domain, you may encounter an error related to gas estimation, typically presenting as: "No manual gas limit set" or "Gas estimation failed". For more information and solutions, visit the [Auto EVM Introduction](/evm/introduction).
 
 Congratulations, you've successfully deployed your smart contract on the Auto EVM!
 
@@ -1134,6 +1214,10 @@ Congratulations, you've successfully deployed your smart contract on the Auto EV
 ---
 
 ### File: evm/general_information.mdx
+
+---
+title: Developer Tools
+---
 
 ## Developer Tools
 
@@ -1159,6 +1243,10 @@ All these tools together provide an cohesive ecosystem for EVM-compatible smart 
 ---
 
 ### File: evm/hardhat.mdx
+
+---
+title: Hardhat Guide
+---
 
 ## Hardhat Guide
 
@@ -1196,7 +1284,7 @@ You'll be prompted to answer some questions. Select \`Create a JavaScript Projec
 
 ![Hardhat-3](/developers/Hardhat-3.png)
 
-4. Change the name of your contract in \`Lock.sol\` (\`Counter\`), the name of the token (\`AutonomysTestToken\`) and the token symbol (\`AI3test\`). As an example, let’s add a simple smart contract that has three functions: \`setNumber()\`, \`increment()\` and \`decrement()\`.
+4. Change the name of your contract in \`Lock.sol\` (\`Counter\`), the name of the token (\`AutonomysTestToken\`) and the token symbol (\`AI3test\`). As an example, let's add a simple smart contract that has three functions: \`setNumber()\`, \`increment()\` and \`decrement()\`.
 
 \`\`\`
 // SPDX-License-Identifier: UNLICENSED
@@ -1223,7 +1311,7 @@ contract Counter is ERC20 \{
 \}
 \`\`\`
 
-For consistency, let’s also rename 'Lock.sol' to \`Counter.sol\`.
+For consistency, let's also rename 'Lock.sol' to \`Counter.sol\`.
 
 
 5. Before proceeding with deployment, thoroughly test your smart contracts for correctness, as mistakes can lead to unforeseen gas costs. To test the contract, open the \`Lock.js\` file in the \`test\` folder, and replace the internals of the file with the following code:
@@ -1275,9 +1363,9 @@ For consistency, let's also rename \`Lock.js\` to \`CounterTest.js\`.
 
  ![Hardhat-4](/developers/Hardhat-4.png)
 
-Everything is working as expected so we’re ready for deployment!
+Everything is working as expected so we're ready for deployment!
 
-8. To deploy the contract, we need to set a deployment network for \`hardhat\`. Open the \`hardhat.config.js\` file and add the Taurus testnet to the list of networks: 
+8. To deploy the contract, we need to set a deployment network for \`hardhat\`. Open the \`hardhat.config.js\` file and add the Chronos testnet to the list of networks: 
 
 \`\`\`
 require("@nomicfoundation/hardhat-toolbox");
@@ -1293,8 +1381,8 @@ solidity: \{
         ]
 \},
 networks: \{
-    subspace: \{
-    url: "https://auto-evm.taurus.autonomys.xyz/ws",
+    autonomys: \{
+    url: "https://auto-evm.chronos.autonomys.xyz/ws",
     accounts: ["private_key_to_your_account"]
     \}
 \}
@@ -1342,8 +1430,6 @@ title: Auto EVM
 
 ## Auto EVM
 
-> *Note:* Auto EVM is currenty available exclusively on the **Taurus** testnet. Mainnet availability is planned for [**Mainnet Phase-2**](https://forum.autonomys.xyz/t/phased-launch-roadmap/4414).
-
 **Auto EVM** enables any tool available for Ethereum development to be compatible with the Autonomys Network.
 
 ### Quick Start Guide
@@ -1358,7 +1444,16 @@ Auto EVM is compatible with most EVM versions but doesn't support some features 
 
 \`\`\`
 Network Name: Autonomys EVM
-New RPC URL: https://auto-evm.taurus.autonomys.xyz/ws
+New RPC URL: https://auto-evm.mainnet.autonomys.xyz/ws
+Chain ID: 870
+Currency Symbol: AI3
+\`\`\`
+
+Auto EVM is also available on the Chronos testnet
+
+\`\`\`
+Network Name: Autonomys EVM
+New RPC URL: https://auto-evm.chronos.autonomys.xyz/ws
 Chain ID: 490000
 Currency Symbol: tAI3
 \`\`\`
@@ -1468,6 +1563,10 @@ Set a higher value in the \`Gas Limit\` field. Start with \`300000\` and adjust 
 
 ### File: evm/local.mdx
 
+---
+title: Local Development Guide
+---
+
 ## Local Development Guide
 
 You can always set up a **local development environment** to test and deploy your smart contracts. To establish a full local network, you need to run a local node, an Auto EVM domain, and a farmer.
@@ -1503,12 +1602,16 @@ This will create a local RPC on port **8545**.
 
 You can specify the desired plot size, but 100M should be sufficient.
 
-That’s it! By starting a **local node** and a **farmer**, you have a **local RPC** ready for testing and deploying smart contracts! You can easily connect your [MetaMask](https://metamask.io/) account to the local development network, as well as use [Remix](https://remix.ethereum.org/) or [Foundry](https://book.getfoundry.sh/) in order to test and deploy smart contracts on a local network!
+That's it! By starting a **local node** and a **farmer**, you have a **local RPC** ready for testing and deploying smart contracts! You can easily connect your [MetaMask](https://metamask.io/) account to the local development network, as well as use [Remix](https://remix.ethereum.org/) or [Foundry](https://book.getfoundry.sh/) in order to test and deploy smart contracts on a local network!
 
 
 ---
 
 ### File: evm/metamask.mdx
+
+---
+title: Adding the Autonomys RPC to MetaMask
+---
 
 ## Adding the Autonomys RPC to MetaMask
 
@@ -1522,7 +1625,7 @@ This guide will help you set up a [**MetaMask**](https://metamask.io/) wallet (a
   
 ![MetaMask-2](/developers/MetaMask-2.png)
 
-3. Set a secure password that’s difficult to guess. Type it twice before proceeding to the next step. MetaMask automatically assesses the strength of your password.
+3. Set a secure password that's difficult to guess. Type it twice before proceeding to the next step. MetaMask automatically assesses the strength of your password.
 > *Note:* Your password should include uppercase letters, lowercase letters, numbers and special characters.
   
 ![MetaMask-3](/developers/MetaMask-3.png)
@@ -1538,7 +1641,7 @@ This guide will help you set up a [**MetaMask**](https://metamask.io/) wallet (a
   
 ![MetaMask-6](/developers/MetaMask-6.png)
 
-6. Confirm that you’ve written down the Secret Recovery Phrase by filling in the missing words.
+6. Confirm that you've written down the Secret Recovery Phrase by filling in the missing words.
   
 ![MetaMask-7](/developers/MetaMask-7.png)
 
@@ -1554,8 +1657,8 @@ This guide will help you set up a [**MetaMask**](https://metamask.io/) wallet (a
 
   \`\`\`
   Network Name: Autonomys EVM
-  New RPC URL: https://auto-evm.taurus.autonomys.xyz/ws
-  Chain ID: 490000
+  New RPC URL: https://auto-evm.chronos.autonomys.xyz/ws
+  Chain ID: 8700
   Currency Symbol: tAI3
   \`\`\`
 
@@ -1566,7 +1669,9 @@ You have now successfully set up a MetaMask wallet and connected it to the Auto 
 
 ### File: evm/remix.mdx
 
-## Remix IDE Guide
+---
+title: Remix IDE Guide
+---
 
 [**Remix**](https://remix-ide.readthedocs.io/en/latest/) is a tool that allows you to easily write, test and deploy smart contracts on any EVM-compatible blockchain.
 
@@ -1594,36 +1699,41 @@ Set "EVM Version" to **"london"** or **"istanbul"**
 
  ![Remix-3](/developers/Remix-3.png)
 
-4. Change the name of your contract (\`Counter\`), the name of the token (\`AutonomysTestToken\`), and the token symbol (\`AI3test\`). As an example, let’s add a simple smart contract that has three functions: \`setNumber()\`, \`increment()\` and \`decrement()\`.
+4. As an example, let's add a simple smart contract that has four functions: \`setNumber(number)\`, \`get()\`, \`increment()\` and \`decrement()\`.
 
- \`\`\`
-  // SPDX-License-Identifier: MIT
- pragma solidity ^0.8.9;
+\`\`\`bash
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.19;
 
- import '@openzeppelin/contracts/token/ERC20/ERC20.sol';
+contract Counter \{
+    uint256 private counter;
 
- contract Counter is ERC20 \{
-     constructor() ERC20("AutonomysTestToken", "AI3test") \{\}
+    // Set the counter to a specific value
+    function set(uint256 _value) public \{
+        counter = _value;
+    \}
 
-     uint256 public number;
+    // Increase the counter by 1
+    function increase() public \{
+        counter += 1;
+    \}
 
-     function setNumber(uint256 newNumber) public \{
-         number = newNumber;
-     \}
+    // Decrease the counter by 1
+    function decrease() public \{
+        require(counter > 0, "Counter cannot go below zero");
+        counter -= 1;
+    \}
 
-     function increment() public \{
-         number++;
-     \}
-
-     function decrement() public \{
-         number--;
-     \}
-  \}
- \`\`\`
+    // Get the current counter value
+    function get() public view returns (uint256) \{
+        return counter;
+    \}
+\}
+\`\`\`
 
  ![Remix-4](/developers/Remix-4.png)
 
-5. Next, let’s compile the \`Counter\` contract. Click on \`SOLIDITY COMPILER\` (on the left), choose the compiler version that corresponds to the Solidity version of your contract (version 0.8.9 in the example), and click on \`Compile MyToken.sol\`. If it compiles correctly, you will see a green checkmark next to the compiler.
+5. Next, let's compile the \`Counter\` contract. Click on \`SOLIDITY COMPILER\` (on the left), choose the compiler version that corresponds to the Solidity version of your contract (version 0.8.9 in the example), and click on \`Compile MyToken.sol\`. If it compiles correctly, you will see a green checkmark next to the compiler.
 
  ![Remix-5](/developers/Remix-5.png)
 
@@ -1670,15 +1780,15 @@ Set "EVM Version" to **"london"** or **"istanbul"**
 
  ![Remix-8](/developers/Remix-8.png)
 
-8. All tests are now passing, meaning our smart contract \`Counter\` is working as expected. We’re now ready to deploy it!
+8. All tests are now passing, meaning our smart contract \`Counter\` is working as expected. We're now ready to deploy it!
 
  ![Remix-9](/developers/Remix-9.png)
 
-9. Click on the \`DEPLOY AND RUN TRANSACTIONS\` tab (on the left) to deploy. Remix allows you to use one of their existing EVMs or inject your own provider through its integration with MetaMask. Since we already have a [MetaMask account set up](/evm/metamask), let’s use this option.
+9. Click on the \`DEPLOY AND RUN TRANSACTIONS\` tab (on the left) to deploy. Remix allows you to use one of their existing EVMs or inject your own provider through its integration with MetaMask. Since we already have a [MetaMask account set up](/evm/metamask), let's use this option.
 
  ![Remix-10](/developers/Remix-10.png)
 
-10. After ensuring the network you’re connected to is the Autonomys EVM, confirm your MetaMask password when prompted.
+10. After ensuring the network you're connected to is the Autonomys EVM, confirm your MetaMask password when prompted.
 
  ![Remix-11](/developers/Remix-11.png)
 
@@ -1693,9 +1803,98 @@ Congratulations, you've successfully deployed your smart contract on the Auto EV
 
 ---
 
+### File: evm/safe.mdx
+
+# Safe Multi-Signature Wallet
+
+Safe (formerly Gnosis Safe) is now available on the Autonomys network, providing industry-leading multi-signature wallet functionality for secure asset management and decentralized operations.
+
+## Overview
+
+Safe is a battle-tested smart contract wallet infrastructure that enables multi-signature security across blockchain networks. With its deployment on Autonomys, teams, DAOs, and individual users can now benefit from enhanced security features and shared asset control on both our mainnet and testnet environments.
+
+## Network Availability
+
+Safe is currently deployed and accessible at: [https://safe.autonomys.xyz](https://safe.autonomys.xyz/welcome)
+
+
+### Transaction Service
+
+The dedicated Transaction Service is available at [https://transaction.safe.autonomys.xyz](https://transaction.safe.autonomys.xyz/)
+
+## Key Features
+
+Safe on Autonomys provides the following capabilities:
+
+- **Multi-signature security**: Require multiple signatures for transaction approval
+- **Shared asset control**: Enable collaborative fund management across team members
+- **dApp integration**: Interact with decentralized applications using your Safe wallet
+- **Smart contract deployment**: Deploy and manage contracts with enhanced security
+- **Customizable policies**: Set spending limits and approval requirements
+
+## Use Cases
+
+Safe is ideal for:
+
+- **Teams and organizations**: Secure collaborative fund management
+- **DAOs**: Decentralized governance and treasury management  
+- **Project treasuries**: Multi-party control over project funds
+- **Individual users**: Enhanced security for high-value assets
+
+## Getting Started
+
+### Creating a Safe Wallet
+
+1. Visit [safe.autonomys.xyz](https://safe.autonomys.xyz/welcome)
+
+    ![safe-1](/developers/safe/safe-1.png)
+
+2. Connect your wallet
+
+    ![safe-2](/developers/safe/safe-2.png)
+
+3. Create a new Safe by specifying:
+   - Wallet name
+   - Owner addresses (signers)
+   - Confirmation threshold (required signatures)
+    
+    ![safe-3](/developers/safe/safe-3.png)
+
+    --- 
+
+    ![safe-4](/developers/safe/safe-4.png)
+
+    ---
+
+    ![safe-5](/developers/safe/safe-5.png)
+
+4. Deploy your Safe wallet
+
+
+### Managing Your Safe
+
+Once created, you can:
+
+- Add or remove owners
+- Change signature requirements
+- Execute transactions
+- Interact with dApps
+- View transaction history
+
+
+
+---
+
 ### File: evm/the_graph.mdx
 
+---
+title: The Graph
+---
+
 # The Graph
+
+> **Note:** Available on both **Mainnet** and **Chronos** testnet!
+
 
 [The Graph](https://thegraph.com/) is an indexing protocol that provides an easy way to query blockchain data through decentralized APIs known as subgraphs. 
 
@@ -1752,7 +1951,7 @@ During the initialization, you will need to specify a few things:
 - Network (Autonomys)
 - Subgraph slug (feel free to use the default name)
 - Directory to create the subgraph in (feel free to use the default directory)
-- Smart contact address (the address of your smart contract deployed on Autonomys Taurus EVM domain)
+- Smart contact address (the address of your smart contract deployed on Autonomys Chronos EVM domain)
 - ABI file (path)
 - Start block (feel free to use the default value)
 - Contract name
@@ -1824,9 +2023,9 @@ contract Counter \{
 
 > Note: This will affect the contract ABI, make sure to change it and upgrade your Subgraph application.
 
-2. Then we'll change the \`Counter\` contract state and set the number to \`5\` by running \`cast send YOUR_CONTRACT_ADDRESS "setNumber(uint256)" 5 --rpc-url https://auto-evm.taurus.autonomys.xyz/ws --private-key YOUR_KEY\`
+2. Then we'll change the \`Counter\` contract state and set the number to \`5\` by running \`cast send YOUR_CONTRACT_ADDRESS "setNumber(uint256)" 5 --rpc-url https://auto-evm.chronos.autonomys.xyz/ws --private-key YOUR_KEY\`
 
-3. Let's trigger one more event in the \`Counter\` contract by calling the \`increment()\` function. We can do that by running \`cast send YOUR_CONTRACT_ADDRESS "increment()" --rpc-url https://auto-evm.taurus.autonomys.xyz/ws --private-key YOUR_KEY\`
+3. Let's trigger one more event in the \`Counter\` contract by calling the \`increment()\` function. We can do that by running \`cast send YOUR_CONTRACT_ADDRESS "increment()" --rpc-url https://auto-evm.chronos.autonomys.xyz/ws --private-key YOUR_KEY\`
 
 4. With two events emitted, let's proceed to **The Graph** playground and **query them**!
 
@@ -1897,6 +2096,10 @@ contract Counter \{
 ---
 
 ### File: evm/transaction_fees.mdx
+
+---
+title: Account Balances and Transaction Fees on Auto EVM
+---
 
 # Account Balances and Transaction Fees on Auto EVM
 
@@ -2024,21 +2227,45 @@ When planning transactions:
 
 ### File: evm/wrapping_ai3.mdx
 
-# How to Swap tAI3 for WAI3 on the Taurus Testnet
+# How to Wrap AI3 Tokens (Mainnet and Chronos Testnet)
 
-Auto EVM tAI3 on Taurus is the same as ETH on the Ethereum network. This means that it is not an ERC-20 token which is sometimes a requirement for certain use-cases.
+Native AI3 tokens on Auto EVM are similar to ETH on the Ethereum network - they are not ERC-20 tokens, which is sometimes a requirement for certain use-cases.
 
-Fortunately there is an ERC-20 contract on Taurus Auto EVM which allows you to "wrap" the tokens. This guide walks us through how to do that.
+Fortunately, there are ERC-20 contracts on both mainnet and testnet Auto EVM that allow you to "wrap" your tokens. This guide walks you through how to do that.
 
-## The Contract
+## The Contracts
 
-The WAI3 contract can be found at \`0x205E735a2C73228fA13EeB70720C7841BDf65EDB\` and you can view the contract code here: https://blockscout.taurus.autonomys.xyz/token/0x205E735a2C73228fA13EeB70720C7841BDf65EDB?tab=contract. Note you can also check out transfer activity and holders on the relevant tabs.
+### Mainnet WAI3 Contract
 
-![wai](/developers/wai3/wai3-1.png)
+**Mainnet** WAI3 Contract: \`0x7ba06C7374566c68495f7e4690093521F6B991bb\`.
 
-## Swapping tAI3 for WAI3
+View contract: https://explorer.auto-evm.mainnet.autonomys.xyz/token/0x7ba06C7374566c68495f7e4690093521F6B991bb
 
-We will use MetaMask today though any EVM compatible wallet should work. First, make sure you have the Taurus Auto EVM network added to MetaMask. Skip this step if you have already done it.
+### Chronos Testnet WAI3 Contract
+
+**Chronos Testnet** WAI3 Contract: \`0xeAb23556Ec571bA10F4C3C8051d719E58e921caC\`. 
+
+View contract: https://explorer.auto-evm.chronos.autonomys.xyz/token/0xeAb23556Ec571bA10F4C3C8051d719E58e921caC
+
+## Wrapping AI3 for WAI3
+
+We will use MetaMask for this guide, though any EVM compatible wallet should work. First, make sure you have the appropriate Auto EVM network added to MetaMask.
+
+\`\`\`
+Network Name: Autonomys EVM
+New RPC URL: https://auto-evm.mainnet.autonomys.xyz/ws
+Chain ID: 870
+Currency Symbol: AI3
+\`\`\`
+
+Auto EVM is also available on the Chronos testnet
+
+\`\`\`
+Network Name: Autonomys EVM
+New RPC URL: https://auto-evm.chronos.autonomys.xyz/ws
+Chain ID: 8700
+Currency Symbol: tAI3
+\`\`\`
 
 The quickest way to add the network is to use this button at the bottom of Blockscout (use the contract link above):
 
@@ -2068,7 +2295,7 @@ Enter the WAI3 contract address and you will be able to see your balance under t
 
 ## Unwrapping WAI3
 
-To unwrap your WAI3 tokens (convert them back to the original tAI3 tokens), you'll need to interact with the \`withdraw\` function in the [WAI3 contract](https://blockscout.taurus.autonomys.xyz/token/0x205E735a2C73228fA13EeB70720C7841BDf65EDB?tab=write_contract). Here's how to do it.
+To unwrap your WAI3 tokens (convert them back to the original tAI3 tokens), you'll need to interact with the \`withdraw\` function in the **[WAI3 contract](#the-contracts)**. Here's how to do it.
 
 First, make sure you have your wallet holding the WAI3 connected to the contract linked above. Ensure you are on the "Write" tab of the contract and look for the \`withdraw\` method.
 
@@ -2155,8 +2382,6 @@ To start using the Auto SDK, refer to our [setup instructions](/sdk) to clone th
 
 ## [Auto EVM](/evm/introduction)
 
-> **Note:** Available on the **Taurus** testnet (and Autonomys Mainnet at [**Phase-2 launch**](https://forum.autonomys.xyz/t/phased-launch-roadmap/4414) in Q1 2025)
-
 ### Key features:
 - **Solidity Smart Contracts**: Write and deploy smart contracts using Solidity, just as you would on Ethereum.
 - **Tool Compatibility**: Compatible with any tool available for Ethereum development, including Remix, Truffle, and Hardhat.
@@ -2174,16 +2399,15 @@ To start using the Auto EVM, refer to our [guides and manuals](/evm/introduction
 
 #### Consensus
 - \`wss://rpc.mainnet.subspace.foundation/ws\`
-- \`wss://rpc.taurus.autonomys.xyz/ws\`
+- \`wss://rpc.chronos.autonomys.xyz/ws\`
 
 ### Auto EVM
-- \`wss://auto-evm.taurus.autonomys.xyz/ws\`
 
-### Auto ID
+#### Mainnet
+- \`wss://auto-evm.mainnet.autonomys.xyz/ws\`
 
-> **Note:** Available on the **Gemini-3h** testnet (availability on Taurus and Mainnet is planned at [**Phase-2 launch**](https://forum.autonomys.xyz/t/phased-launch-roadmap/4414) in Q1 2025)
-
-- \`wss://autoid-0.gemini-3h.subspace.network/ws\`
+#### Chronos Testnet
+- \`wss://auto-evm.chronos.autonomys.xyz/ws\`
 
 ## Questions or feedback? Post on our [forum](https://forum.autonomys.xyz/) or in the *#developer-chat* channel on our [Discord](https://discord.gg/EAw6B48r).
 
@@ -2194,12 +2418,6 @@ To access the developer role-gated *#developer-chat* channel:
 
 3. Link your GitHub account to attain the developer role and gain access to *#developer-chat*. 
    ![Discord-2](/developers/Discord-2.png)
-
-
----
-
-### File: llm_friendly_docs.mdx
-
 
 
 ---
@@ -2258,7 +2476,7 @@ Many functions in the \`auto-consensus\` package require an \`api\` object as a 
 import \{ createConnection \} from '@autonomys/auto-utils';
 
 async function getApiInstance() \{
-  const endpoint = 'wss://rpc.taurus.autonomys.xyz/ws';
+  const endpoint = 'wss://auto-evm.chronos.autonomys.xyz/ws';
   const api = await createConnection(endpoint);
   return api;
 \}
@@ -2344,7 +2562,7 @@ import \{ account \} from '@autonomys/auto-consensus';
 import \{ activate \} from '@autonomys/auto-utils';
 
 (async () => \{
-  const api = await activate(\{ networkId: 'taurus' \});
+  const api = await activate(\{ networkId: 'chronos' \});
   const accountData = await account(api, 'your_address');
 
   console.log(\`Nonce: \$\{accountData.nonce\}\`);
@@ -2365,7 +2583,7 @@ import \{ balance \} from '@autonomys/auto-consensus';
   // Activate a wallet using a mnemonic phrase
   const \{ api, accounts \} = await activateWallet(\{
     mnemonic: 'your mnemonic phrase here', // Replace with your mnemonic
-    networkId: 'taurus', // Optional: specify the network ID
+    networkId: 'chronos', // Optional: specify the network ID
   \});
 
   const account = accounts[0];
@@ -2389,7 +2607,7 @@ import \{ balance \} from '@autonomys/auto-consensus';
 import \{ activate \} from '@autonomys/auto-utils';
 
 (async () => \{
-  const api = await activate(\{ networkId: 'taurus' \});
+  const api = await activate(\{ networkId: 'chronos' \});
   const accountBalance = await balance(api, 'your_address');
 
   console.log(\`Free Balance: \$\{accountBalance.free\}\`);
@@ -2404,7 +2622,7 @@ import \{ activate \} from '@autonomys/auto-utils';
 import \{ totalIssuance \} from '@autonomys/auto-consensus';
 
 (async () => \{
-  const total = await totalIssuance('taurus');
+  const total = await totalIssuance('chronos');
 
   console.log(\`Total Issuance: \$\{total.toString()\}\`);
 \})();
@@ -2459,7 +2677,7 @@ import \{ activateWallet, signAndSendTx, disconnect \} from '@autonomys/auto-uti
 
 (async () => \{
   const \{ api, accounts \} = await activateWallet(\{
-    networkId: 'taurus',
+    networkId: 'chronos',
     mnemonic: 'your_mnemonic',
   \});
 
@@ -2490,20 +2708,20 @@ import \{ activateWallet, signAndSendTx \} from '@autonomys
 
 (async () => \{
   const \{ api \} = await activateWallet(\{
-    networkId: 'taurus',
+    networkId: 'chronos',
     mnemonic: 'sender_mnemonic',
   \});
 
   // Sender's account (who is registering the operator)
   const \{ accounts: senderAccounts \} = await activateWallet(\{
-    networkId: 'taurus',
+    networkId: 'chronos',
     mnemonic: 'sender_mnemonic',
   \});
   const sender = senderAccounts[0];
 
   // Operator's account
   const \{ accounts: operatorAccounts \} = await activateWallet(\{
-    networkId: 'taurus',
+    networkId: 'chronos',
     mnemonic: 'operator_mnemonic',
   \});
   const operatorAccount = operatorAccounts[0];
@@ -2533,7 +2751,7 @@ import \{ activateWallet, signAndSendTx \} from '@autonomys/auto-utils';
 
 (async () => \{
   const \{ api, accounts \} = await activateWallet(\{
-    networkId: 'taurus',
+    networkId: 'chronos',
     mnemonic: 'nominator_mnemonic',
   \});
   const nominator = accounts[0];
@@ -2563,7 +2781,7 @@ import \{ blockNumber, blockHash, networkTimestamp \} from '@autonomys/auto-cons
 import \{ activate \} from '@autonomys/auto-utils';
 
 (async () => \{
-  const api = await activate(\{ networkId: 'taurus' \});
+  const api = await activate(\{ networkId: 'chronos' \});
 
   const currentBlockNumber = await blockNumber(api);
   const currentBlockHash = await blockHash(api);
@@ -2586,7 +2804,7 @@ import \{ domains \} from '@autonomys/auto-consensus';
 import \{ activate \} from '@autonomys/auto-utils';
 
 (async () => \{
-  const api = await activate(\{ networkId: 'taurus' \});
+  const api = await activate(\{ networkId: 'chronos' \});
   const domainList = await domains(api);
 
   domainList.forEach((domain) => \{
@@ -2607,7 +2825,7 @@ import \{ domainStakingSummary \} from '@autonomys/auto-consensus';
 import \{ activate \} from '@autonomys/auto-utils';
 
 (async () => \{
-  const api = await activate(\{ networkId: 'taurus' \});
+  const api = await activate(\{ networkId: 'chronos' \});
   const stakingSummaries = await domainStakingSummary(api);
 
   stakingSummaries.forEach((summary) => \{
@@ -2627,7 +2845,7 @@ import \{ latestConfirmedDomainBlock \} from '@autonomys/auto-consensus';
 import \{ activate \} from '@autonomys/auto-utils';
 
 (async () => \{
-  const api = await activate(\{ networkId: 'taurus' \});
+  const api = await activate(\{ networkId: 'chronos' \});
   const confirmedBlocks = await latestConfirmedDomainBlock(api);
 
   confirmedBlocks.forEach((blockInfo) => \{
@@ -2644,79 +2862,631 @@ import \{ activate \} from '@autonomys/auto-utils';
 
 ---
 
-### File: sdk/auto-drive.mdx
+### File: sdk/auto-dag-data.mdx
 
-## Auto-Drive Package
+# Auto DAG Data Package
 
-### Introduction
+## Introduction
 
-The \`@autonomys/auto-drive\` package provides a set of tools to interact with the Autonomys Auto-Drive API.
+The \`@autonomys/auto-dag-data\` package provides utilities for creating and managing IPLD DAGs (InterPlanetary Linked Data Directed Acyclic Graphs) for files and folders. It facilitates chunking large files, handling metadata, and creating folder structures suitable for distributed storage systems like IPFS.
 
-### Features
+> **Note**: This package is an ES Module package and is designed to work with ESM applications. Check [this tutorial](https://dev.to/mangadev/set-up-a-backend-nodejs-typescript-jest-using-es-modules-1530) for guidance on setting up an ES module application.
 
-- **Autonomys DSN**: Permanently store files on the Autonomys' DSN (Decentralized Store Network).
-- **CID Management**: Just like with IPFS, each upload gets its own CID (Content Identifier). 
-- **TypeScript Support**: Fully typed for an enhanced developer experience.
+## Features
 
-### Auto Drive API documentation
+- **File Chunking and DAG Creation**: Efficiently split large files into smaller chunks and create IPLD DAGs.
+- **Folder Structure Creation**: Generate IPLD DAGs for directory structures.
+- **Metadata Handling**: Add and manage metadata for files and folders.
+- **CID Management**: Utilities for working with Content Identifiers (CIDs).
+- **TypeScript Support**: Fully typed for enhanced developer experience.
 
-Auto Drive API documentation with all it's function signatures is available [here](https://mainnet.auto-drive.autonomys.xyz/api/docs).
+## Installation
 
-  ![Auto-Drive-API-1](/developers/Auto-Drive-API-1.png)
+Install the package via \`npm\` or \`yarn\`:
+
+\`\`\`bash
+# Using npm
+npm install @autonomys/auto-dag-data
+
+# Using yarn
+yarn add @autonomys/auto-dag-data
+\`\`\`
+
+## Importing
+
+Import the \`auto-dag-data\` functions you need into your project:
+
+\`\`\`typescript
+// Import specific functions
+import \{ processFileToIPLDFormat, processFolderToIPLDFormat, cidOfNode \} from '@autonomys/auto-dag-data';
+
+// Or import everything
+import * as dagData from '@autonomys/auto-dag-data';
+\`\`\`
+
+## Available Functions
+
+> **Note**: All asynchronous functions return a \`Promise\` and should be used with \`await\` for proper execution flow. Wrap asynchronous calls in \`try...catch\` blocks to handle potential errors gracefully.
+
+### File Processing
+
+- \`processFileToIPLDFormat(blockstore, fileStream, fileSize, fileName): CID\`: Creates an IPLD DAG from a file stream.
+
+### Folder Processing
+
+- \`processFolderToIPLDFormat(blockstore, childCIDs, folderName, folderSize): CID\`: Generates an IPLD DAG from a folder structure.
+
+### CID Utilities
+
+- \`cidOfNode(node): CID\`: Creates a CID from an IPLD node.
+- \`cidToString(cid): string\`: Converts a CID to its string representation.
+- \`stringToCid(cidString): CID\`: Parses a CID string back into a CID object.
+
+### Node Operations
+
+- \`encodeNode(node): Uint8Array\`: Encodes an IPLD node to bytes.
+- \`decodeNode(bytes): IPLDNode\`: Decodes bytes back into an IPLD node.
+
+### Metadata Management
+
+- \`createMetadataNode(metadata): IPLDNode\`: Creates a metadata node from metadata object.
+- \`processMetadataToIPLDFormat(blockstore, metadata): CID\`: Processes metadata into IPLD format.
+
+## Usage Examples
+
+### 1. Creating an IPLD DAG from a File
+
+Process a file into IPLD format for distributed storage:
+
+\`\`\`typescript
+import \{ processFileToIPLDFormat, cidToString \} from '@autonomys/auto-dag-data';
+import \{ MemoryBlockstore \} from 'blockstore-core/memory';
+import fs from 'fs';
+
+(async () => \{
+  const fileStream = fs.createReadStream('path/to/your/file.txt');
+  const fileSize = fs.statSync('path/to/your/file.txt').size;
+
+  const blockstore = new MemoryBlockstore();
+  const fileCID = await processFileToIPLDFormat(blockstore, fileStream, fileSize, 'file.txt');
+  
+  const cidString = cidToString(fileCID);
+  console.log(\`File CID: \$\{cidString\}\`);
+\})();
+\`\`\`
+
+### 2. Creating an IPLD DAG from a Folder
+
+Generate an IPLD DAG from a directory structure:
+
+\`\`\`typescript
+import \{ processFolderToIPLDFormat, decodeNode, cidToString \} from '@autonomys/auto-dag-data';
+import \{ MemoryBlockstore \} from 'blockstore-core/memory';
+import \{ CID \} from 'multiformats';
+
+(async () => \{
+  // Example child CIDs from files in the folder
+  const childCIDs: CID[] = [
+    /* array of CIDs from folder contents */
+  ];
+  const folderName = 'my-folder';
+  const folderSize = 1024; // total size of all children
+
+  const blockstore = new MemoryBlockstore();
+  const folderCID = await processFolderToIPLDFormat(blockstore, childCIDs, folderName, folderSize);
+
+  const node = await decodeNode(await blockstore.get(folderCID));
+  const cidString = cidToString(folderCID);
+  console.log(\`Folder CID: \$\{cidString\}\`);
+\})();
+\`\`\`
+
+### 3. Working with CIDs
+
+Convert between CID objects and strings:
+
+\`\`\`typescript
+import \{ cidOfNode, cidToString, stringToCid \} from '@autonomys/auto-dag-data';
+
+(async () => \{
+  // Assuming you have an IPLD node
+  const cid = cidOfNode(someNode);
+
+  // Convert CID to string for storage or transmission
+  const cidString = cidToString(cid);
+  console.log(\`CID as string: \$\{cidString\}\`);
+
+  // Parse string back into CID object
+  const parsedCID = stringToCid(cidString);
+  console.log('CID object:', parsedCID);
+\})();
+\`\`\`
+
+### 4. Encoding and Decoding Nodes
+
+Handle IPLD node serialization:
+
+\`\`\`typescript
+import \{ encodeNode, decodeNode \} from '@autonomys/auto-dag-data';
+
+(async () => \{
+  // Encode a node for storage
+  const encodedNode = encodeNode(someNode);
+  console.log('Encoded node:', encodedNode);
+
+  // Decode node from storage
+  const decodedNode = decodeNode(encodedNode);
+  console.log('Decoded node:', decodedNode);
+\})();
+\`\`\`
+
+### 5. Handling Metadata
+
+Create and process metadata for your files:
+
+\`\`\`typescript
+import \{ createMetadataNode, processMetadataToIPLDFormat, cidToString \} from '@autonomys/auto-dag-data';
+import \{ MemoryBlockstore \} from 'blockstore-core/memory';
+
+(async () => \{
+  const metadata = \{
+    name: 'My File',
+    description: 'This is a sample file',
+    created: new Date().toISOString(),
+    // ... other metadata fields
+  \};
+
+  // Create metadata node
+  const metadataNode = createMetadataNode(metadata);
+
+  // Process metadata to IPLD format
+  const blockstore = new MemoryBlockstore();
+  const metadataCID = await processMetadataToIPLDFormat(blockstore, metadata);
+  
+  const cidString = cidToString(metadataCID);
+  console.log(\`Metadata CID: \$\{cidString\}\`);
+\})();
+\`\`\`
+
+### 6. Complete File Processing Example
+
+Full example of processing a file and extracting its CID:
+
+\`\`\`typescript
+import \{ processFileToIPLDFormat, cidToString \} from '@autonomys/auto-dag-data';
+import \{ MemoryBlockstore \} from 'blockstore-core/memory';
+import fs from 'fs';
+
+(async () => \{
+  try \{
+    const filePath = 'path/to/your/file.txt';
+    const fileStream = fs.createReadStream(filePath);
+    const fileStats = fs.statSync(filePath);
+    
+    const blockstore = new MemoryBlockstore();
+    const cid = await processFileToIPLDFormat(
+      blockstore, 
+      fileStream, 
+      fileStats.size, 
+      'file.txt'
+    );
+
+    const cidString = cidToString(cid);
+    console.log(\`Successfully processed file. CID: \$\{cidString\}\`);
+    
+  \} catch (error) \{
+    console.error('Error processing file:', error);
+  \}
+\})();
+\`\`\`
+
+## Best Practices
+
+### Error Handling
+
+Always wrap asynchronous operations in try-catch blocks:
+
+\`\`\`typescript
+try \{
+  const cid = await processFileToIPLDFormat(blockstore, stream, size, name);
+  // Handle success
+\} catch (error) \{
+  console.error('Processing failed:', error);
+  // Handle error appropriately
+\}
+\`\`\`
+
+### Blockstore Management
+
+Use appropriate blockstore implementations based on your needs:
+
+\`\`\`typescript
+// For temporary operations
+import \{ MemoryBlockstore \} from 'blockstore-core/memory';
+const tempBlockstore = new MemoryBlockstore();
+
+// For persistent storage
+import \{ FsBlockstore \} from 'blockstore-fs';
+const persistentBlockstore = new FsBlockstore('./blocks');
+\`\`\`
+
+### Resource Cleanup
+
+Ensure proper cleanup of resources when working with file streams:
+
+\`\`\`typescript
+const stream = fs.createReadStream(filePath);
+try \{
+  const cid = await processFileToIPLDFormat(blockstore, stream, size, name);
+  // Process result
+\} finally \{
+  stream.destroy(); // Clean up stream
+\}
+\`\`\`
+
+---
+
+### File: sdk/auto-drive/api_reference.mdx
+
+# Auto-Drive API Reference
+
+## Overview
+
+Auto-Drive provides REST APIs for interacting with the Autonomys decentralized storage network. The APIs handle file operations, metadata management, and subscription services.
+
+## API Documentation
+
+The complete API documentation with all function signatures is available [here](https://mainnet.auto-drive.autonomys.xyz/api/docs).
+
+![Auto-Drive-API-1](/developers/Auto-Drive-API-1.png)
+
+## API Endpoints Structure
+
+The API is organized into several main categories:
+
+### Subscriptions Endpoints
+- Manage your account subscription and view usage statistics
+- \`GET /subscriptions/info\` - Get subscription information
+- \`GET /subscriptions/credits\` - Check pending upload/download credits
+
+### Upload Endpoints
+- Progress tracking and upload management
+- \`POST /uploads/file\` - Upload single files
+- \`POST /uploads/folder\` - Upload folders and directories
+- \`POST /uploads/multipart\` - Multipart uploads for large files
+
+### Objects Endpoints
+- Object metadata management and access control
+- \`GET /objects\` - List your uploaded objects
+- \`GET /objects/search\` - Search objects by name or CID
+- \`POST /objects/share\` - Share objects and manage permissions
+
+### Download Endpoints
+- Support for password-protected downloads
+- \`GET /downloads/\{cid\}\` - Download files by CID
+- \`GET /downloads/stream/\{cid\}\` - Streaming downloads
+
+## Base URLs
+
+- **Mainnet**: \`https://mainnet.auto-drive.autonomys.xyz\`
+
+## Authentication
+
+All API requests require authentication using one of these methods:
+
+### API Key Authentication (Recommended)
+Include your API key in the request headers:
+
+\`\`\`http
+Authorization: Bearer your-api-key
+X-Auth-Provider: apikey
+\`\`\`
+
+### JWT Token Authentication
+For advanced use cases, JWT tokens are supported:
+
+\`\`\`http
+Authorization: Bearer your-jwt-token
+X-Auth-Provider: jwt
+\`\`\`
+
+> **Security Note:** Keep your API keys secure and never share them with unauthorized parties.
+
+## Auto-Drive Services
+
+Auto-Drive consists of two main services:
+
+### 1. Auto-Drive Storage API
+Handles all file operations and object management:
+- **File uploads** (single and multipart)
+- **Object metadata management** 
+- **Access control and permissions**
+- **Subscription management**
+
+### 2. Auto-Drive Download Gateway
+Provides optimized file download capabilities:
+- **Direct file downloads**
+- **Asynchronous downloads**
+- **Bandwidth optimization**
 
 
-### Auto Gateway
+## Response Format
 
-Auto gateway is a unified gateway solution designed to seamlessly connect and access files or folders permanently stored on Autonomys Mainnet & Tesnet through a single, streamlined interface. The gateway is available [here](https://gateway.autonomys.xyz/).
+All API responses follow a consistent JSON format with appropriate HTTP status codes. Error responses include detailed error messages to help with debugging.
 
-  ![Auto-Gateway-1](/developers/Auto-Gateway-1.png)
+## Rate Limits
 
-### How to use Auto Drive SDK?
+API usage is subject to your subscription limits:
+- **Upload limit**: 100MB per month (default)
+- **Download limit**: 5GB per month (default)
 
-To interact with the Auto-Drive SDK, you'll need to create an API key. Follow these steps:
+Check your current limits using the subscription endpoints or in the Auto-Drive dashboard.
 
-1. Go to Auto-Drive and login with your preffered SSO.
-2. Once you're logged in, click on the **developers** section in the left sidebar menu.
-3. In the developers section, click on **'Create API Key'**
-4. Read the modal message and click on generate
+## Making Direct API Calls
 
-### Auto Drive Dashboard
+You can make direct HTTP requests to the API endpoints:
 
-View your upload and download limits, access files uploaded by other users, and manage and share your submissions by logging in to Auto Drive:
+\`\`\`bash
+# Example: Get subscription info
+curl -X GET "https://mainnet.auto-drive.autonomys.xyz/subscriptions/info" \
+  -H "Authorization: Bearer your-api-key" \
+  -H "X-Auth-Provider: apikey"
+\`\`\`
+
+\`\`\`bash
+# Example: Upload a file
+curl -X POST "https://mainnet.auto-drive.autonomys.xyz/uploads/file" \
+  -H "Authorization: Bearer your-api-key" \
+  -H "X-Auth-Provider: apikey" \
+  -H "Content-Type: multipart/form-data" \
+  -F "file=@path/to/your/file.txt"
+\`\`\`
+
+For detailed endpoint specifications, request/response schemas, and interactive testing, visit the [complete API documentation](https://mainnet.auto-drive.autonomys.xyz/api/docs).
+
+---
+
+### File: sdk/auto-drive/available_functions.mdx
+
+# Auto-Drive SDK Available Functions
+
+### Upload Operations
+
+- \`uploadFile(api, file, options): Promise<string>\`: Uploads a file (using a buffer, \`File\`, or a custom interface) with optional encryption and compression. Returns the resulting CID as a string.
+- \`uploadFileFromFilepath(api, filePath, options): Promise<string>\`: Uploads a file from filepath with optional encryption and compression. Returns the resulting CID as a string.
+- \`uploadFileFromInput(api, file, options): Promise<string>\`: Uploads a file obtained from a browser's \`File\` API.
+- \`uploadFolderFromInput(api, fileList, options): Promise<string>\`: Uploads a folder from a browser's \`FileList\`.
+- \`uploadFileWithinFolderUpload(api, uploadId, file, options): Promise<string>\`: Uploads a file within an existing folder upload session.
+- \`uploadObjectAsJSON(api, object, name?, options): Promise<string>\`: Serializes and uploads any object as a JSON file.
+
+### Download Operations
+
+- \`downloadFile(api, cid, password?): AsyncIterable<Buffer>\`: Downloads a file from its CID, with optional decryption using a password.
+- \`getMyFiles(api, page, limit): Promise<PaginatedResult<ObjectSummary>>\`: Retrieves paginated list of user's files.
+- \`searchByNameOrCIDInMyFiles(api, value): Promise<ObjectSummary[]>\`: Searches for files by name or CID within user's files.
+- \`searchByNameOrCID(api, value): Promise<ObjectSummary[]>\`: Global search for files by name or CID.
+
+### Utility Functions
+
+- \`getPendingCredits(api): Promise<\{ upload: number; download: number \}>\`: Gets the current user's pending upload and download credits.
+- \`getSubscriptionInfo(api): Promise<SubscriptionInfo>\`: Retrieves the current user's subscription information.
+
+---
+
+### File: sdk/auto-drive/create_api_key.mdx
+
+# Creating Your Auto-Drive API Key
+
+## Authentication Overview
+
+All requests to the Auto-Drive APIs require authentication using an API key. The API key is a string that authenticates your requests to the Auto-Drive APIs.
+
+## Step-by-Step Guide to Create an API Key
+
+### 1. Access Auto-Drive Dashboard
 
 1. Open [Auto Drive](https://ai3.storage/)
 2. Sign in via Google, Discord, GitHub or Wallet
 
    ![Auto-Drive-1](/developers/Auto-Drive-1.png)
 
-3. On the Dashboard you will see:  
+### 2. Navigate to Developer Section
 
-   - Your upload limit (currently **100MB** per month)  
-   - Your download limit (currently **5GB** per month)  
-   - A list of **uploaded files** and their **CIDs**
-   - Options to **Download**, **Share** or **Remove** each file
+1. Once you're logged in, click on the **developers** section in the left sidebar menu
+2. In the developers section, click on **'Create API Key'**
+3. Read the modal message and click on generate
 
-  ![Auto-Drive-2](/developers/Auto-Drive-2.png)
+### 3. Alternative Method - Via Profile
+
+You can also create an API key through your profile:
+
+1. Click on \`Profile\` in the dashboard
+2. Create your API key from the profile section
+
+   ![Auto-Drive-4](/developers/Auto-Drive-4.png)
+
+## Understanding Your Dashboard
+
+Once logged in, your Dashboard will show:
+
+- Your upload limit (currently **20MB** per month on mainnet)   
+- A list of **uploaded files** and their **CIDs**
+- Options to **Download**, **Share** or **Remove** each file
+
+![Auto-Drive-5](/developers/Auto-Drive-5.png)
 
 > *Note:* Removing a file does not delete it from the DSN as it is permanent storage. It only removes the file from your Dashboard.
 
-4. Use the in-browser environment to upload, download or share files, or the SDK functions (described below) to upload files or folders via the CLI.
+## Using Your API Key
 
-  ![Auto-Drive-3](/developers/Auto-Drive-3.png)
+Once you have your API key, you can use it to authenticate your requests:
 
-#### Creating an API key
+\`\`\`typescript
+import \{ createAutoDriveApi \} from '@autonomys/auto-drive'
+import \{ NetworkId \} from '@autonomys/auto-utils'
 
-Click on \`Profile\` to create your API key. Use this API key in the CLI to upload files or folders.
+const api = createAutoDriveApi(\{
+  apiKey: 'your-api-key-here',
+  network: NetworkId.MAINNET
+\})
+\`\`\`
 
-  ![Auto-Drive-4](/developers/Auto-Drive-4.png)
+## Network Selection
 
-#### Sharing files
+Auto Drive is available on:
+- **Mainnet** (\`NetworkId.MAINNET\`) - Production environment
 
-Click the \`Share\` button next to a file to share it using a link, or provide a user’s public ID to share all their files. Each user’s public ID is visible on their \`Profile\` page.
+## Security Best Practices
 
-  ![Auto-Drive-5](/developers/Auto-Drive-5.png)
+- Keep your API key secure and never commit it to version control
+- Use environment variables to store your API key
+- Regenerate your API key if you suspect it has been compromised
 
-### Installation
+## Next Steps
+
+With your API key created, you can now:
+- Install the Auto-Drive SDK
+- Start uploading and downloading files
+- Explore the full API reference
+- Try the usage examples
+
+---
+
+### File: sdk/auto-drive/gateway.mdx
+
+# Auto Drive Gateway
+
+## What is the Auto Drive Gateway?
+
+Auto Gateway is a unified gateway solution designed for seamlessly accessing files or folders permanently stored on the Autonomys Mainnet through a single, streamlined interface. The gateway is available [here](https://gateway.autonomys.xyz/).
+
+![Auto-Gateway-1](/developers/Auto-Gateway-1.png)
+
+## How Gateways Work
+
+In decentralized storage systems, files are identified by their Content Identifier (CID) rather than traditional file paths. A gateway acts as a bridge between the decentralized network and standard web protocols, allowing you to access stored content using familiar HTTP requests.
+
+Think of it as a web interface that translates CIDs into downloadable files - similar to how IPFS gateways work, but specifically designed for the Autonomys network.
+
+## When to Use Auto Drive Gateway
+
+### Direct File Access
+- **Public file sharing**: Share files with others who don't have the Auto Drive SDK
+- **Web integration**: Embed files directly in websites using standard HTML tags
+- **Browser downloads**: Allow users to download files directly through their browser
+- **CDN-like functionality**: Serve static assets like images, documents, or media files
+
+### Development & Testing
+- **Quick verification**: Quickly check if your uploads were successful
+- **Debugging**: Verify file integrity without writing code
+- **Prototyping**: Access files during development without implementing full SDK integration
+
+### Integration Scenarios
+- **Third-party applications**: Enable other services to access your stored files
+- **API responses**: Return direct download links in your API responses
+- **Mobile apps**: Simple file access without complex SDK integration
+
+## Gateway Endpoints
+
+### Retrieve File by CID
+\`\`\`
+GET /file/:cid
+\`\`\`
+Retrieves a file based on its Content Identifier (CID).
+
+**Responses:**
+- \`200 OK\`: Successfully retrieves and serves the requested file
+- \`302 Redirect\`: Redirects to \`/folder/:cid\` if the CID corresponds to a folder
+- \`404 Not Found\`: If no file is found for the provided CID
+
+### Retrieve Folder by CID
+\`\`\`
+GET /folder/:cid
+\`\`\`
+Retrieves a folder based on its Content Identifier (CID).
+
+**Responses:**
+- \`200 OK\`: Successfully retrieves and serves the requested folder
+- \`302 Redirect\`: Redirects to \`/file/:cid\` if the CID corresponds to a file  
+- \`404 Not Found\`: If no folder is found for the provided CID
+
+## Usage Examples
+
+### Direct Browser Access
+\`\`\`
+https://gateway.autonomys.xyz/file/your-cid-here
+\`\`\`
+
+### HTML Integration
+\`\`\`html
+<!-- Display an image -->
+<img src="https://gateway.autonomys.xyz/file/your-image-cid" alt="My Image">
+
+<!-- Download link -->
+<a href="https://gateway.autonomys.xyz/file/your-document-cid" download>Download Document</a>
+\`\`\`
+
+### API Response
+\`\`\`javascript
+const response = \{
+  filename: "document.pdf",
+  downloadUrl: \`https://gateway.autonomys.xyz/file/\$\{fileCid\}\`,
+  size: 1024000
+\}
+\`\`\`
+
+## Finding Your CIDs
+
+To use the gateway, you'll need the CID of your uploaded file or folder. You can find CIDs:
+
+1. In your [Auto Drive Dashboard](https://ai3.storage/) after uploading files
+2. From the return value of SDK upload functions
+3. In your application logs where upload responses are recorded
+
+Simply enter your CID in the gateway interface or construct the URL directly for programmatic access.
+
+---
+
+### File: sdk/auto-drive/overview_setup.mdx
+
+# Auto-Drive Overview & Setup
+
+## Introduction
+
+The \`@autonomys/auto-drive\` package provides a set of tools to interact with the Autonomys Auto-Drive API.
+
+## Features
+
+- **Autonomys DSN**: Permanently store files on the Autonomys' DSN (Decentralized Store Network).
+- **CID Management**: Just like with IPFS, each upload gets its own CID (Content Identifier). 
+- **TypeScript Support**: Fully typed for an enhanced developer experience.
+
+## Authentication
+
+All requests to the Auto-Drive APIs require authentication using an API key. 
+
+> **Need an API key?** See our [API Key Setup Guide](/sdk/auto-drive/create_api_key) for detailed instructions on creating your API key.
+
+## Auto Drive Dashboard
+
+The Auto Drive dashboard provides a web interface for managing your files and account:
+
+- View your upload and download limits
+- Browse and manage your uploaded files
+- Share files with others
+- Create and manage API keys
+
+Access the dashboard at [Auto Drive](https://ai3.storage/) and sign in with Google, Discord, or GitHub.
+
+![Auto-Drive-3](/developers/Auto-Drive-3.png)
+
+### Sharing files
+
+You can share files directly from the dashboard by clicking the \`Share\` button next to any file. You can share using a direct link or provide a user's public ID to share all their files.
+
+![Auto-Drive-5](/developers/Auto-Drive-5.png)
+
+## Installation
 
 Install the package via \`npm\` or \`yarn\`:
 
@@ -2730,7 +3500,7 @@ yarn add @autonomys/auto-drive
 yarn add @autonomys/auto-utils
 \`\`\`
 
-### Importing
+## Importing
 
 Import the \`auto-drive\` functions you need into your project:
 
@@ -2744,52 +3514,254 @@ import * as drive from '@autonomys/auto-drive';
 import \{ NetworkId \} from '@autonomys/auto-utils'
 \`\`\`
 
-### Available functions
+## Network Configuration
 
-#### Upload operations
-
-- \`uploadFile(api, file, options): Promise<string>\`: Uploads a file (using a buffer, \`File\`, or a custom interface) with optional encryption and compression. Returns the resulting CID as a string.
-- \`uploadFileFromFilepath(api, filePath, options): Promise<string>\`: Uploads a file from filepath with optional encryption and compression. Returns the resulting CID as a string.
-- \`uploadFileFromInput(api, file, options): Promise<string>\`: Uploads a file obtained from a browser's \`File\` API.
-- \`uploadFolderFromInput(api, fileList, options): Promise<string>\`: Uploads a folder from a browser's \`FileList\`.
-- \`uploadFileWithinFolderUpload(api, uploadId, file, options): Promise<string>\`: Uploads a file within an existing folder upload session.
-- \`uploadObjectAsJSON(api, object, name?, options): Promise<string>\`: Serializes and uploads any object as a JSON file.
-
-#### Download operations
-
-- \`downloadFile(api, cid, password?): AsyncIterable<Buffer>\`: Downloads a file from its CID, with optional decryption using a password.
-- \`getMyFiles(api, page, limit): Promise<PaginatedResult<ObjectSummary>>\`: Retrieves paginated list of user's files.
-- \`searchByNameOrCIDInMyFiles(api, value): Promise<ObjectSummary[]>\`: Searches for files by name or CID within user's files.
-- \`searchByNameOrCID(api, value): Promise<ObjectSummary[]>\`: Global search for files by name or CID.
-
-#### Utility functions
-
-- \`getPendingCredits(api): Promise<\{ upload: number; download: number \}>\`: Gets the current user's pending upload and download credits.
-- \`getSubscriptionInfo(api): Promise<SubscriptionInfo>\`: Retrieves the current user's subscription information.
-
-### Network configuration
-
-As [Auto Drive](https://ai3.storage) is available on both Mainnet and the Taurus testnet, you need to configure the network when using the package:
+[Auto Drive](https://ai3.storage) is available on Mainnet. To connect to it, you need to configure the network using \`auto-utils\` package:
 
 \`\`\`ts
 import \{ NetworkId \} from '@autonomys/auto-utils'
 
 const api = createAutoDriveApi(\{
   apiKey: 'your-api-key',
-  network: NetworkId.TAURUS | NetworkId.MAINNET
+  network: NetworkId.MAINNET
 \})
-
 \`\`\`
 
-## Usage examples
+---
 
-### 1. Uploading a file from a filepath (Not available in browser)
+### File: sdk/auto-drive/s3_layer.mdx
+
+# Auto Drive S3 Layer Guide
+
+## Overview
+
+**Auto Drive** provides an **S3-compatible API layer** that allows you to interact with **decentralized storage(DSN)** using standard **Amazon Web Services Simple Storage Service (AWS S3)** SDK commands. This bridges the gap between familiar cloud storage patterns and next-generation decentralized infrastructure, giving developers the best of both worlds: the **reliability and developer experience of S3 APIs** with the **permanence and censorship-resistance** of decentralized storage.
+
+For those unfamiliar, [Amazon Web Services Simple Storage Service (AWS S3)](https://aws.amazon.com/s3/) is an industry-standard object storage service that powers much of the modern web's file storage needs. **Auto Drive** maintains complete compatibility with S3's APIs while storing your data on a **decentralized network** instead of **centralized servers**.
+
+## How It Works
+Auto Drive maintains an object_mappings table in the database that maps S3 object keys to Content Identifiers (CIDs). When you upload via S3 API, the system:
+
+1. Stores the file content on the decentralized network (DSN)
+2. Records the key-to-CID mapping in the database
+3. Returns the CID as the ETag for S3 compatibility
+4. Enables cross-API access between S3 and Auto Drive APIs
+
+
+## Key Features
+
+### 1. **Standard S3 SDK Compatibility**
+
+- Use official AWS S3 SDK (\`@aws-sdk/client-s3\`)
+- Supports all major S3 operations: \`PutObject\`, \`GetObject\`, \`HeadObject\`, multipart uploads (\`CreateMultipartUploadCommand\`, \`UploadPartCommand\` & \`CompleteMultipartUploadCommand\`)
+- No code changes required for existing S3 applications
+
+### 2. **Enhanced Metadata Support**
+
+\`\`\`typescript
+// Compression and encryption metadata
+const command = new PutObjectCommand(\{
+  Bucket: "https://public.auto-drive.autonomys.xyz/api/s3",
+  Key: "file.txt",
+  Body: buffer,
+  Metadata: \{
+    compression: "ZLIB",
+    encryption: "AES_256_GCM",
+  \},
+\});
+\`\`\`
+
+### 3. **Range Requests**
+
+- Partial file downloads supported
+- Standard HTTP Range headers
+
+\`\`\`typescript
+const command = new GetObjectCommand(\{
+  Bucket: bucket,
+  Key: key,
+  Range: "bytes=0-9", // Download first 10 bytes
+\});
+\`\`\`
+
+### 4. **Multipart Upload Support**
+
+- Full multipart upload workflow
+- Create → Upload Parts → Complete pattern
+- Automatic chunking for large files
+
+\`\`\`typescript
+// Complete multipart upload example
+const key = "large-file.txt";
+const fileContent = Buffer.from("Large file content...");
+
+// Step 1: Create multipart upload
+const createCommand = new CreateMultipartUploadCommand(\{
+  Bucket: "https://public.auto-drive.autonomys.xyz/api/s3",
+  Key: key,
+\});
+const createResult = await s3Client.send(createCommand);
+const uploadId = createResult.UploadId!;
+
+// Step 2: Upload parts
+const uploadPartCommand = new UploadPartCommand(\{
+  Bucket: "https://public.auto-drive.autonomys.xyz/api/s3",
+  Key: key,
+  UploadId: uploadId,
+  PartNumber: 1,
+  Body: fileContent,
+\});
+const partResult = await s3Client.send(uploadPartCommand);
+
+
+// Step 3: Complete multipart upload
+const completeCommand = new CompleteMultipartUploadCommand(\{
+  Bucket: "https://public.auto-drive.autonomys.xyz/api/s3",
+  Key: key,
+  UploadId: uploadId,
+  MultipartUpload: \{
+    Parts: [
+      \{
+        ETag: partResult.ETag!,
+        PartNumber: 1,
+      \},
+    ],
+  \},
+\});
+const completeResult = await s3Client.send(completeCommand);
+\`\`\`
+
+## Configuration
+
+### Client Setup
+
+\`\`\`typescript
+const s3Client = new S3Client(\{
+  region: "us-east-1",
+  credentials: \{
+    accessKeyId: "your-auto-drive-api-key", // Your Auto Drive API key
+    secretAccessKey: "", // Always empty for Auto Drive
+  \},
+  bucketEndpoint: true, // Required for custom endpoints
+\});
+\`\`\`
+
+### Endpoint Configuration
+
+\`\`\`typescript
+// The "Bucket" parameter becomes part of the endpoint URL
+const Bucket = \`\$\{baseURL\}/s3\`; // e.g., "https://public.auto-drive.autonomys.xyz/api/s3"
+// No actual S3 bucket is created - it's just URL routing
+\`\`\`
+- Mainnet: \`https://public.auto-drive.autonomys.xyz/api/s3\`
+- Base URL: http://localhost:3000/s3 (development)
+- Bucket name becomes the full endpoint path
+- No actual bucket concept - uses path-based routing
+
+## Authentication
+
+- Uses Auto Drive API key-based authentication
+- Integrates with Auto Drive's user management system
+- API key goes in \`accessKeyId\`, \`secretAccessKey\` remains empty
+- Supports the same authentication as the Auto Drive API
+
+## File Ownership & Access
+
+- **Cross-API compatibility**: Files uploaded via S3 API are accessible through Auto Drive API and vice versa
+- **Centralized ownership**: File ownership is tracked centrally, not per-API
+- **Content deduplication**: Multiple users uploading identical content will share the same underlying CID
+- **Shared access**: If different users upload the same file via different APIs, both can access it through either API
+
+## Storage Characteristics
+
+### Content Addressing
+
+- Files are stored using Content Identifiers (CIDs)
+- ETag returned is the actual CID of the uploaded content
+- Immutable storage - same content always produces same CID
+
+### Decentralized Backend
+
+- Files stored on the DSN of Autonomys Network (available on Autonomys Mainnet & Testnet)
+- Automatic replication and redundancy
+- No single point of failure
+
+## Migrating from AWS S3
+
+For developers moving from traditional AWS S3:
+
+1. **Update endpoint** to Auto Drive server URL
+2. **Change credentials** to use Auto Drive API key (with empty secret)
+3. **Set \`bucketEndpoint\`**: true in S3Client configuration
+4. **Handle longer response times** due to blockchain network latency
+5. **Expect CIDs as ETags** instead of MD5 hashes
+6. **Update bucket references** to use full endpoint URLs
+7. **Test multipart uploads** as they may behave slightly differently
+
+\`\`\`typescript
+// Before (AWS S3)
+const s3Client = new S3Client(\{
+  region: "us-east-1",
+  credentials: \{
+    accessKeyId: "AKIA...",
+    secretAccessKey: "abc123...",
+  \},
+\});
+
+// After (Auto Drive)
+const s3Client = new S3Client(\{
+  region: "us-east-1",
+  credentials: \{
+    accessKeyId: "your-auto-drive-api-key",
+    secretAccessKey: "",
+  \},
+  bucketEndpoint: true,
+\});
+\`\`\`
+
+## Limitations & Considerations
+
+### Performance
+
+- The DSN (on-chain) storage has higher latency than traditional S3
+- Multipart uploads recommended for files > 5MB
+- Range requests may have different performance characteristics
+
+### Compatibility Notes
+
+- Not all S3 features supported (e.g., versioning, lifecycle policies)
+- Custom metadata handling for compression/encryption
+- Bucket operations are virtual (no actual bucket creation)
+
+## Best Practices
+
+1. **Use Multipart Uploads** for files larger than 5MB
+2. **Leverage Range Requests** for partial file access
+3. **Include Compression/Encryption** metadata when needed
+4. **Handle ETags as CIDs** for content verification
+5. **Implement Retry Logic** for blockchain network delays
+
+## Error Handling
+
+- Standard S3 error responses
+- Additional blockchain-specific error codes
+- Network timeouts may be longer than traditional S3
+
+This S3 layer provides a familiar interface while leveraging the benefits of decentralized storage, making it easy to migrate existing S3-based applications to Auto Drive.
+
+---
+
+### File: sdk/auto-drive/usage_examples.mdx
+
+# Auto-Drive Usage Examples
+
+## 1. Uploading a file from a filepath (not available in browser)
 
 \`\`\`typescript
 import \{ fs,createAutoDriveApi \} from '@autonomys/auto-drive'
 import \{ NetworkId \} from '@autonomys/auto-utils'
 
-const api = createAutoDriveApi(\{ apiKey: 'your-api-key', network: NetworkId.TAURUS \}) // Initialize your API instance with API key
+const api = createAutoDriveApi(\{ apiKey: 'your-api-key', network: NetworkId.MAINNET \}) // Initialize your API instance with API key
 const filePath = 'path/to/your/file.txt' // Specify the path to your file
 const options = \{
   password: 'your-encryption-password', // Optional: specify a password for encryption
@@ -2805,13 +3777,13 @@ const cid = await fs.uploadFileFromFilepath(api, filePath, options)
 console.log(\`The file is uploaded and its cid is \$\{cid\}\`)
 \`\`\`
 
-### 2. Uploading a file using FILE interface 
+## 2. Uploading a file using File interface 
 
 \`\`\`typescript
 import \{ uploadFileFromInput, createAutoDriveApi \} from '@autonomys/auto-drive'
 import \{ NetworkId \} from '@autonomys/auto-utils'
 
-const api = createAutoDriveApi(\{ apiKey: 'your-api-key', network: NetworkId.TAURUS \}) // Initialize your API instance with API key
+const api = createAutoDriveApi(\{ apiKey: 'your-api-key', network: NetworkID.MAINNET \}) // Initialize your API instance with API key
 
 // e.g Get File from object from HTML event
 const file: File = e.target.value // Substitute with your file
@@ -2824,13 +3796,13 @@ const cid = await api.uploadFileFromInput(file, options)
 console.log(\`The file is uploaded and its cid is \$\{cid\}\`)
 \`\`\`
 
-### 3. Uploading a folder (Not available in browser)
+## 3. Uploading a folder (not available in browser)
 
 \`\`\`typescript
 import \{ createAutoDriveApi, fs \} from '@autonomys/auto-drive'
 import \{ NetworkId \} from '@autonomys/auto-utils'
 
-const api = createAutoDriveApi(\{ apiKey: 'your-api-key', network: NetworkId.TAURUS \}) // Initialize your API instance with API key
+const api = createAutoDriveApi(\{ apiKey: 'your-api-key', network: NetworkID.MAINNET \}) // Initialize your API instance with API key
 const folderPath = 'path/to/your/folder' // Specify the path to your folder
 
 const options = \{
@@ -2845,16 +3817,15 @@ const options = \{
 const folderCID = await fs.uploadFolderFromFolderPath(api, folderPath, options)
 
 console.log(\`The folder is uploaded and its cid is \$\{folderCID\}\`)
-
 \`\`\`
 
-### 4. Uploading a file from a custom interface with \`GenericFile\`:
+## 4. Uploading a file from a custom interface with \`GenericFile\`
 
 \`\`\`typescript
 import \{ createAutoDriveApi \} from '@autonomys/auto-drive'
 import \{ NetworkId \} from '@autonomys/auto-utils'
 
-const api = createAutoDriveApi(\{ apiKey: 'your-api-key', network: NetworkId.TAURUS \}) // Initialize your API instance with API key
+const api = createAutoDriveApi(\{ apiKey: 'your-api-key', network: NetworkID.MAINNET \}) // Initialize your API instance with API key
 const buffer = Buffer.from(...);
 const genericFile = \{
   read: async function *() \{
@@ -2880,13 +3851,13 @@ const cid = api.uploadFile(genericFile, options)
 console.log(\`The file is uploaded and its cid is \$\{cid\}\`)
 \`\`\`
 
-### 5. Downloading files
+## 5. Downloading files
 
 \`\`\`typescript
 import \{ createAutoDriveApi \} from '@autonomys/auto-drive'
 import \{ NetworkId \} from '@autonomys/auto-utils'
 
-const api = createAutoDriveApi(\{ apiKey: 'your-api-key', network: NetworkId.TAURUS \}) // Initialize your API instance with API key
+const api = createAutoDriveApi(\{ apiKey: 'your-api-key', network: NetworkID.MAINNET \}) // Initialize your API instance with API key
 
 try \{
   const cid = '..'
@@ -2901,13 +3872,13 @@ try \{
 \}
 \`\`\`
 
-### 6. Creating shareable download link
+## 6. Creating shareable download link
 
 \`\`\`typescript
 import \{ createAutoDriveApi \} from '@autonomys/auto-drive'
 import \{ NetworkId \} from '@autonomys/auto-utils'
 
-const api = createAutoDriveApi(\{ apiKey: 'your-api-key', network: NetworkId.TAURUS \}) // Initialize your API instance with API key
+const api = createAutoDriveApi(\{ apiKey: 'your-api-key', network: NetworkID.MAINNET \}) // Initialize your API instance with API key
 
 try \{
   const cid = 'your-file-cid'
@@ -2918,15 +3889,15 @@ try \{
 \}
 \`\`\`
 
-### 7. Example usage of \`getMyFiles\`
+## 7. Example usage of \`getMyFiles\`
 
-Here is an example of how to use the getMyFiles method to retrieve the root directories:
+Here is an example of how to use the \`getMyFiles\` method to retrieve the root directories:
 
 \`\`\`typescript
 import \{ createAutoDriveApi \} from '@autonomys/auto-drive'
 import \{ NetworkId \} from '@autonomys/auto-utils'
 
-const api = createAutoDriveApi(\{ apiKey: 'your-api-key', network: NetworkId.TAURUS \}) // Initialize your API instance with API key
+const api = createAutoDriveApi(\{ apiKey: 'your-api-key', network: NetworkID.MAINNET \}) // Initialize your API instance with API key
 
 try \{
   for (let i = 0; i < 10; i++) \{
@@ -3084,7 +4055,7 @@ import \{ activateWallet \} from '@autonomys/auto-utils';
 
   const \{ api, accounts \} = await activateWallet(\{
     mnemonic,
-    networkId: 'taurus', // Optional: specify the network ID
+    networkId: 'chronos', // Optional: specify the network ID
   \});
 
   const account = accounts[0];
@@ -3122,7 +4093,7 @@ import \{ activateWallet \} from '@autonomys/auto-utils';
 import \{ activate, mockWallets, getMockWallet \} from '@autonomys/auto-utils';
 
 (async () => \{
-  const api = await activate(\{ networkId: 'taurus' \});
+  const api = await activate(\{ networkId: 'chronos' \});
 
   const wallets = await mockWallets(\{\}, api);
   const aliceWallet = getMockWallet('Alice', wallets);
@@ -3153,7 +4124,7 @@ networks.forEach((network) => \{
 \`\`\`typescript
 import \{ getNetworkDetails \} from '@autonomys/auto-utils';
 
-const network = getNetworkDetails(\{ networkId: 'taurus' \});
+const network = getNetworkDetails(\{ networkId: 'chronos' \});
 console.log(\`Network Name: \$\{network.name\}\`);
 console.log(\`RPC URLs: \$\{network.rpcUrls.join(', ')\}\`);
 \`\`\`
@@ -3163,7 +4134,7 @@ console.log(\`RPC URLs: \$\{network.rpcUrls.join(', ')\}\`);
 \`\`\`typescript
 import \{ getNetworkDomainDetails \} from '@autonomys/auto-utils';
 
-const domain = getNetworkDomainDetails(\{ domainId: '1', networkId: 'taurus' \});
+const domain = getNetworkDomainDetails(\{ domainId: '1', networkId: 'chronos' \});
 console.log(\`Domain Name: \$\{domain.name\}\`);
 console.log(\`RPC URLs: \$\{domain.rpcUrls.join(', ')\}\`);
 \`\`\`
@@ -3214,7 +4185,7 @@ console.log(\`Concatenated Result: \$\{new TextDecoder().decode(concatenated)\}\
 import \{ activate \} from '@autonomys/auto-utils';
 
 (async () => \{
-  const api = await activate(\{ networkId: 'taurus' \});
+  const api = await activate(\{ networkId: 'chronos' \});
 
   console.log('API connected');
 
@@ -3231,7 +4202,7 @@ import \{ activate \} from '@autonomys/auto-utils';
 import \{ activateDomain \} from '@autonomys/auto-utils';
 
 (async () => \{
-  const api = await activateDomain(\{ domainId: '1', networkId: 'taurus' \});
+  const api = await activateDomain(\{ domainId: '1', networkId: 'chronos' \});
 
   console.log('Domain API connected');
 
@@ -3369,10 +4340,10 @@ type ChainOrDomain = Consensus | Domain;
 import \{ activateWallet \} from '@autonomys/auto-utils'
 import \{ transferToDomainAccount20Type \} from '@autonomys/auto-xdm'
 
-const api = await activateWallet(\{ networkId: 'taurus', uri: '//alice' \})
+const api = await activateWallet(\{ networkId: 'chronos', uri: '//alice' \})
 const tx = await transferToDomainAccount20Type(
   api,
-  0, // Receiver domain (0 is Auto EVM on Taurus Testnet)
+  0, // Receiver domain (0 is Auto EVM on Chronos Testnet)
   '0x1234567890abcdef', // Receiver domain account
   '1000000000000000000',
 )
@@ -3385,10 +4356,10 @@ const tx = await transferToDomainAccount20Type(
 import \{ activateWallet \} from '@autonomys/auto-utils'
 import \{ transferToDomainAccount32Type \} from '@autonomys/auto-xdm'
 
-const api = await activateWallet(\{ networkId: 'taurus', uri: '//alice' \})
+const api = await activateWallet(\{ networkId: 'chronos', uri: '//alice' \})
 const tx = await transferToDomainAccount32Type(
   api,
-  0, // Receiver domain (0 is Auto EVM on Taurus Testnet)
+  0, // Receiver domain (0 is Auto EVM on Chronos Testnet)
   'su1234567890abcdef', // Receiver domain account
   '1000000000000000000',
 )
@@ -3400,7 +4371,7 @@ const tx = await transferToDomainAccount32Type(
 import \{ activateWallet \} from '@autonomys/auto-utils'
 import \{ transferToConsensus \} from '@autonomys/auto-xdm'
 
-const api = await activateWallet(\{ networkId: 'taurus', domainId: 0, uri: '//alice' \})
+const api = await activateWallet(\{ networkId: 'chronos', domainId: 0, uri: '//alice' \})
 const tx = await transferToConsensus(
   api,
   'su1234567890abcdef', // Receiver consensus account,
@@ -3416,10 +4387,10 @@ import \{ domainBalances \} from '@autonomys/auto-xdm';
 
 (async () => \{
   const \{ api \} = await activateWallet(\{ 
-    networkId: 'taurus' 
+    networkId: 'chronos' 
   \});
 
-  // Get balances for domain 0 (Auto EVM on the Taurus testnet)
+  // Get balances for domain 0 (Auto EVM on the Chronos testnet)
   const balances = await domainBalances(api, 0);
   console.log('Domain balances:', balances.toString());
 \})();
@@ -3589,6 +4560,234 @@ The tests will automatically detect and execute on the local node and farmer.
 ## Next steps
 
 With the Auto SDK set up locally, you're ready to start building and testing your blockchain applications. Explore the following pages for code examples and a functions overview.
+
+
+---
+
+### File: sdk/polkadot-api.mdx
+
+# Understanding the Polkadot API for Auto SDK Development
+
+## Introduction
+
+While the Auto SDK provides convenient, high-level functions for common tasks on the Autonomys Network, many advanced use cases require direct interaction with the underlying blockchain through the **Polkadot API**. The Autonomys Network is built on Substrate (the same framework as Polkadot), which means it inherits the powerful \`@polkadot/api\` interface for blockchain interactions.
+
+> **For newcomers**: If you're just starting with blockchain development, think of the Auto SDK as a friendly toolkit for common tasks, while the Polkadot API is the comprehensive "power user" interface that gives you access to everything the blockchain can do.
+
+## Why You Need the Polkadot API
+
+The Auto SDK covers many essential operations, but there are numerous scenarios where you'll need to access blockchain data and functionality that isn't wrapped by the SDK:
+
+### Chain State Queries
+- **Block information**: Current block number, timestamps, block hashes
+- **Network fees**: Transaction fees, storage costs, operational parameters
+- **Account data**: Balances, nonces, detailed account information
+- **System parameters**: Network constants, runtime version, chain specifications
+
+### Advanced Transaction Handling
+- **Fee estimation**: Calculate exact transaction costs before submission
+- **Complex extrinsics**: Multi-signature operations, batched transactions
+- **Event filtering**: Listen for specific blockchain events beyond basic success/failure
+- **Custom pallets**: Interact with specialized blockchain modules
+
+### Real-time Monitoring
+- **Block subscriptions**: Monitor new blocks and their contents
+- **State changes**: Watch for changes in specific storage items
+- **Network status**: Monitor node health, peer connections, sync status
+
+## Essential Polkadot API Documentation
+
+The **[Polkadot.js API Documentation](https://polkadot.js.org/docs/api)** is your comprehensive resource for understanding blockchain interactions. Key sections include:
+
+- **[API Basics](https://polkadot.js.org/docs/api/start/basics)**: Connection setup and fundamental concepts
+- **[Query Methods](https://polkadot.js.org/docs/api/start/api.query)**: Reading blockchain state
+- **[RPC Calls](https://polkadot.js.org/docs/api/start/api.rpc)**: Direct node communication
+- **[Subscription Patterns](https://polkadot.js.org/docs/api/start/api.query.subs)**: Real-time data monitoring
+
+## Installation and Setup
+
+The Polkadot API works alongside the Auto SDK. Install both packages:
+
+\`\`\`bash
+npm install @polkadot/api @autonomys/auto-utils
+\`\`\`
+
+Import both in your project:
+
+\`\`\`typescript
+// Auto SDK for high-level operations
+import \{ activate, activateWallet \} from '@autonomys/auto-utils';
+
+// Polkadot API for direct blockchain access
+import \{ ApiPromise, WsProvider \} from '@polkadot/api';
+\`\`\`
+
+## Common Use Cases and Examples
+
+### 1. Getting Network Information and Fees
+
+This example shows how to retrieve transaction fees and timestamps - information not available through the Auto SDK:
+
+\`\`\`typescript
+import \{ ApiPromise, WsProvider \} from '@polkadot/api';
+
+async function getNetworkInfo() \{
+  // Connect to the Autonomys Network
+  const api = await ApiPromise.create(\{
+    provider: new WsProvider('wss://rpc-0.mainnet.subspace.network/ws')
+  \});
+
+  try \{
+    // Get current block header
+    const header = await api.rpc.chain.getHeader();
+    const blockNumber = header.number.toNumber();
+    
+    // Get current timestamp
+    const timestamp = (await api.query.timestamp.now()).toNumber();
+    
+    // Get transaction fees
+    const fee = await api.query.transactionFees.transactionByteFee();
+    
+    console.log('Block number:', blockNumber);
+    console.log('Timestamp:', new Date(timestamp).toISOString());
+    console.log('Current fee:', fee.current.toString());
+    console.log('Next fee:', fee.next.toString());
+    
+  \} finally \{
+    await api.disconnect();
+  \}
+\}
+\`\`\`
+
+### 2. Account Balance and Nonce Queries
+
+\`\`\`typescript
+async function getAccountDetails(accountAddress) \{
+  const api = await ApiPromise.create(\{
+    provider: new WsProvider('wss://rpc-0.gemini-3h.subspace.network/ws')
+  \});
+
+  try \{
+    // Get account balance
+    const balance = await api.query.system.account(accountAddress);
+    
+    console.log('Free balance:', balance.data.free.toString());
+    console.log('Reserved balance:', balance.data.reserved.toString());
+    console.log('Account nonce:', balance.nonce.toString());
+    
+  \} finally \{
+    await api.disconnect();
+  \}
+\}
+\`\`\`
+
+### 3. Fee Estimation Before Transaction
+
+\`\`\`typescript
+import \{ activateWallet \} from '@autonomys/auto-utils';
+import \{ ApiPromise \} from '@polkadot/api';
+
+async function estimateTransactionFee(recipientAddress, amount) \{
+  // Use Auto SDK to get wallet and API
+  const \{ api, accounts \} = await activateWallet(\{
+    uri: '//Alice',
+    networkId: 'mainnet'
+  \});
+  
+  const sender = accounts[0];
+  
+  // Create transaction
+  const transfer = api.tx.balances.transfer(recipientAddress, amount);
+  
+  // Estimate fees using Polkadot API
+  const info = await transfer.paymentInfo(sender.address);
+  
+  console.log(\`Estimated fee: \$\{info.partialFee.toString()\}\`);
+  console.log(\`Transaction weight: \$\{info.weight.toString()\}\`);
+  
+  await api.disconnect();
+\}
+\`\`\`
+
+### 4. Monitoring Blockchain Events
+
+\`\`\`typescript
+async function monitorBlocks() \{
+  const api = await ApiPromise.create(\{
+    provider: new WsProvider('wss://rpc-0.gemini-3h.subspace.network/ws')
+  \});
+
+  // Subscribe to new blocks
+  const unsubscribe = await api.rpc.chain.subscribeNewHeads((header) => \{
+    console.log(\`New block #\$\{header.number\} with hash \$\{header.hash\}\`);
+  \});
+
+  // Subscribe to balance changes for specific account
+  const accountAddress = 'your-account-address';
+  const unsubBalance = await api.query.system.account(accountAddress, (balance) => \{
+    console.log('Balance updated:', balance.data.free.toString());
+  \});
+
+  // Clean up subscriptions
+  setTimeout(() => \{
+    unsubscribe();
+    unsubBalance();
+    api.disconnect();
+  \}, 30000); // Stop after 30 seconds
+\}
+\`\`\`
+
+## Integration Patterns with Auto SDK
+
+### Combining Auto SDK with Polkadot API
+
+\`\`\`typescript
+import \{ activateWallet \} from '@autonomys/auto-utils';
+import \{ ApiPromise \} from '@polkadot/api';
+
+async function advancedWalletOperations() \{
+  // Use Auto SDK for wallet setup
+  const \{ api, accounts \} = await activateWallet(\{
+    mnemonic: 'your mnemonic phrase here',
+    networkId: 'mainneth'
+  \});
+  
+  const account = accounts[0];
+  
+  // Use Polkadot API for advanced queries
+  const accountInfo = await api.query.system.account(account.address);
+  const currentFees = await api.query.transactionFees.transactionByteFee();
+  
+  console.log(\`Account: \$\{account.address\}\`);
+  console.log(\`Balance: \$\{accountInfo.data.free.toString()\}\`);
+  console.log(\`Current fee rate: \$\{currentFees.current.toString()\}\`);
+  
+  // The api instance from Auto SDK is a full Polkadot API instance
+  // You can use all Polkadot API methods on it
+  const blockHash = await api.rpc.chain.getBlockHash();
+  console.log(\`Latest block hash: \$\{blockHash\}\`);
+  
+  await api.disconnect();
+\}
+\`\`\`
+
+## When to Use Auto SDK vs. Polkadot API
+
+### Use Auto SDK for:
+- ✅ Wallet creation and management
+- ✅ Basic token transfers
+- ✅ File uploads to Auto Drive
+- ✅ Auto ID operations
+- ✅ Network connection setup
+- ✅ Common utility functions
+
+### Use Polkadot API for:
+- ✅ Fee calculations and estimations
+- ✅ Block and timestamp queries
+- ✅ Custom pallet interactions
+- ✅ Advanced transaction types
+- ✅ Real-time blockchain monitoring
+- ✅ Complex state queries
 
 
 ---
