@@ -6,7 +6,7 @@
 import { fs,createAutoDriveApi } from '@autonomys/auto-drive'
 import { NetworkId } from '@autonomys/auto-utils'
 
-const api = createAutoDriveApi({ apiKey: 'your-api-key', network: NetworkId.TAURUS }) // Initialize your API instance with API key
+const api = createAutoDriveApi({ apiKey: 'your-api-key', network: NetworkId.MAINNET }) // Initialize your API instance with API key
 const filePath = 'path/to/your/file.txt' // Specify the path to your file
 const options = {
   password: 'your-encryption-password', // Optional: specify a password for encryption
@@ -28,7 +28,7 @@ console.log(`The file is uploaded and its cid is ${cid}`)
 import { uploadFileFromInput, createAutoDriveApi } from '@autonomys/auto-drive'
 import { NetworkId } from '@autonomys/auto-utils'
 
-const api = createAutoDriveApi({ apiKey: 'your-api-key', network: NetworkId.TAURUS }) // Initialize your API instance with API key
+const api = createAutoDriveApi({ apiKey: 'your-api-key', network: NetworkID.MAINNET }) // Initialize your API instance with API key
 
 // e.g Get File from object from HTML event
 const file: File = e.target.value // Substitute with your file
@@ -47,7 +47,7 @@ console.log(`The file is uploaded and its cid is ${cid}`)
 import { createAutoDriveApi, fs } from '@autonomys/auto-drive'
 import { NetworkId } from '@autonomys/auto-utils'
 
-const api = createAutoDriveApi({ apiKey: 'your-api-key', network: NetworkId.TAURUS }) // Initialize your API instance with API key
+const api = createAutoDriveApi({ apiKey: 'your-api-key', network: NetworkID.MAINNET }) // Initialize your API instance with API key
 const folderPath = 'path/to/your/folder' // Specify the path to your folder
 
 const options = {
@@ -70,7 +70,7 @@ console.log(`The folder is uploaded and its cid is ${folderCID}`)
 import { createAutoDriveApi } from '@autonomys/auto-drive'
 import { NetworkId } from '@autonomys/auto-utils'
 
-const api = createAutoDriveApi({ apiKey: 'your-api-key', network: NetworkId.TAURUS }) // Initialize your API instance with API key
+const api = createAutoDriveApi({ apiKey: 'your-api-key', network: NetworkID.MAINNET }) // Initialize your API instance with API key
 const buffer = Buffer.from(...);
 const genericFile = {
   read: async function *() {
@@ -102,7 +102,7 @@ console.log(`The file is uploaded and its cid is ${cid}`)
 import { createAutoDriveApi } from '@autonomys/auto-drive'
 import { NetworkId } from '@autonomys/auto-utils'
 
-const api = createAutoDriveApi({ apiKey: 'your-api-key', network: NetworkId.TAURUS }) // Initialize your API instance with API key
+const api = createAutoDriveApi({ apiKey: 'your-api-key', network: NetworkID.MAINNET }) // Initialize your API instance with API key
 
 try {
   const cid = '..'
@@ -123,7 +123,7 @@ try {
 import { createAutoDriveApi } from '@autonomys/auto-drive'
 import { NetworkId } from '@autonomys/auto-utils'
 
-const api = createAutoDriveApi({ apiKey: 'your-api-key', network: NetworkId.TAURUS }) // Initialize your API instance with API key
+const api = createAutoDriveApi({ apiKey: 'your-api-key', network: NetworkID.MAINNET }) // Initialize your API instance with API key
 
 try {
   const cid = 'your-file-cid'
@@ -142,7 +142,7 @@ Here is an example of how to use the `getMyFiles` method to retrieve the root di
 import { createAutoDriveApi } from '@autonomys/auto-drive'
 import { NetworkId } from '@autonomys/auto-utils'
 
-const api = createAutoDriveApi({ apiKey: 'your-api-key', network: NetworkId.TAURUS }) // Initialize your API instance with API key
+const api = createAutoDriveApi({ apiKey: 'your-api-key', network: NetworkID.MAINNET }) // Initialize your API instance with API key
 
 try {
   for (let i = 0; i < 10; i++) {
