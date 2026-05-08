@@ -1,0 +1,129 @@
+---
+title: File Encryption Specification
+---
+
+# File Encryption Specification
+
+Auto Drive supports optional **client-side encryption** — files are encrypted on your device before they are transmitted to the network. No one else, including storage nodes, can read your data without your password.
+
+This page describes the encryption algorithm, key derivation process, and chunking architecture used when you supply a `password` to an upload function.
+
+---
+
+## Overview
+
+| Property | Value |
+|---|---|
+| **Algorithm** | AES-256-GCM |
+| **Key derivation** | PBKDF2 + SHA-256 |
+| **KDF iterations** | 100,000 |
+| **Salt length** | 32 bytes (randomly generated per file) |
+| **Chunk size** | 1 MB |
+| **IV per chunk** | 16 bytes (randomly generated per chunk) |
+
+---
+
+## Encryption Algorithm: AES-256-GCM
+
+Auto Drive uses **AES-256-GCM** (Advanced Encryption Standard, 256-bit key, Galois/Counter Mode). This algorithm provides two guarantees simultaneously:
+
+- **Confidentiality** — data is encrypted with a 256-bit key, making brute-force attacks computationally infeasible.
+- **Integrity** — GCM mode appends an authentication tag to each encrypted chunk. If anyone modifies even a single bit of the ciphertext, decryption fails immediately with a detectable error.
+
+Modern processors include hardware acceleration for AES operations, so encryption and decryption add minimal overhead for most workloads.
+
+---
+
+## Key Derivation: PBKDF2
+
+Passwords are not used directly as encryption keys. Instead, Auto Drive converts your password into a cryptographic key using **PBKDF2** (Password-Based Key Derivation Function 2):
+
+1. A **32-byte random salt** is generated using a cryptographically secure random number generator. This salt is unique per file and is stored alongside the encrypted data (it does not need to be secret).
+2. The password and salt are combined and processed through **SHA-256**, repeated **100,000 times**.
+3. The output is a 256-bit key used for all chunks in the file.
+
+The high iteration count makes dictionary and brute-force attacks against the password computationally expensive, even if an attacker retrieves the encrypted file from the network.
+
+```
+password + random_salt
+        │
+        ▼
+   PBKDF2-SHA256
+   (100,000 iterations)
+        │
+        ▼
+  256-bit encryption key
+```
+
+---
+
+## File Chunking
+
+Large files are split into **1 MB chunks** before encryption. Each chunk is processed independently:
+
+1. A unique **16-byte initialization vector (IV)** is generated per chunk via a cryptographically secure random source.
+2. The chunk is encrypted with AES-256-GCM using the derived key and the chunk-specific IV.
+3. GCM produces the encrypted chunk data plus an **authentication tag**.
+
+Because each chunk has its own IV, identical chunks in the same file produce different ciphertext — preventing pattern analysis.
+
+```
+File
+ │
+ ├── Chunk 1 ── IV₁ ── AES-256-GCM ──► [ciphertext₁ + auth_tag₁]
+ ├── Chunk 2 ── IV₂ ── AES-256-GCM ──► [ciphertext₂ + auth_tag₂]
+ └── Chunk N ── IVₙ ── AES-256-GCM ──► [ciphertextₙ + auth_tagₙ]
+```
+
+The 1 MB chunk size balances memory efficiency with processing speed, and enables streaming uploads and downloads without loading the entire file into memory.
+
+---
+
+## Network Privacy
+
+Because encryption happens entirely on the client before any data leaves your device:
+
+- **Content delivery nodes** see only ciphertext.
+- **Farmers** in the distributed hash table layer store only encrypted segments.
+- **Archival storage participants** hold only encrypted data.
+
+No single point in the network ever holds the complete file in unencrypted form. This privacy guarantee persists as the network evolves, independent of individual node operators.
+
+---
+
+## Performance Characteristics
+
+- **Key derivation** (PBKDF2, 100,000 iterations) happens once per file. This is intentionally slow to resist password attacks, but adds a fixed one-time cost regardless of file size.
+- **Per-chunk encryption** runs with hardware AES acceleration on modern CPUs and is effectively negligible for typical upload speeds.
+- **Streaming** — chunked processing means Auto Drive never needs to hold the entire file in memory, making it practical for very large files.
+
+---
+
+## Using Encryption
+
+Pass a `password` option to any upload function in the `@autonomys/auto-drive` SDK:
+
+```typescript
+import { createAutoDriveApi } from '@autonomys/auto-drive'
+import { NetworkId } from '@autonomys/auto-utils'
+
+const api = createAutoDriveApi({ apiKey: 'your-api-key', network: NetworkId.MAINNET })
+
+// Upload with encryption
+const cid = await api.uploadFileFromInput(file, {
+  password: 'your-strong-password',
+})
+
+// Download and decrypt
+const stream = await api.downloadFile(cid, { password: 'your-strong-password' })
+```
+
+> **Important:** Your password is never transmitted to the network. If you lose it, the encrypted file cannot be recovered — there is no password reset mechanism.
+
+---
+
+## Further Reading
+
+- [Auto Drive Overview](/auto_drive)
+- [Auto Drive SDK — Usage Examples](/sdk/auto-drive/usage_examples)
+- [Auto Drive SDK — Available Functions](/sdk/auto-drive/available_functions)

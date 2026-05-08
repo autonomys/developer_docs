@@ -9,6 +9,7 @@ export default {
     foundry: 'Foundry Guide',
     hardhat: 'HardHat Guide',
     local: 'Local Development',
+    farmerless_dev_node: 'Farmerless Dev Node',
     the_graph: 'Query On-chain Data with The Graph',
     safe: "Safe Multi-Signature Wallet",
     wrapping_ai3: "Wrapping AI3 (WAI3)",
