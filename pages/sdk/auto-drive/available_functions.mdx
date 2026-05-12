@@ -1,22 +1,143 @@
-# Auto-Drive SDK Available Functions
+# Auto-Drive SDK — Available Functions
 
-### Upload Operations
+All functions are available as methods on the `AutoDriveApi` instance returned by `createAutoDriveApi`. Upload functions that operate on the local filesystem (Node.js only) are accessed via the `fs` sub-module.
 
-- `uploadFile(api, file, options): Promise<string>`: Uploads a file (using a buffer, `File`, or a custom interface) with optional encryption and compression. Returns the resulting CID as a string.
-- `uploadFileFromFilepath(api, filePath, options): Promise<string>`: Uploads a file from filepath with optional encryption and compression. Returns the resulting CID as a string.
-- `uploadFileFromInput(api, file, options): Promise<string>`: Uploads a file obtained from a browser's `File` API.
-- `uploadFolderFromInput(api, fileList, options): Promise<string>`: Uploads a folder from a browser's `FileList`.
-- `uploadFileWithinFolderUpload(api, uploadId, file, options): Promise<string>`: Uploads a file within an existing folder upload session.
-- `uploadObjectAsJSON(api, object, name?, options): Promise<string>`: Serializes and uploads any object as a JSON file.
+```typescript
+import { createAutoDriveApi, fs } from '@autonomys/auto-drive'
+import { NetworkId } from '@autonomys/auto-utils'
 
-### Download Operations
+const api = createAutoDriveApi({ apiKey: 'your-api-key', network: NetworkId.MAINNET })
+```
 
-- `downloadFile(api, cid, password?): AsyncIterable<Buffer>`: Downloads a file from its CID, with optional decryption using a password.
-- `getMyFiles(api, page, limit): Promise<PaginatedResult<ObjectSummary>>`: Retrieves paginated list of user's files.
-- `searchByNameOrCIDInMyFiles(api, value): Promise<ObjectSummary[]>`: Searches for files by name or CID within user's files.
-- `searchByNameOrCID(api, value): Promise<ObjectSummary[]>`: Global search for files by name or CID.
+---
 
-### Utility Functions
+## Upload Operations
 
-- `getPendingCredits(api): Promise<{ upload: number; download: number }>`: Gets the current user's pending upload and download credits.
-- `getSubscriptionInfo(api): Promise<SubscriptionInfo>`: Retrieves the current user's subscription information.
+- `api.uploadFile(file, options?, uploadChunkSize?): Promise<string>` — Uploads a `GenericFile` (custom async-iterable interface) with optional encryption and compression. Returns the CID.
+
+- `fs.uploadFileFromFilepath(api, filePath, options?): Promise<string>` — **Node.js only.** Uploads a file from a local filesystem path with optional encryption and compression. Returns the CID.
+
+- `api.uploadFileFromInput(file, options?, uploadChunkSize?): Promise<string>` — Uploads a browser `File` object (e.g. from an `<input type="file">` event). Returns the CID.
+
+- `api.uploadFileFromBuffer(buffer, name, options?, uploadChunkSize?): Promise<string>` — Uploads a `Buffer` directly with a given filename. Returns the CID.
+
+- `api.uploadObjectAsJSON(object, name?, options?, uploadChunkSize?): Promise<string>` — Serializes any value as JSON and uploads it. Returns the CID.
+
+- `api.uploadFolderFromInput(fileList, options?): Promise<string>` — Uploads a browser `FileList` or `File[]` array as a folder. Returns the root CID.
+
+- `api.uploadFileWithinFolderUpload(uploadId, file, uploadChunkSize?, options?): Promise<string>` — Uploads a single file into an existing folder upload session identified by `uploadId`. Returns the CID.
+
+**`UploadFileOptions`**
+
+```typescript
+type UploadFileOptions = {
+  password?: string         // enables AES-256-GCM client-side encryption
+  compression?: boolean
+  onProgress?: (progress: number) => void
+}
+```
+
+---
+
+## Download Operations
+
+- `api.downloadFile(cid, password?): Promise<AsyncIterable<Buffer>>` — Downloads a file by CID. Pass the same `password` used at upload time to decrypt.
+
+- `api.publishObject(cid): Promise<string>` — Creates a publicly accessible download URL for the given CID. Returns the URL string.
+
+- `api.isFileCached(cid): Promise<boolean>` — Returns whether the file is currently cached and immediately available for download.
+
+- `api.createAsyncDownload(cid): Promise<AsyncDownload>` — Queues a large file for async background download. Returns an `AsyncDownload` descriptor.
+
+- `api.getAsyncDownloads(): Promise<AsyncDownload[]>` — Returns all active async download jobs for the current account.
+
+- `api.getAsyncDownload(downloadId): Promise<AsyncDownload>` — Returns the status of a single async download by ID.
+
+- `api.dismissAsyncDownload(downloadId): Promise<void>` — Removes a completed or failed async download from the queue.
+
+---
+
+## File Discovery
+
+- `api.getMyFiles(page, limit): Promise<PaginatedResult<ObjectSummary>>` — Returns a paginated list of the current user's uploaded files.
+
+- `api.searchByNameOrCIDInMyFiles(value): Promise<ObjectSummary[]>` — Searches for files by name or CID within the current user's files.
+
+- `api.searchByNameOrCID(value): Promise<ObjectSummary[]>` — Global search across all public files by name or CID.
+
+---
+
+## Account and Credits
+
+- `api.me(): Promise<UserInfo>` — Returns the current authenticated user's profile information.
+
+- `api.getPendingCredits(): Promise<{ upload: number; download: number }>` — Returns the current user's remaining upload and download credit balances.
+
+- `api.getSubscriptionInfo(): Promise<SubscriptionInfo>` — Returns the current user's subscription tier and allocation details.
+
+- `api.getStoragePrice(): Promise<StoragePrice>` — Returns the current live storage price from the protocol. No API key required.
+
+```typescript
+type StoragePrice = {
+  shannonsPerByte: number
+  ai3PerGb: number
+}
+```
+
+---
+
+## Pay with AI3 — Payment Intents
+
+These functions implement the complete [Pay with AI3](/auto_drive/pay_with_ai3) credit purchase flow. See the [developer integration guide](/sdk/auto-drive/pay_with_ai3) for full examples.
+
+**Four-step flow:**
+```
+1. createPaymentIntent(sizeBytes)         — locks price, returns amount + contract details
+2. send ai3AmountWei to contractAddress   — call payIntent(intentId) on-chain (your wallet code)
+3. watchPaymentTransaction(id, txHash)    — notify Auto Drive of the transaction hash
+4. waitForPaymentCompletion(id)           — poll until COMPLETED (credits applied)
+```
+
+- `api.getPaymentContractInfo(): Promise<PaymentContractInfo>` — Returns the Auto-EVM contract address, chain ID, and `payIntent` ABI. No API key required. Called internally by `createPaymentIntent`; export this for client-side wallet pre-fetching.
+
+- `api.createPaymentIntent(sizeBytes): Promise<PaymentIntent>` — Locks the current storage price for the authenticated account and returns a payment intent. The price is locked for **10 minutes**.
+
+- `api.watchPaymentTransaction(intentId, txHash): Promise<void>` — Submits the on-chain transaction hash to Auto Drive. The backend polls for 6 block confirmations before granting credits.
+
+- `api.getPaymentIntentStatus(intentId): Promise<{ id: string; status: PaymentIntentStatus }>` — Returns the current status of a payment intent.
+
+- `api.waitForPaymentCompletion(intentId, options?): Promise<PaymentIntentTerminalStatus>` — Polls until the intent reaches a terminal state (`COMPLETED`, `EXPIRED`, `FAILED`, or `OVER_CAP`). Resolves with the terminal status.
+
+**Supporting types:**
+
+```typescript
+type PaymentContractInfo = {
+  chainId: number
+  contractAddress: string
+  payIntentAbi: readonly unknown[]
+}
+
+type PaymentIntent = {
+  intentId: string
+  ai3AmountWei: string   // exact value to send as msg.value (in Shannons)
+  ai3Amount: string      // human-readable AI3 amount
+  contractAddress: string
+  shannonsPerByte: string
+  expiresAt: string      // ISO 8601 timestamp, 10 minutes from creation
+}
+
+type PaymentIntentStatus =
+  | 'PENDING'    // awaiting on-chain payment
+  | 'CONFIRMED'  // payment received, awaiting final credit grant
+  | 'COMPLETED'  // credits applied to account
+  | 'EXPIRED'    // no payment received within 10 minutes
+  | 'FAILED'     // payment amount below quoted price
+  | 'OVER_CAP'   // account's 100 GB limit would be exceeded
+
+type PaymentIntentTerminalStatus = 'COMPLETED' | 'EXPIRED' | 'FAILED' | 'OVER_CAP'
+
+type PollOptions = {
+  pollIntervalMs?: number  // default: 3000
+  timeoutMs?: number       // default: 300000 (5 minutes)
+}
+```
