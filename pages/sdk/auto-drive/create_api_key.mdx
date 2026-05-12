@@ -32,12 +32,11 @@ You can also create an API key through your profile:
 
 Once logged in, your Dashboard will show:
 
-- Your upload limit (currently **20MB** per month on mainnet and **100MB** per month on Taurus testnet)  
-- Your download limit (currently **5GB** per month on both mainnet and Taurus testnet)  
+- Your upload limit (currently **20MB** per month on mainnet)   
 - A list of **uploaded files** and their **CIDs**
 - Options to **Download**, **Share** or **Remove** each file
 
-![Auto-Drive-2](/developers/Auto-Drive-2.png)
+![Auto-Drive-5](/developers/Auto-Drive-5.png)
 
 > *Note:* Removing a file does not delete it from the DSN as it is permanent storage. It only removes the file from your Dashboard.
 
@@ -51,17 +50,14 @@ import { NetworkId } from '@autonomys/auto-utils'
 
 const api = createAutoDriveApi({
   apiKey: 'your-api-key-here',
-  network: NetworkId.TAURUS // or NetworkId.MAINNET
+  network: NetworkId.MAINNET
 })
 ```
 
 ## Network Selection
 
-Auto Drive is available on both:
+Auto Drive is available on:
 - **Mainnet** (`NetworkId.MAINNET`) - Production environment
-- **Taurus Testnet** (`NetworkId.TAURUS`) - Testing environment
-
-Choose the appropriate network based on your needs.
 
 ## Security Best Practices
 

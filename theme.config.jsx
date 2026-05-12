@@ -15,16 +15,6 @@ export default {
             ? `${frontMatter.title}`
             : 'Autonomys Developer Hub'}
         </title>
-        {/* Kapa AI widget script */}
-        <script
-          src="https://widget.kapa.ai/kapa-widget.bundle.js"
-          data-website-id="125444e5-cd06-4812-b4e2-3cf33cd3f6fa"
-          data-project-name="Autonomys Network"
-          data-project-color="#f2f2f5"
-          data-project-logo="https://i.postimg.cc/BQjSkRPy/Autonomys-small-light.png"
-          data-modal-disclaimer="This is a custom LLM for Autonomys Network with access to all documentation, forum and discord threads. Since this is AI technology please use your best judgment."
-          async
-        />
         {/* Google Analytics script */}
         <script async src="https://www.googletagmanager.com/gtag/js?id=G-N417BD8BLW"></script>
         <script
