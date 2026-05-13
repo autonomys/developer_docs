@@ -75,7 +75,7 @@ description: Permanent Distributed Storage
 
 Whether you’re building a super dApp or Auto Agent, archiving important data, or hosting files for the web3 world, Auto Drive offers a seamless, developer-friendly solution.
 
-![Auto-Drive](/developers/Auto-Drive-1.png)
+![Auto-Drive](/developers/Auto-Drive-2.png)
 
 ### Key features
 
@@ -822,6 +822,204 @@ yarn resurrect your_character_name --output ./custom/path
 
 ---
 
+### File: auto_drive/index.mdx
+
+---
+title: Auto Drive
+description: Permanent On-Chain Distributed Storage
+---
+
+# Auto Drive
+
+[Auto Drive](https://ai3.storage/) transforms the underlying blockspace of the Autonomys decentralized storage network into a secure, easy-to-use, interoperable data storage platform with a user experience akin to Web2 cloud services — but with on-chain permanence.
+
+Unlike other decentralized storage solutions that distribute data across servers with no durability guarantees, Auto Drive provides access to genuine **on-chain blockspace**. Your data inherits the same permanence, security, and decentralization as the Autonomys Network itself.
+
+![Auto-Drive](/developers/Auto-Drive-1.png)
+
+---
+
+## Why Auto Drive?
+
+### Permanent Availability Without Pinning
+
+Some services require active pinning or hosting to keep files online — when a pin expires or a node goes offline, the file disappears. Auto Drive eliminates this problem entirely.
+
+The Autonomys **Distributed Storage Network (DSN)** is a permissionless on-chain storage layer supported by a globally distributed network of **farmers** who collectively pledge over **40 PB of SSD space**. Farmers are economically incentivized via **Proof-of-Archival-Storage (PoAS)** consensus to store as many provably unique segments of chain history as their disk space allows.
+
+### Tamper-Proof by Design
+
+Autonomys maintains data redundancy via **erasure-coded replication** across the network — each data chunk is stored on multiple nodes, guaranteeing data availability and integrity. It becomes exponentially more difficult for a single actor to control the majority of copies.
+
+---
+
+## Key Features
+
+### True On-Chain Storage
+
+Auto Drive provides access to genuine on-chain blockspace. This means your data inherits the same permanence, security, and decentralization guarantees as the Autonomys Network itself — not a separate off-chain storage layer with additional trust assumptions.
+
+### End-to-End Encryption (Optional)
+
+Auto Drive supports optional client-side encryption using **AES-256-GCM**. Files are encrypted on your device before they are transmitted to the network, so storage nodes never see your plaintext data. See the [File Encryption Specification](/sdk/auto-drive/encryption) for full technical details.
+
+### Permissionless Storage Credits — Pay with AI3
+
+Storage on Auto Drive is paid for with **credits**. Beyond the free monthly tier, credits can be purchased directly with native **AI3 tokens** on the Auto-EVM network — no intermediary, no grant form, no foundation approval. Payments settle on-chain and credits become available within a few blocks.
+
+→ See the full guide: **[Pay with AI3](/auto_drive/pay_with_ai3)**
+
+### User-Friendly Dashboard
+
+[ai3.storage](https://ai3.storage/) provides an intuitive web interface for managing your files and account:
+
+- Drag and drop file uploads
+- Create and manage directories
+- Share files via direct link or Public ID
+- Manage API keys
+- Track upload and download credits
+
+Sign in with Google, Discord, GitHub, or a wallet.
+
+![Auto-Drive-2](/developers/Auto-Drive-2.png)
+
+## Use Cases
+
+- **Super dApps** — host decentralized application assets with permanent availability guarantees.
+- **Auto Agents** — store on-chain agent state, logs, and artifacts transparently and verifiably.
+- **NFT metadata** — link NFT metadata and media files to permanent storage so they can never disappear.
+- **Long-term archival** — permanently archive important files without relying on pinning services.
+- **Web3 file hosting** — serve files for web3 applications with no single point of failure.
+
+---
+
+## Storage Credits
+
+Every account includes a free monthly allocation. When you need more, there are two options — grants for projects early in development, and permissionless on-chain purchase for production use.
+
+### Free Tier
+
+| Resource | Included Free |
+|---|---|
+| **Upload** | 20 MB / month |
+| **Renewal** | Monthly |
+
+### Requesting a Grant
+
+If your project needs more storage during development, submit your **Auto Drive Public ID** via the [credits request form](https://forms.gle/EAPzicXcbP7gH2uT6) to request a grant from the Autonomys team.
+
+### Pay with AI3
+
+For production applications, credits can be purchased permissionlessly with native **AI3 tokens** directly on the Auto-EVM network. No approval process, no intermediary — pay on-chain and credits are available within a few blocks.
+
+**[→ Pay with AI3 guide](/auto_drive/pay_with_ai3)** — covers step by step process on how to purchase credits with AI3 tokens.
+
+---
+
+## Further Reading
+
+- [Pay with AI3](/auto_drive/pay_with_ai3) — purchase storage credits permissionlessly with AI3 tokens
+- [File Encryption Specification](/sdk/auto-drive/encryption) — AES-256-GCM encryption details
+- [Auto Drive SDK](/sdk/auto-drive) — full SDK reference including all available functions, S3 compatibility layer, and API reference
+
+
+---
+
+### File: auto_drive/pay_with_ai3.mdx
+
+---
+title: Pay with AI3 — Storage Credits
+---
+
+# Pay with AI3
+
+Pay with AI3 lets you purchase **Auto Drive storage credits** directly with native AI3 tokens — no intermediary, no grant form, no approval process. Payments are made on-chain on the **Auto-EVM network** (Chain ID 870) and credits become available within a few blocks of confirmation.
+
+> **AI3 on Auto EVM required.** Payments use AI3 on the Auto-EVM network, not on the consensus chain. If your AI3 is on the consensus chain, you will need to bridge it to Auto EVM first — see the [Bridging guide](https://docs.autonomys.xyz/bridge).
+
+---
+
+## Step 1: Open Purchase Credits
+
+Sign in to [ai3.storage](https://ai3.storage/) and click **"Buy more credits"** in the bottom-left sidebar of the dashboard.
+
+![PwAI3-1](/developers/PwAI3-1.png)
+
+---
+
+## Step 2: Select a Package
+
+Choose one of the preset packages or configure a custom amount. The current price per MB is shown at the top of the page and reflects live protocol-level DSN storage costs and a service fee.
+
+![PwAI3-2](/developers/PwAI3-2.png)
+
+---
+
+## Step 3: Review and Confirm the Order
+
+After selecting a package or entering a custom amount, review the order details — storage amount, AI3 token amount, USD equivalent, and your credits balance before and after purchase. Click **"Confirm Purchase"** to proceed.
+
+> **The price is locked for 10 minutes from this point.** Complete the payment within the window. If the timer expires before the transaction is sent, go back and request a new price quote before purchasing.
+
+![PwAI3-3](/developers/PwAI3-3.png)
+
+---
+
+## Step 4: Connect Your Wallet and Send the Transfer
+
+The next screen shows the transfer details: your connected wallet address, the recipient contract address, and the exact AI3 amount. Connect a compatible EVM wallet and click **"Send Transfer"**.
+
+Your wallet must hold **AI3 on the Auto-EVM network** (Chain ID 870). If your AI3 is on the consensus chain, bridge it first — see the [Bridging guide](https://docs.autonomys.xyz/bridge). If needed, add Auto EVM to your wallet:
+
+\`\`\`
+Network Name: Autonomys EVM
+RPC URL:      https://auto-evm.mainnet.autonomys.xyz/ws
+Chain ID:     870
+Symbol:       AI3
+\`\`\`
+
+After sending, the page will show a confirmation progress bar. Wait for **6 out of 6 block confirmations** before continuing.
+
+![PwAI3-4](/developers/PwAI3-4.png)
+
+---
+
+## Step 5: Payment Complete
+
+Once all 6 confirmations are reached, you will see a payment receipt showing storage added, AI3 paid, transaction hash, and your new purchased credits total. Click **"Continue to Dashboard"**.
+
+Your credits are immediately available and will be reflected in the sidebar balance. Credits are consumed in **FIFO expiry order** — credits closest to expiration are spent first. Your free monthly allocation is always spent before purchased credits.
+
+![PwAI3-5](/developers/PwAI3-5.png)
+
+---
+
+## A Note on Current Limitations
+
+These restrictions are deliberate economic protections, not permanent product decisions. The Autonomys Network is still in its early growth phase, and they exist to prevent storage credit hoarding or speculative accumulation. The goal is for storage credits to be used, not held.
+
+**Google authentication is required.** Purchasing credits requires signing in with a Google account. Server-side integrations work as long as the owning account authenticated with Google when creating the API key.
+
+**100 GB maximum purchased credits per account.** This limit is enforced at the time credits are granted. If a payment would push you past the cap, the intent moves to \`OVER_CAP\` — the payment is not lost and is recoverable.
+
+**Purchased credits expire after 90 days.** Unused bytes are forfeited at expiry. Work is underway on automated refunds for unused credits — for now, expiry forfeiture is recoverable through support.
+
+These constraints will be revisited as the network matures. If you are building something that these limits add friction to, reach out on the [forum](https://forum.autonomys.xyz/) or in [Discord](https://autonomys.xyz/discord).
+
+For full details, see the [Auto Drive Terms of Use](https://autonomys.xyz/auto-drive-terms-of-use).
+
+---
+
+## Further Reading
+
+- [Auto Drive Overview](/auto_drive)
+- [Pay with AI3 — Developer Integration](/sdk/auto-drive/pay_with_ai3) — integrate permissionless credit purchasing into your own application
+- [File Encryption Specification](/sdk/auto-drive/encryption)
+- [Auto Drive SDK](/sdk/auto-drive)
+
+
+---
+
 ### File: evm/NFT_guide.mdx
 
 ---
@@ -1006,6 +1204,192 @@ This testnet environment is perfect for developers and users to experiment with 
 We encourage everyone in the community to explore these bridges and experiment with their capabilities. Your feedback is crucial as we continue to refine and improve our infrastructure.
 
 Experience the power of seamless interoperability across blockchain networks!
+
+---
+
+### File: evm/farmerless_dev_node.mdx
+
+---
+title: Farmerless Dev Node Quick Start
+---
+
+## Subspace Farmerless Dev Node
+
+Developer utility binary that boots a local Subspace consensus node (mocked farmerless setup) and, optionally, an EVM domain node for integration testing and manual experimentation. It wraps helpers from \`subspace-test-service\` and \`domain-test-service\` so that devs can exercise cross-domain flows without spinning up a full farmer.
+
+### Prerequisites
+
+- Rust toolchain with \`cargo\`
+- Workspace dependencies built once (\`cargo build -p subspace-farmerless-dev-node\`)
+
+### Usage
+
+From the workspace root:
+
+\`\`\`bash
+cargo run -p subspace-farmerless-dev-node -- [FLAGS/OPTIONS]
+\`\`\`
+
+#### Common Flags
+
+- \`--finalize-depth <K>\`: Enforce finalization depth; omit to disable.
+- \`--domain\`: Start the EVM domain node alongside consensus.
+- \`--base-path <PATH>\`: Persist data instead of using a temp dir.
+- \`--rpc-host <IP>\` / \`--rpc-port <PORT>\`: Consensus RPC interface (defaults \`127.0.0.1:9944\`).
+- \`--domain-rpc-host <IP>\` / \`--domain-rpc-port <PORT>\`: Domain RPC interface (defaults \`127.0.0.1:9945\`).
+- \`--block-interval-ms <MS>\`: Slot and block production cadence (default \`6000\`; use \`0\` to disable auto-production).
+
+To inspect the full CLI help, run:
+
+\`\`\`bash
+cargo run -p subspace-farmerless-dev-node -- --help
+\`\`\`
+
+### Typical Scenarios
+
+#### Quick Smoke Test
+
+Produces consensus blocks every 6s using temp storage:
+
+\`\`\`bash
+cargo run -p subspace-farmerless-dev-node
+\`\`\`
+
+#### Run with Domain Node
+
+Start both consensus and EVM domain nodes:
+
+\`\`\`bash
+cargo run -p subspace-farmerless-dev-node -- --domain
+\`\`\`
+
+#### Fast Integration Testing
+
+Faster block production for quick testing:
+
+\`\`\`bash
+cargo run -p subspace-farmerless-dev-node -- --block-interval-ms 500 --domain
+\`\`\`
+
+#### Manual Block Production
+
+Disable auto-production and trigger blocks manually via RPC:
+
+\`\`\`bash
+cargo run -p subspace-farmerless-dev-node -- --block-interval-ms 0 --domain
+\`\`\`
+
+### Manual Block Production RPCs
+
+When \`--block-interval-ms 0\` is set, the node exposes JSON-RPC endpoints for manual block production:
+
+#### \`dev_produceBlock\`
+
+Produce a single consensus block.
+
+**Parameters:**
+
+- \`wait_for_bundle\` (optional, boolean): If \`true\`, wait for domain bundle submission before producing the block. Defaults to \`false\`.
+
+**Example:**
+
+\`\`\`bash
+curl -H "Content-Type: application/json" \
+     --data '\{"jsonrpc":"2.0","id":1,"method":"dev_produceBlock","params":[true]\}' \
+     http://127.0.0.1:9944
+\`\`\`
+
+#### \`dev_produceBlocks\`
+
+Produce multiple consensus blocks.
+
+**Parameters:**
+
+- \`count\` (required, number): Number of blocks to produce.
+- \`wait_for_bundle\` (optional, boolean): If \`true\`, wait for domain bundle submission before each block. Defaults to \`false\`.
+
+**Examples:**
+
+\`\`\`bash
+# Produce 5 blocks without waiting for bundles
+curl -H "Content-Type: application/json" \
+     --data '\{"jsonrpc":"2.0","id":1,"method":"dev_produceBlocks","params":[5]\}' \
+     http://127.0.0.1:9944
+
+# Produce 5 blocks, waiting for bundles
+curl -H "Content-Type: application/json" \
+     --data '\{"jsonrpc":"2.0","id":1,"method":"dev_produceBlocks","params":[5,true]\}' \
+     http://127.0.0.1:9944
+\`\`\`
+
+> **Note:** When \`wait_for_bundle\` is \`true\`, the domain node must be running (\`--domain\` flag) or the RPC call will timeout waiting for bundle submission.
+
+### Docker Setup
+
+For easy setup using Docker, you can use the provided \`docker-compose.yml\` file. This setup automatically builds and runs the farmerless dev node with the EVM domain enabled.
+
+#### Prerequisites
+
+- Docker and Docker Compose installed
+
+#### Quick Start with Docker
+
+1. Ensure you're in the workspace root directory (where \`docker-compose.yml\` is located).
+
+2. Start the farmerless dev node:
+
+\`\`\`bash
+docker-compose up
+\`\`\`
+
+This will:
+- Build the \`subspace-farmerless-dev-node\` binary
+- Start the node with the \`--domain\` flag enabled
+- Expose ports:
+  - \`9944\`: Consensus RPC
+  - \`9945\`: Domain RPC
+  - \`8545\`: EVM RPC
+
+3. Access the RPC endpoints:
+   - Consensus RPC: \`http://localhost:9944\`
+   - Domain RPC: \`http://localhost:9945\`
+   - EVM RPC: \`http://localhost:8545\`
+
+#### Customizing Docker Setup
+
+You can modify the \`docker-compose.yml\` file to customize the setup:
+
+- **Change block interval**: Modify the command to include \`--block-interval-ms <MS>\`
+- **Persist data**: Add \`--base-path /workspace/data\` to the command
+- **Change ports**: Update the port mappings in the \`ports\` section
+
+#### Example: Fast Block Production
+
+To run with faster block production (500ms intervals), modify the command in \`docker-compose.yml\`:
+
+\`\`\`yaml
+command: >
+  bash -c "
+    cargo build -p subspace-farmerless-dev-node --release &&
+    cargo run -p subspace-farmerless-dev-node --release -- --domain --block-interval-ms 500 --rpc-host 0.0.0.0 --domain-rpc-host 0.0.0.0
+  "
+\`\`\`
+
+#### Stopping the Container
+
+To stop the farmerless dev node:
+
+\`\`\`bash
+docker-compose down
+\`\`\`
+
+To stop and remove volumes (clearing cached build artifacts):
+
+\`\`\`bash
+docker-compose down -v
+\`\`\`
+
+
 
 ---
 
@@ -2227,7 +2611,7 @@ When planning transactions:
 
 ### File: evm/wrapping_ai3.mdx
 
-# How to Wrap AI3 Tokens (Mainnet and Chronos Testnet)
+# How to Wrap AI3 Tokens (Mainnet and Taurus Testnet)
 
 Native AI3 tokens on Auto EVM are similar to ETH on the Ethereum network - they are not ERC-20 tokens, which is sometimes a requirement for certain use-cases.
 
@@ -2418,6 +2802,12 @@ To access the developer role-gated *#developer-chat* channel:
 
 3. Link your GitHub account to attain the developer role and gain access to *#developer-chat*. 
    ![Discord-2](/developers/Discord-2.png)
+
+
+---
+
+### File: llm_friendly_docs.mdx
+
 
 
 ---
@@ -3169,6 +3559,7 @@ The API is organized into several main categories:
 ## Base URLs
 
 - **Mainnet**: \`https://mainnet.auto-drive.autonomys.xyz\`
+- **Taurus Testnet**: \`https://taurus.auto-drive.autonomys.xyz\`
 
 ## Authentication
 
@@ -3248,28 +3639,150 @@ For detailed endpoint specifications, request/response schemas, and interactive 
 
 ### File: sdk/auto-drive/available_functions.mdx
 
-# Auto-Drive SDK Available Functions
+# Auto-Drive SDK — Available Functions
 
-### Upload Operations
+All functions are available as methods on the \`AutoDriveApi\` instance returned by \`createAutoDriveApi\`. Upload functions that operate on the local filesystem (Node.js only) are accessed via the \`fs\` sub-module.
 
-- \`uploadFile(api, file, options): Promise<string>\`: Uploads a file (using a buffer, \`File\`, or a custom interface) with optional encryption and compression. Returns the resulting CID as a string.
-- \`uploadFileFromFilepath(api, filePath, options): Promise<string>\`: Uploads a file from filepath with optional encryption and compression. Returns the resulting CID as a string.
-- \`uploadFileFromInput(api, file, options): Promise<string>\`: Uploads a file obtained from a browser's \`File\` API.
-- \`uploadFolderFromInput(api, fileList, options): Promise<string>\`: Uploads a folder from a browser's \`FileList\`.
-- \`uploadFileWithinFolderUpload(api, uploadId, file, options): Promise<string>\`: Uploads a file within an existing folder upload session.
-- \`uploadObjectAsJSON(api, object, name?, options): Promise<string>\`: Serializes and uploads any object as a JSON file.
+\`\`\`typescript
+import \{ createAutoDriveApi, fs \} from '@autonomys/auto-drive'
+import \{ NetworkId \} from '@autonomys/auto-utils'
 
-### Download Operations
+const api = createAutoDriveApi(\{ apiKey: 'your-api-key', network: NetworkId.MAINNET \})
+\`\`\`
 
-- \`downloadFile(api, cid, password?): AsyncIterable<Buffer>\`: Downloads a file from its CID, with optional decryption using a password.
-- \`getMyFiles(api, page, limit): Promise<PaginatedResult<ObjectSummary>>\`: Retrieves paginated list of user's files.
-- \`searchByNameOrCIDInMyFiles(api, value): Promise<ObjectSummary[]>\`: Searches for files by name or CID within user's files.
-- \`searchByNameOrCID(api, value): Promise<ObjectSummary[]>\`: Global search for files by name or CID.
+---
 
-### Utility Functions
+## Upload Operations
 
-- \`getPendingCredits(api): Promise<\{ upload: number; download: number \}>\`: Gets the current user's pending upload and download credits.
-- \`getSubscriptionInfo(api): Promise<SubscriptionInfo>\`: Retrieves the current user's subscription information.
+- \`api.uploadFile(file, options?, uploadChunkSize?): Promise<string>\` — Uploads a \`GenericFile\` (custom async-iterable interface) with optional encryption and compression. Returns the CID.
+
+- \`fs.uploadFileFromFilepath(api, filePath, options?): Promise<string>\` — **Node.js only.** Uploads a file from a local filesystem path with optional encryption and compression. Returns the CID.
+
+- \`api.uploadFileFromInput(file, options?, uploadChunkSize?): Promise<string>\` — Uploads a browser \`File\` object (e.g. from an \`<input type="file">\` event). Returns the CID.
+
+- \`api.uploadFileFromBuffer(buffer, name, options?, uploadChunkSize?): Promise<string>\` — Uploads a \`Buffer\` directly with a given filename. Returns the CID.
+
+- \`api.uploadObjectAsJSON(object, name?, options?, uploadChunkSize?): Promise<string>\` — Serializes any value as JSON and uploads it. Returns the CID.
+
+- \`api.uploadFolderFromInput(fileList, options?): Promise<string>\` — Uploads a browser \`FileList\` or \`File[]\` array as a folder. Returns the root CID.
+
+- \`api.uploadFileWithinFolderUpload(uploadId, file, uploadChunkSize?, options?): Promise<string>\` — Uploads a single file into an existing folder upload session identified by \`uploadId\`. Returns the CID.
+
+**\`UploadFileOptions\`**
+
+\`\`\`typescript
+type UploadFileOptions = \{
+  password?: string         // enables AES-256-GCM client-side encryption
+  compression?: boolean
+  onProgress?: (progress: number) => void
+\}
+\`\`\`
+
+---
+
+## Download Operations
+
+- \`api.downloadFile(cid, password?): Promise<AsyncIterable<Buffer>>\` — Downloads a file by CID. Pass the same \`password\` used at upload time to decrypt.
+
+- \`api.publishObject(cid): Promise<string>\` — Creates a publicly accessible download URL for the given CID. Returns the URL string.
+
+- \`api.isFileCached(cid): Promise<boolean>\` — Returns whether the file is currently cached and immediately available for download.
+
+- \`api.createAsyncDownload(cid): Promise<AsyncDownload>\` — Queues a large file for async background download. Returns an \`AsyncDownload\` descriptor.
+
+- \`api.getAsyncDownloads(): Promise<AsyncDownload[]>\` — Returns all active async download jobs for the current account.
+
+- \`api.getAsyncDownload(downloadId): Promise<AsyncDownload>\` — Returns the status of a single async download by ID.
+
+- \`api.dismissAsyncDownload(downloadId): Promise<void>\` — Removes a completed or failed async download from the queue.
+
+---
+
+## File Discovery
+
+- \`api.getMyFiles(page, limit): Promise<PaginatedResult<ObjectSummary>>\` — Returns a paginated list of the current user's uploaded files.
+
+- \`api.searchByNameOrCIDInMyFiles(value): Promise<ObjectSummary[]>\` — Searches for files by name or CID within the current user's files.
+
+- \`api.searchByNameOrCID(value): Promise<ObjectSummary[]>\` — Global search across all public files by name or CID.
+
+---
+
+## Account and Credits
+
+- \`api.me(): Promise<UserInfo>\` — Returns the current authenticated user's profile information.
+
+- \`api.getPendingCredits(): Promise<\{ upload: number; download: number \}>\` — Returns the current user's remaining upload and download credit balances.
+
+- \`api.getSubscriptionInfo(): Promise<SubscriptionInfo>\` — Returns the current user's subscription tier and allocation details.
+
+- \`api.getStoragePrice(): Promise<StoragePrice>\` — Returns the current live storage price from the protocol. No API key required.
+
+\`\`\`typescript
+type StoragePrice = \{
+  shannonsPerByte: number
+  ai3PerGb: number
+\}
+\`\`\`
+
+---
+
+## Pay with AI3 — Payment Intents
+
+These functions implement the complete [Pay with AI3](/auto_drive/pay_with_ai3) credit purchase flow. See the [developer integration guide](/sdk/auto-drive/pay_with_ai3) for full examples.
+
+**Four-step flow:**
+\`\`\`
+1. createPaymentIntent(sizeBytes)         — locks price, returns amount + contract details
+2. send ai3AmountWei to contractAddress   — call payIntent(intentId) on-chain (your wallet code)
+3. watchPaymentTransaction(id, txHash)    — notify Auto Drive of the transaction hash
+4. waitForPaymentCompletion(id)           — poll until COMPLETED (credits applied)
+\`\`\`
+
+- \`api.getPaymentContractInfo(): Promise<PaymentContractInfo>\` — Returns the Auto-EVM contract address, chain ID, and \`payIntent\` ABI. No API key required. Called internally by \`createPaymentIntent\`; export this for client-side wallet pre-fetching.
+
+- \`api.createPaymentIntent(sizeBytes): Promise<PaymentIntent>\` — Locks the current storage price for the authenticated account and returns a payment intent. The price is locked for **10 minutes**.
+
+- \`api.watchPaymentTransaction(intentId, txHash): Promise<void>\` — Submits the on-chain transaction hash to Auto Drive. The backend polls for 6 block confirmations before granting credits.
+
+- \`api.getPaymentIntentStatus(intentId): Promise<\{ id: string; status: PaymentIntentStatus \}>\` — Returns the current status of a payment intent.
+
+- \`api.waitForPaymentCompletion(intentId, options?): Promise<PaymentIntentTerminalStatus>\` — Polls until the intent reaches a terminal state (\`COMPLETED\`, \`EXPIRED\`, \`FAILED\`, or \`OVER_CAP\`). Resolves with the terminal status.
+
+**Supporting types:**
+
+\`\`\`typescript
+type PaymentContractInfo = \{
+  chainId: number
+  contractAddress: string
+  payIntentAbi: readonly unknown[]
+\}
+
+type PaymentIntent = \{
+  intentId: string
+  ai3AmountWei: string   // exact value to send as msg.value (in Shannons)
+  ai3Amount: string      // human-readable AI3 amount
+  contractAddress: string
+  shannonsPerByte: string
+  expiresAt: string      // ISO 8601 timestamp, 10 minutes from creation
+\}
+
+type PaymentIntentStatus =
+  | 'PENDING'    // awaiting on-chain payment
+  | 'CONFIRMED'  // payment received, awaiting final credit grant
+  | 'COMPLETED'  // credits applied to account
+  | 'EXPIRED'    // no payment received within 10 minutes
+  | 'FAILED'     // payment amount below quoted price
+  | 'OVER_CAP'   // account's 100 GB limit would be exceeded
+
+type PaymentIntentTerminalStatus = 'COMPLETED' | 'EXPIRED' | 'FAILED' | 'OVER_CAP'
+
+type PollOptions = \{
+  pollIntervalMs?: number  // default: 3000
+  timeoutMs?: number       // default: 300000 (5 minutes)
+\}
+\`\`\`
+
 
 ---
 
@@ -3309,11 +3822,12 @@ You can also create an API key through your profile:
 
 Once logged in, your Dashboard will show:
 
-- Your upload limit (currently **20MB** per month on mainnet)   
+- Your upload limit (currently **20MB** per month on mainnet and **100MB** per month on Taurus testnet)  
+- Your download limit (currently **5GB** per month on both mainnet and Taurus testnet)  
 - A list of **uploaded files** and their **CIDs**
 - Options to **Download**, **Share** or **Remove** each file
 
-![Auto-Drive-5](/developers/Auto-Drive-5.png)
+![Auto-Drive-2](/developers/Auto-Drive-2.png)
 
 > *Note:* Removing a file does not delete it from the DSN as it is permanent storage. It only removes the file from your Dashboard.
 
@@ -3327,14 +3841,17 @@ import \{ NetworkId \} from '@autonomys/auto-utils'
 
 const api = createAutoDriveApi(\{
   apiKey: 'your-api-key-here',
-  network: NetworkId.MAINNET
+  network: NetworkId.TAURUS // or NetworkId.MAINNET
 \})
 \`\`\`
 
 ## Network Selection
 
-Auto Drive is available on:
+Auto Drive is available on both:
 - **Mainnet** (\`NetworkId.MAINNET\`) - Production environment
+- **Taurus Testnet** (\`NetworkId.TAURUS\`) - Testing environment
+
+Choose the appropriate network based on your needs.
 
 ## Security Best Practices
 
@@ -3352,13 +3869,148 @@ With your API key created, you can now:
 
 ---
 
+### File: sdk/auto-drive/encryption.mdx
+
+---
+title: File Encryption Specification
+---
+
+# File Encryption Specification
+
+Auto Drive supports optional **client-side encryption** — files are encrypted on your device before they are transmitted to the network. No one else, including storage nodes, can read your data without your password.
+
+This page describes the encryption algorithm, key derivation process, and chunking architecture used when you supply a \`password\` to an upload function.
+
+---
+
+## Overview
+
+| Property | Value |
+|---|---|
+| **Algorithm** | AES-256-GCM |
+| **Key derivation** | PBKDF2 + SHA-256 |
+| **KDF iterations** | 100,000 |
+| **Salt length** | 32 bytes (randomly generated per file) |
+| **Chunk size** | 1 MB |
+| **IV per chunk** | 16 bytes (randomly generated per chunk) |
+
+---
+
+## Encryption Algorithm: AES-256-GCM
+
+Auto Drive uses **AES-256-GCM** (Advanced Encryption Standard, 256-bit key, Galois/Counter Mode). This algorithm provides two guarantees simultaneously:
+
+- **Confidentiality** — data is encrypted with a 256-bit key, making brute-force attacks computationally infeasible.
+- **Integrity** — GCM mode appends an authentication tag to each encrypted chunk. If anyone modifies even a single bit of the ciphertext, decryption fails immediately with a detectable error.
+
+Modern processors include hardware acceleration for AES operations, so encryption and decryption add minimal overhead for most workloads.
+
+---
+
+## Key Derivation: PBKDF2
+
+Passwords are not used directly as encryption keys. Instead, Auto Drive converts your password into a cryptographic key using **PBKDF2** (Password-Based Key Derivation Function 2):
+
+1. A **32-byte random salt** is generated using a cryptographically secure random number generator. This salt is unique per file and is stored alongside the encrypted data (it does not need to be secret).
+2. The password and salt are combined and processed through **SHA-256**, repeated **100,000 times**.
+3. The output is a 256-bit key used for all chunks in the file.
+
+The high iteration count makes dictionary and brute-force attacks against the password computationally expensive, even if an attacker retrieves the encrypted file from the network.
+
+\`\`\`
+password + random_salt
+        │
+        ▼
+   PBKDF2-SHA256
+   (100,000 iterations)
+        │
+        ▼
+  256-bit encryption key
+\`\`\`
+
+---
+
+## File Chunking
+
+Large files are split into **1 MB chunks** before encryption. Each chunk is processed independently:
+
+1. A unique **16-byte initialization vector (IV)** is generated per chunk via a cryptographically secure random source.
+2. The chunk is encrypted with AES-256-GCM using the derived key and the chunk-specific IV.
+3. GCM produces the encrypted chunk data plus an **authentication tag**.
+
+Because each chunk has its own IV, identical chunks in the same file produce different ciphertext — preventing pattern analysis.
+
+\`\`\`
+File
+ │
+ ├── Chunk 1 ── IV₁ ── AES-256-GCM ──► [ciphertext₁ + auth_tag₁]
+ ├── Chunk 2 ── IV₂ ── AES-256-GCM ──► [ciphertext₂ + auth_tag₂]
+ └── Chunk N ── IVₙ ── AES-256-GCM ──► [ciphertextₙ + auth_tagₙ]
+\`\`\`
+
+The 1 MB chunk size balances memory efficiency with processing speed, and enables streaming uploads and downloads without loading the entire file into memory.
+
+---
+
+## Network Privacy
+
+Because encryption happens entirely on the client before any data leaves your device:
+
+- **Content delivery nodes** see only ciphertext.
+- **Farmers** in the distributed hash table layer store only encrypted segments.
+- **Archival storage participants** hold only encrypted data.
+
+No single point in the network ever holds the complete file in unencrypted form. This privacy guarantee persists as the network evolves, independent of individual node operators.
+
+---
+
+## Performance Characteristics
+
+- **Key derivation** (PBKDF2, 100,000 iterations) happens once per file. This is intentionally slow to resist password attacks, but adds a fixed one-time cost regardless of file size.
+- **Per-chunk encryption** runs with hardware AES acceleration on modern CPUs and is effectively negligible for typical upload speeds.
+- **Streaming** — chunked processing means Auto Drive never needs to hold the entire file in memory, making it practical for very large files.
+
+---
+
+## Using Encryption
+
+Pass a \`password\` option to any upload function in the \`@autonomys/auto-drive\` SDK:
+
+\`\`\`typescript
+import \{ createAutoDriveApi \} from '@autonomys/auto-drive'
+import \{ NetworkId \} from '@autonomys/auto-utils'
+
+const api = createAutoDriveApi(\{ apiKey: 'your-api-key', network: NetworkId.MAINNET \})
+
+// Upload with encryption
+const cid = await api.uploadFileFromInput(file, \{
+  password: 'your-strong-password',
+\})
+
+// Download and decrypt
+const stream = await api.downloadFile(cid, \{ password: 'your-strong-password' \})
+\`\`\`
+
+> **Important:** Your password is never transmitted to the network. If you lose it, the encrypted file cannot be recovered — there is no password reset mechanism.
+
+---
+
+## Further Reading
+
+- [Auto Drive Overview](/auto_drive)
+- [Auto Drive SDK — Usage Examples](/sdk/auto-drive/usage_examples)
+- [Auto Drive SDK — Available Functions](/sdk/auto-drive/available_functions)
+
+
+---
+
 ### File: sdk/auto-drive/gateway.mdx
 
 # Auto Drive Gateway
 
 ## What is the Auto Drive Gateway?
 
-Auto Gateway is a unified gateway solution designed for seamlessly accessing files or folders permanently stored on the Autonomys Mainnet through a single, streamlined interface. The gateway is available [here](https://gateway.autonomys.xyz/).
+Auto Gateway is a unified gateway solution designed for seamlessly accessing files or folders permanently stored on the Autonomys Mainnet & Taurus testnet through a single, streamlined interface. The gateway is available [here](https://gateway.autonomys.xyz/).
 
 ![Auto-Gateway-1](/developers/Auto-Gateway-1.png)
 
@@ -3516,16 +4168,261 @@ import \{ NetworkId \} from '@autonomys/auto-utils'
 
 ## Network Configuration
 
-[Auto Drive](https://ai3.storage) is available on Mainnet. To connect to it, you need to configure the network using \`auto-utils\` package:
+As [Auto Drive](https://ai3.storage) is available on both Mainnet and the Taurus testnet, you need to configure the network when using the package:
 
 \`\`\`ts
 import \{ NetworkId \} from '@autonomys/auto-utils'
 
 const api = createAutoDriveApi(\{
   apiKey: 'your-api-key',
-  network: NetworkId.MAINNET
+  network: NetworkId.TAURUS | NetworkId.MAINNET
 \})
 \`\`\`
+
+---
+
+### File: sdk/auto-drive/pay_with_ai3.mdx
+
+---
+title: Pay with AI3 — Developer Integration
+---
+
+# Pay with AI3 — Developer Integration
+
+This page covers how to integrate permissionless Auto Drive credit purchasing into your own application using the \`AutoDriveCreditsReceiver\` smart contract and the credits API.
+
+For the end-user purchase walkthrough, see the [Pay with AI3 guide](/auto_drive/pay_with_ai3).
+
+---
+
+## How It Works
+
+The payment system is built around a **payment intent** model. Each purchase follows four steps:
+
+1. Your app fetches a **price quote** from the backend — reflects the live protocol-level DSN storage cost via a Substrate RPC connection to the Autonomys consensus chain, plus a service fee.
+2. The backend creates a **payment intent** — a server-side record that locks the price and binds a \`bytes32\` intent ID to the authenticated account for up to 10 minutes.
+3. Your app calls \`payIntent(intentId)\` on the \`AutoDriveCreditsReceiver\` contract on Auto-EVM, sending the exact quoted AI3 amount as \`msg.value\`.
+4. Your app submits the transaction hash to the watch endpoint; the backend polls for **6 block confirmations** and then grants the credits.
+
+Credits are available immediately after confirmation and can be used via the dashboard, the AutoSDK, or the REST API.
+
+---
+
+## Smart Contract
+
+| Field | Value |
+|---|---|
+| **Contract** | \`AutoDriveCreditsReceiver\` |
+| **Network** | Autonomys Auto-EVM |
+| **Chain ID** | \`870\` |
+| **Address** | \`0xBa5bed8325183c0807EcBC80C82D40Dc7Ac5cbf7\` |
+
+View on Blockscout: [AutoDriveCreditsReceiver](https://explorer.auto-evm.mainnet.autonomys.xyz/address/0xBa5bed8325183c0807EcBC80C82D40Dc7Ac5cbf7)
+
+### \`payIntent\`
+
+\`\`\`solidity
+function payIntent(bytes32 intentId) public payable whenNotPaused;
+\`\`\`
+
+\`intentId\` is the \`bytes32\` value returned by \`POST /intents/\`. Send the exact quoted amount as \`msg.value\` — the transaction will fail if the value does not match.
+
+The \`whenNotPaused\` modifier allows the protocol team to pause payments in the event of a critical issue.
+
+### Event
+
+\`\`\`solidity
+event IntentPaymentReceived(bytes32 indexed intentId, uint256 paymentAmount);
+\`\`\`
+
+Emitted on successful payment. Listen for this event to confirm receipt before calling the watch endpoint.
+
+---
+
+## Payment Intent State Machine
+
+\`\`\`
+PENDING ──► CONFIRMED ──► COMPLETED
+   │
+   ├──► EXPIRED   (no payment received within 10 minutes)
+   │
+   └──► FAILED    (payment amount below the quoted price)
+
+CONFIRMED ──► OVER_CAP  (account's 100 GB purchased credit limit exceeded)
+\`\`\`
+
+> Always fetch a fresh quote immediately before creating an intent. Prices reflect live protocol costs and can change between requests.
+
+---
+
+## API Reference
+
+Base URL: \`https://api.autonomys.xyz\`
+
+### Get a Price Quote
+
+\`\`\`http
+GET /intents/price
+\`\`\`
+
+Returns the current AI3 cost (in Shannons) per GB. No authentication required.
+
+**Example response:**
+
+\`\`\`json
+\{
+  "pricePerGb": "1000000000000000000",
+  "currency": "AI3"
+\}
+\`\`\`
+
+---
+
+### Create a Payment Intent
+
+\`\`\`http
+POST /intents/
+\`\`\`
+
+Locks the current price for the authenticated account and returns an intent ID.
+
+> **Authentication:** Requires a Google OAuth token in the \`Authorization\` header. The intent is bound to this account — credits cannot be redirected elsewhere.
+
+**Request body:**
+
+\`\`\`json
+\{
+  "storageGb": 10
+\}
+\`\`\`
+
+**Response:**
+
+\`\`\`json
+\{
+  "intentId": "0xabc123...",
+  "amount": "10000000000000000000",
+  "expiresAt": "2026-05-12T12:10:00Z"
+\}
+\`\`\`
+
+Pass \`intentId\` as the argument to \`payIntent\` and \`amount\` as \`msg.value\`.
+
+---
+
+### Confirm a Transaction
+
+\`\`\`http
+POST /intents/:id/watch
+\`\`\`
+
+Submit the on-chain transaction hash. The backend polls for 6 confirmations before crediting the account.
+
+**Request body:**
+
+\`\`\`json
+\{
+  "txHash": "0xdef456..."
+\}
+\`\`\`
+
+---
+
+## Integration Patterns
+
+### Pattern 1 — App-managed credits
+
+Your application holds a funded Auto-EVM wallet and purchases credits on behalf of users. Useful for apps that abstract storage costs away entirely.
+
+\`\`\`typescript
+import \{ ethers \} from 'ethers'
+
+const CONTRACT_ADDRESS = '0xBa5bed8325183c0807EcBC80C82D40Dc7Ac5cbf7'
+const ABI = [
+  'function payIntent(bytes32 intentId) payable',
+  'event IntentPaymentReceived(bytes32 indexed intentId, uint256 paymentAmount)',
+]
+
+async function purchaseCredits(signer: ethers.Signer, authToken: string, storageGb: number) \{
+  // 1. Fetch fresh quote
+  const quoteRes = await fetch('https://api.autonomys.xyz/intents/price')
+  const \{ pricePerGb \} = await quoteRes.json()
+
+  // 2. Create intent — price locked for 10 minutes
+  const intentRes = await fetch('https://api.autonomys.xyz/intents/', \{
+    method: 'POST',
+    headers: \{
+      'Content-Type': 'application/json',
+      Authorization: \`Bearer \$\{authToken\}\`,
+    \},
+    body: JSON.stringify(\{ storageGb \}),
+  \})
+  const \{ intentId, amount \} = await intentRes.json()
+
+  // 3. Call payIntent on Auto-EVM — send exact quoted amount
+  const contract = new ethers.Contract(CONTRACT_ADDRESS, ABI, signer)
+  const tx = await contract.payIntent(intentId, \{ value: amount \})
+  await tx.wait()
+
+  // 4. Submit tx hash — backend confirms 6 blocks then grants credits
+  await fetch(\`https://api.autonomys.xyz/intents/\$\{intentId\}/watch\`, \{
+    method: 'POST',
+    headers: \{ 'Content-Type': 'application/json' \},
+    body: JSON.stringify(\{ txHash: tx.hash \}),
+  \})
+
+  return tx.hash
+\}
+\`\`\`
+
+### Pattern 2 — User-managed credits
+
+Direct users to the [Auto Drive dashboard](https://ai3.storage/) to purchase credits themselves using the [Pay with AI3 guide](/auto_drive/pay_with_ai3). Your application uses the AutoSDK with the user's API key — no on-chain interaction required in your code.
+
+This is the lower-complexity option and is suitable for most applications.
+
+---
+
+## Using Credits After Purchase
+
+Once purchased, credits are consumed automatically when uploading via the \`@autonomys/auto-drive\` SDK. No additional configuration is needed.
+
+\`\`\`typescript
+import \{ createAutoDriveApi \} from '@autonomys/auto-drive'
+import \{ NetworkId \} from '@autonomys/auto-utils'
+
+const api = createAutoDriveApi(\{ apiKey: 'your-api-key', network: NetworkId.MAINNET \})
+
+// Credits are deducted automatically on upload
+const cid = await api.uploadFileFromInput(file, \{
+  password: 'optional-encryption-password', // enable AES-256-GCM encryption
+\})
+
+console.log('Uploaded CID:', cid)
+\`\`\`
+
+Credits are consumed in **FIFO expiry order** — the soonest-to-expire credits are spent first. Free monthly credits are consumed before purchased ones.
+
+---
+
+## Limits and Expiry
+
+| Parameter | Value |
+|---|---|
+| **Maximum purchased credits** | 100 GB per account |
+| **Credit expiry** | 90 days from grant date |
+| **Intent timeout** | 10 minutes |
+| **Confirmation blocks** | 6 |
+
+---
+
+## Further Reading
+
+- [Pay with AI3 — User Guide](/auto_drive/pay_with_ai3)
+- [Auto Drive Overview & Setup](/sdk/auto-drive/overview_setup)
+- [Available Functions](/sdk/auto-drive/available_functions)
+- [Usage Examples](/sdk/auto-drive/usage_examples)
+
 
 ---
 
@@ -3654,6 +4551,7 @@ const Bucket = \`\$\{baseURL\}/s3\`; // e.g., "https://public.auto-drive.autonom
 // No actual S3 bucket is created - it's just URL routing
 \`\`\`
 - Mainnet: \`https://public.auto-drive.autonomys.xyz/api/s3\`
+- Taurus Testnet: \`https://public.taurus.auto-drive.autonomys.xyz/api/s3\`
 - Base URL: http://localhost:3000/s3 (development)
 - Bucket name becomes the full endpoint path
 - No actual bucket concept - uses path-based routing
@@ -3761,7 +4659,7 @@ This S3 layer provides a familiar interface while leveraging the benefits of dec
 import \{ fs,createAutoDriveApi \} from '@autonomys/auto-drive'
 import \{ NetworkId \} from '@autonomys/auto-utils'
 
-const api = createAutoDriveApi(\{ apiKey: 'your-api-key', network: NetworkId.MAINNET \}) // Initialize your API instance with API key
+const api = createAutoDriveApi(\{ apiKey: 'your-api-key', network: NetworkId.TAURUS \}) // Initialize your API instance with API key
 const filePath = 'path/to/your/file.txt' // Specify the path to your file
 const options = \{
   password: 'your-encryption-password', // Optional: specify a password for encryption
@@ -3783,7 +4681,7 @@ console.log(\`The file is uploaded and its cid is \$\{cid\}\`)
 import \{ uploadFileFromInput, createAutoDriveApi \} from '@autonomys/auto-drive'
 import \{ NetworkId \} from '@autonomys/auto-utils'
 
-const api = createAutoDriveApi(\{ apiKey: 'your-api-key', network: NetworkID.MAINNET \}) // Initialize your API instance with API key
+const api = createAutoDriveApi(\{ apiKey: 'your-api-key', network: NetworkId.TAURUS \}) // Initialize your API instance with API key
 
 // e.g Get File from object from HTML event
 const file: File = e.target.value // Substitute with your file
@@ -3802,7 +4700,7 @@ console.log(\`The file is uploaded and its cid is \$\{cid\}\`)
 import \{ createAutoDriveApi, fs \} from '@autonomys/auto-drive'
 import \{ NetworkId \} from '@autonomys/auto-utils'
 
-const api = createAutoDriveApi(\{ apiKey: 'your-api-key', network: NetworkID.MAINNET \}) // Initialize your API instance with API key
+const api = createAutoDriveApi(\{ apiKey: 'your-api-key', network: NetworkId.TAURUS \}) // Initialize your API instance with API key
 const folderPath = 'path/to/your/folder' // Specify the path to your folder
 
 const options = \{
@@ -3825,7 +4723,7 @@ console.log(\`The folder is uploaded and its cid is \$\{folderCID\}\`)
 import \{ createAutoDriveApi \} from '@autonomys/auto-drive'
 import \{ NetworkId \} from '@autonomys/auto-utils'
 
-const api = createAutoDriveApi(\{ apiKey: 'your-api-key', network: NetworkID.MAINNET \}) // Initialize your API instance with API key
+const api = createAutoDriveApi(\{ apiKey: 'your-api-key', network: NetworkId.TAURUS \}) // Initialize your API instance with API key
 const buffer = Buffer.from(...);
 const genericFile = \{
   read: async function *() \{
@@ -3857,7 +4755,7 @@ console.log(\`The file is uploaded and its cid is \$\{cid\}\`)
 import \{ createAutoDriveApi \} from '@autonomys/auto-drive'
 import \{ NetworkId \} from '@autonomys/auto-utils'
 
-const api = createAutoDriveApi(\{ apiKey: 'your-api-key', network: NetworkID.MAINNET \}) // Initialize your API instance with API key
+const api = createAutoDriveApi(\{ apiKey: 'your-api-key', network: NetworkId.TAURUS \}) // Initialize your API instance with API key
 
 try \{
   const cid = '..'
@@ -3878,7 +4776,7 @@ try \{
 import \{ createAutoDriveApi \} from '@autonomys/auto-drive'
 import \{ NetworkId \} from '@autonomys/auto-utils'
 
-const api = createAutoDriveApi(\{ apiKey: 'your-api-key', network: NetworkID.MAINNET \}) // Initialize your API instance with API key
+const api = createAutoDriveApi(\{ apiKey: 'your-api-key', network: NetworkId.TAURUS \}) // Initialize your API instance with API key
 
 try \{
   const cid = 'your-file-cid'
@@ -3897,7 +4795,7 @@ Here is an example of how to use the \`getMyFiles\` method to retrieve the root 
 import \{ createAutoDriveApi \} from '@autonomys/auto-drive'
 import \{ NetworkId \} from '@autonomys/auto-utils'
 
-const api = createAutoDriveApi(\{ apiKey: 'your-api-key', network: NetworkID.MAINNET \}) // Initialize your API instance with API key
+const api = createAutoDriveApi(\{ apiKey: 'your-api-key', network: NetworkId.TAURUS \}) // Initialize your API instance with API key
 
 try \{
   for (let i = 0; i < 10; i++) \{

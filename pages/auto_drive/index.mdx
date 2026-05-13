@@ -1,0 +1,96 @@
+---
+title: Auto Drive
+description: Permanent On-Chain Distributed Storage
+---
+
+# Auto Drive
+
+[Auto Drive](https://ai3.storage/) transforms the underlying blockspace of the Autonomys decentralized storage network into a secure, easy-to-use, interoperable data storage platform with a user experience akin to Web2 cloud services — but with on-chain permanence.
+
+Unlike other decentralized storage solutions that distribute data across servers with no durability guarantees, Auto Drive provides access to genuine **on-chain blockspace**. Your data inherits the same permanence, security, and decentralization as the Autonomys Network itself.
+
+![Auto-Drive](/developers/Auto-Drive-1.png)
+
+---
+
+## Why Auto Drive?
+
+### Permanent Availability Without Pinning
+
+Some services require active pinning or hosting to keep files online — when a pin expires or a node goes offline, the file disappears. Auto Drive eliminates this problem entirely.
+
+The Autonomys **Distributed Storage Network (DSN)** is a permissionless on-chain storage layer supported by a globally distributed network of **farmers** who collectively pledge over **40 PB of SSD space**. Farmers are economically incentivized via **[Proof-of-Archival-Storage (PoAS)](https://academy.autonomys.xyz/autonomys-network/consensus)** consensus to store as many provably unique segments of chain history as their disk space allows.
+
+### Tamper-Proof by Design
+
+Autonomys maintains data redundancy via **erasure-coded replication** across the network — each data chunk is stored on multiple nodes, guaranteeing data availability and integrity.
+
+---
+
+## Key Features
+
+### True On-Chain Storage
+
+Auto Drive provides access to genuine on-chain blockspace. This means your data inherits the same permanence, security, and decentralization guarantees as the Autonomys Network itself — not a separate off-chain storage layer with additional trust assumptions.
+
+### End-to-End Encryption (Optional)
+
+Auto Drive supports optional client-side encryption using **AES-256-GCM**. Files are encrypted on your device before they are transmitted to the network, so storage nodes never see your plaintext data. See the [File Encryption Specification](/sdk/auto-drive/encryption) for full technical details.
+
+### Permissionless Storage Credits — Pay with AI3
+
+Storage on Auto Drive is paid for with **credits**. Beyond the free monthly tier, credits can be purchased directly with native **AI3 tokens** on the Auto-EVM network — no intermediary, no grant form, no foundation approval. Payments settle on-chain and credits become available within a few blocks.
+
+→ See the full guide: **[Pay with AI3](/auto_drive/pay_with_ai3)**
+
+### User-Friendly Dashboard
+
+[ai3.storage](https://ai3.storage/) provides an intuitive web interface for managing your files and account:
+
+- Drag and drop file uploads and folders
+- Share files via direct link or Public ID
+- Manage API keys
+- Track and purchase upload credits
+
+Sign in with Google, Discord, GitHub, or a wallet.
+
+![Auto-Drive-2](/developers/Auto-Drive-2.png)
+
+## Use Cases
+
+- **Super dApps** — host decentralized application assets with permanent availability guarantees.
+- **Auto Agents** — store on-chain agent state, logs, and artifacts transparently and verifiably.
+- **NFT metadata** — link NFT metadata and media files to permanent storage so they can never disappear.
+- **Long-term archival** — permanently archive important files without relying on pinning services.
+- **Web3 file hosting** — serve files for web3 applications with no single point of failure.
+
+---
+
+## Storage Credits
+
+Every account includes a free monthly allocation. When you need more, there are two options — grants for projects early in development, and permissionless on-chain purchase for production use.
+
+### Free Tier
+
+| Resource | Included Free |
+|---|---|
+| **Upload** | 20 MB / month |
+| **Renewal** | Monthly |
+
+### Requesting a Grant
+
+If your project needs more storage during development, submit your **Auto Drive Public ID** via the [credits request form](https://forms.gle/EAPzicXcbP7gH2uT6) to request a grant from the Autonomys team.
+
+### Pay with AI3
+
+For production applications, credits can be purchased permissionlessly with native **AI3 tokens** directly on the Auto-EVM network. No approval process, no intermediary — pay on-chain and credits are available within a few blocks.
+
+**[→ Pay with AI3 guide](/auto_drive/pay_with_ai3)** — covers step by step process on how to purchase credits with AI3 tokens.
+
+---
+
+## Further Reading
+
+- [Pay with AI3](/auto_drive/pay_with_ai3) — purchase storage credits permissionlessly with AI3 tokens
+- [File Encryption Specification](/sdk/auto-drive/encryption) — AES-256-GCM encryption details
+- [Auto Drive SDK](/sdk/auto-drive) — full SDK reference including all available functions, S3 compatibility layer, and API reference

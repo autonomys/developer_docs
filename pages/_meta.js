@@ -12,13 +12,11 @@ export default {
       }
     },
     introduction: "Introduction",
+    auto_drive: 'Auto Drive',
+    sdk: 'Auto SDK',
+    evm: 'Auto EVM',
     application_examples: 'Example Applications',
     auto_agents_framework: 'Autonomys Agents Framework',
-    sdk: 'Auto SDK',
-    '---': {
-      type: 'separator'
-    },
-    evm: 'Auto EVM',
     llm_friendly_docs: {
       title: 'LLM-Friendly Docs',
       theme: {
