@@ -8,6 +8,7 @@ Developer utility binary that boots a local Subspace consensus node (mocked farm
 
 ### Prerequisites
 
+- Cloned [Subspace Repository](https://github.com/autonomys/subspace)
 - Rust toolchain with `cargo`
 - Workspace dependencies built once (`cargo build -p subspace-farmerless-dev-node`)
 
@@ -115,7 +116,7 @@ curl -H "Content-Type: application/json" \
 
 ### Docker Setup
 
-For easy setup using Docker, you can use the provided `docker-compose.yml` file. This setup automatically builds and runs the farmerless dev node with the EVM domain enabled.
+For easy setup using Docker, you can use the [provided `farmerless-dev-node.yml`](https://github.com/autonomys/subspace/blob/main/docker/farmerless-dev-node.Dockerfile) file. This setup automatically builds and runs the farmerless dev node with the EVM domain enabled.
 
 #### Prerequisites
 
