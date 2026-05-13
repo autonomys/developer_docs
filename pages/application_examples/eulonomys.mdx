@@ -1,0 +1,165 @@
+---
+title: Eulonomys
+description: A reference application that preserves eulogies permanently using Auto Drive storage and Pay with AI3
+---
+
+## Eulonomys: Permanent Eulogies on the Autonomys Network
+
+Eulonomys is a reference application that preserves eulogies permanently using Auto Drive storage. Every tribute created with Eulonomys is immutable, censorship-resistant, and independent of any company or server.
+
+This walkthrough highlights a new Auto Drive capability: **Pay with AI3**. Users can now pay for permanent storage on the Autonomys DSN directly with AI3 tokens from their wallet. No subscriptions. No intermediaries. Your words, preserved forever.
+
+The real purpose of this app is to show developers how to build on Autonomys. Every pattern is meant to be copied, extended, and improved.
+
+---
+
+### Video walkthrough
+
+<iframe
+  width="100%"
+  height="430"
+  src="https://www.youtube.com/embed/cMlaWvectS8"
+  title="Eulonomys Walkthrough"
+  frameBorder="0"
+  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+  allowFullScreen
+  style={{ borderRadius: '8px', marginTop: '1rem' }}
+/>
+
+---
+
+### Try it
+
+🕊️ **Live app**: [eulonomys.vercel.app](https://eulonomys.vercel.app/)
+
+---
+
+### Source code
+
+The full source is open and meant to be forked:
+
+**[github.com/autonomys-community/eulonomys](https://github.com/autonomys-community/eulonomys)**
+
+---
+
+## Pay with AI3 — Code Walkthrough
+
+The following snippets are taken directly from the Eulonomys repository and show how Pay with AI3 is integrated end-to-end.
+
+### Creating a payment intent
+
+The server-side API route creates a payment intent, watches the on-chain transaction, and polls for completion — all through the `@autonomys/auto-drive` SDK:
+
+```typescript
+// src/app/api/payment/route.ts
+
+import { createAutoDriveApi } from "@autonomys/auto-drive";
+import { NextRequest, NextResponse } from "next/server";
+import { config } from "@/config/app";
+
+function getApi() {
+  return createAutoDriveApi({
+    apiKey: config.autoDrive.apiKey,
+    apiUrl: config.autoDrive.apiUrl,
+  });
+}
+
+export async function POST(request: NextRequest) {
+  const body = await request.json();
+  const { action } = body;
+
+  // Step 1: Create an intent (locks price for 10 minutes)
+  if (action === "createIntent") {
+    const { contentSizeBytes } = body;
+    const intent = await getApi().createPaymentIntent(contentSizeBytes);
+    return NextResponse.json(intent);
+  }
+
+  // Step 2: User has sent the on-chain tx — submit hash for watching
+  if (action === "watch") {
+    const { intentId, txHash } = body;
+    await getApi().watchPaymentTransaction(intentId, txHash);
+    return NextResponse.json({ success: true });
+  }
+
+  // Step 3: Wait for intent to complete (long-poll)
+  if (action === "waitForCompletion") {
+    const { intentId } = body;
+    const status = await getApi().waitForPaymentCompletion(intentId, {
+      pollIntervalMs: 3000,
+      timeoutMs: 300000,
+    });
+    return NextResponse.json({ status });
+  }
+}
+```
+
+### Uploading to Auto Drive after payment
+
+Once credits land, the app uploads the eulogy content using the SDK. The `SdkAutoDriveClient` wraps the SDK and provides a clean interface for the rest of the app:
+
+```typescript
+// src/services/autoDrive.ts
+
+import { createAutoDriveApi } from "@autonomys/auto-drive";
+import { config } from "@/config/app";
+
+export class SdkAutoDriveClient {
+  private api: ReturnType<typeof createAutoDriveApi>;
+
+  constructor() {
+    this.api = createAutoDriveApi({
+      provider: "apikey",
+      apiKey: config.autoDrive.apiKey,
+      apiUrl: config.autoDrive.apiUrl,
+    });
+  }
+
+  async uploadFile(buffer: Buffer, filename: string) {
+    const cid = await this.api.uploadFileFromBuffer(buffer, filename, {
+      compression: true,
+    });
+    return { cid };
+  }
+
+  async uploadJson(data: Record<string, unknown>, filename: string) {
+    const cid = await this.api.uploadObjectAsJSON(data, filename, {
+      compression: true,
+    });
+    return { cid };
+  }
+}
+```
+
+### App configuration
+
+Minimal configuration is required — an API key and the network endpoints:
+
+```typescript
+// src/config/app.ts
+
+export const config = {
+  autoDrive: {
+    gatewayUrl:
+      process.env.NEXT_PUBLIC_AUTO_DRIVE_GATEWAY_URL ||
+      "https://gateway.autonomys.xyz/file",
+    apiUrl:
+      process.env.AUTO_DRIVE_API_URL ||
+      "https://mainnet.auto-drive.autonomys.xyz/api",
+    apiKey: process.env.AUTO_DRIVE_API_KEY || "",
+  },
+  payment: {
+    pollIntervalMs: 3000,
+    pollTimeoutMs: 300000,
+  },
+} as const;
+```
+
+---
+
+## Further reading
+
+- [Auto Drive Overview](/auto_drive)
+- [Pay with AI3 — Storage Credits](/auto_drive/pay_with_ai3)
+- [Pay with AI3 — Developer Integration](/sdk/auto-drive/pay_with_ai3)
+- [Auto Drive SDK](/sdk/auto-drive)
