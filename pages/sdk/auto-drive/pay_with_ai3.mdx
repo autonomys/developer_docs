@@ -15,11 +15,11 @@ For the end-user purchase walkthrough, see the [Pay with AI3 guide](/auto_drive/
 The payment system is built around a **payment intent** model. Each purchase follows four steps:
 
 1. Your app fetches a **price quote** from the backend — reflects the live protocol-level DSN storage cost via a Substrate RPC connection to the Autonomys consensus chain, plus a service fee.
-2. The backend creates a **payment intent** — a server-side record that locks the price and binds a `bytes32` intent ID to the authenticated account for up to 10 minutes.
+2. Your app asks the Auto Drive backend to create a **payment intent** — a server-side record that locks the price and binds a `bytes32` intent ID to the authenticated account for up to 10 minutes.
 3. Your app calls `payIntent(intentId)` on the `AutoDriveCreditsReceiver` contract on Auto-EVM, sending the exact quoted AI3 amount as `msg.value`.
 4. Your app submits the transaction hash to the watch endpoint; the backend polls for **6 block confirmations** and then grants the credits.
 
-Credits are available immediately after confirmation and can be used via the dashboard, the AutoSDK, or the REST API.
+Credits are available immediately after confirmation and can be used via the dashboard, the Auto SDK, or the REST API.
 
 ---
 
@@ -66,7 +66,7 @@ PENDING ──► CONFIRMED ──► COMPLETED
 CONFIRMED ──► OVER_CAP  (account's 100 GB purchased credit limit exceeded)
 ```
 
-> Always fetch a fresh quote immediately before creating an intent. Prices reflect live protocol costs and can change between requests.
+> Always fetch a fresh quote immediately before creating an intent. Prices reflect live protocol storage cost and can change between requests.
 
 ---
 

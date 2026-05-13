@@ -6,7 +6,7 @@ title: Pay with AI3 — Storage Credits
 
 Pay with AI3 lets you purchase **Auto Drive storage credits** directly with native AI3 tokens — no intermediary, no grant form, no approval process. Payments are made on-chain on the **Auto-EVM network** (Chain ID 870) and credits become available within a few blocks of confirmation.
 
-> **AI3 on Auto EVM required.** Payments use AI3 on the Auto-EVM network, not on the consensus chain. If your AI3 is on the consensus chain, you will need to bridge it to Auto EVM first — see the [Bridging guide](https://docs.autonomys.xyz/bridge).
+> **AI3 on Auto EVM required.** Payments use AI3 on the Auto-EVM network, not on the consensus chain. If your AI3 is on the consensus chain, you will need to move it to Auto EVM using Cross Domain Messaging (XDM) first — see the [XDM guide](https://docs.autonomys.xyz/xdm).
 
 ---
 
@@ -20,7 +20,7 @@ Sign in to [ai3.storage](https://ai3.storage/) and click **"Buy more credits"** 
 
 ## Step 2: Select a Package
 
-Choose one of the preset packages or configure a custom amount. The current price per MB is shown at the top of the page and reflects live protocol-level DSN storage costs and a service fee.
+Choose one of the preset packages or configure a custom amount. The current price per MB is shown at the top of the page and is derived from live protocol-level DSN storage costs.
 
 ![PwAI3-2](/developers/PwAI3-2.png)
 
@@ -40,7 +40,7 @@ After selecting a package or entering a custom amount, review the order details 
 
 The next screen shows the transfer details: your connected wallet address, the recipient contract address, and the exact AI3 amount. Connect a compatible EVM wallet and click **"Send Transfer"**.
 
-Your wallet must hold **AI3 on the Auto-EVM network** (Chain ID 870). If your AI3 is on the consensus chain, bridge it first — see the [Bridging guide](https://docs.autonomys.xyz/bridge). If needed, add Auto EVM to your wallet:
+Your wallet must hold **AI3 on the Auto-EVM network** (Chain ID 870). If your AI3 is on the consensus chain, XDM it first — see the [Cross Domain Messaging guide](https://docs.autonomys.xyz/xdm). If needed, add Auto EVM to your wallet:
 
 ```
 Network Name: Autonomys EVM
