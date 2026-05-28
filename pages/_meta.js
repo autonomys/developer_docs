@@ -14,9 +14,24 @@ export default {
     introduction: "Introduction",
     auto_drive: 'Auto Drive',
     sdk: 'Auto SDK',
-    evm: 'Auto EVM',
-    application_examples: 'Example Applications',
-    auto_agents_framework: 'Autonomys Agents Framework',
+    evm: {
+      title: 'Auto EVM',
+      theme: {
+        collapsed: true,
+      },
+    },
+    application_examples: {
+      title: 'Example Applications',
+      theme: {
+        collapsed: true,
+      },
+    },
+    auto_agents_framework: {
+      title: 'Autonomys Agents Framework',
+      theme: {
+        collapsed: true,
+      },
+    },
     llm_friendly_docs: {
       title: 'LLM-Friendly Docs',
       theme: {
