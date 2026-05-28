@@ -2,33 +2,118 @@
 
 ## Overview
 
-**Auto Drive** provides an **S3-compatible API layer** that allows you to interact with **decentralized storage(DSN)** using standard **Amazon Web Services Simple Storage Service (AWS S3)** SDK commands. This bridges the gap between familiar cloud storage patterns and next-generation decentralized infrastructure, giving developers the best of both worlds: the **reliability and developer experience of S3 APIs** with the **permanence and censorship-resistance** of decentralized storage.
+**Auto Drive** provides an **S3-compatible API layer** that allows you to interact with **decentralized storage (DSN)** using standard **Amazon Web Services Simple Storage Service (AWS S3)** SDK commands. This bridges the gap between familiar cloud storage patterns and next-generation decentralized infrastructure, giving developers the best of both worlds: the **reliability and developer experience of S3 APIs** with the **permanence and censorship-resistance** of decentralized storage.
 
-For those unfamiliar, [Amazon Web Services Simple Storage Service (AWS S3)](https://aws.amazon.com/s3/) is an industry-standard object storage service that powers much of the modern web's file storage needs. **Auto Drive** maintains complete compatibility with S3's APIs while storing your data on a **decentralized network** instead of **centralized servers**.
+For those unfamiliar, [Amazon Web Services Simple Storage Service (AWS S3)](https://aws.amazon.com/s3/) is an industry-standard object storage service that powers much of the modern web's file storage needs. **Auto Drive** maintains compatibility with the most-used parts of S3's APIs while storing your data on a **decentralized network** instead of **centralized servers**.
+
+> **Permanent and immutable by design.** Auto Drive storage is permanent. Objects on the Autonomys DSN cannot be modified, overwritten, or deleted. `DeleteObject` returns `403 Forbidden`. Re-uploading the same key creates a new object — the old data persists on the DSN. Plan your data model around this guarantee.
 
 ## How It Works
-Auto Drive maintains an object_mappings table in the database that maps S3 object keys to Content Identifiers (CIDs). When you upload via S3 API, the system:
+
+Auto Drive maintains an `object_mappings` table in the database that maps S3 (bucket, key) pairs to Content Identifiers (CIDs) and MD5 checksums. When you upload via the S3 API, the system:
 
 1. Stores the file content on the decentralized network (DSN)
-2. Records the key-to-CID mapping in the database
-3. Returns the CID as the ETag for S3 compatibility
-4. Enables cross-API access between S3 and Auto Drive APIs
-
+2. Computes the MD5 of the content and records the `(bucket, key) → (cid, md5)` mapping
+3. Returns the **MD5 as the `ETag`** (standard S3 format) and exposes the **CID in the `x-amz-meta-cid` response header**
+4. Enables cross-API access between the S3 API and the native Auto Drive API
 
 ## Key Features
 
-### 1. **Standard S3 SDK Compatibility**
+### 1. Standard S3 SDK and CLI Compatibility
 
-- Use official AWS S3 SDK (`@aws-sdk/client-s3`)
-- Supports all major S3 operations: `PutObject`, `GetObject`, `HeadObject`, multipart uploads (`CreateMultipartUploadCommand`, `UploadPartCommand` & `CompleteMultipartUploadCommand`)
-- No code changes required for existing S3 applications
+- Works with the official AWS S3 SDKs (`@aws-sdk/client-s3`, `boto3`), the **AWS CLI**, and S3-compatible tools like **[rclone](#rclone-integration)**
+- Supported operations: `ListBuckets`, `ListObjectsV2`, `PutObject`, `GetObject`, `HeadObject`, multipart uploads (`CreateMultipartUpload`, `UploadPart`, `CompleteMultipartUpload`)
+- No code changes required for existing S3 applications other than swapping the endpoint and credentials
 
-### 2. **Enhanced Metadata Support**
+### 2. Buckets
+
+Buckets behave like standard S3 buckets. The **first path segment of the object key is the bucket name**, and the remainder is the key:
+
+| S3 path | Bucket | Key |
+| --- | --- | --- |
+| `my-archive/report.pdf` | `my-archive` | `report.pdf` |
+| `my-archive/sub/file.txt` | `my-archive` | `sub/file.txt` |
+| `test.txt` (no slash) | `default` | `test.txt` |
+
+Buckets are **created implicitly** on first write — there is no `CreateBucket` call. `ListBuckets` (`GET /`) returns every distinct bucket you have written to.
 
 ```typescript
-// Compression and encryption metadata
+import { ListBucketsCommand } from "@aws-sdk/client-s3";
+
+const result = await s3Client.send(new ListBucketsCommand({}));
+console.log(result.Buckets); // [{ Name: "my-archive", CreationDate: ... }, ...]
+```
+
+Single-segment keys uploaded before bucket support was introduced remain accessible under the `default` bucket.
+
+### 3. ListObjectsV2 with Prefix, Delimiter, and Pagination
+
+Auto Drive implements `ListObjectsV2` end-to-end, with the parameters most clients depend on:
+
+- **Prefix filtering** — `?prefix=subdir/` returns only keys starting with `subdir/`
+- **Delimiter folding** — `?delimiter=/` collapses keys into `<CommonPrefixes>` virtual directories
+- **Pagination** — `?max-keys=N` plus `?continuation-token=…` for cursor-based paging
+- **Object size** — `<Size>` is populated from indexed metadata
+- **MD5 ETag in listings** — listing entries return the MD5 ETag, so checksum verification does not require an extra `HeadObject` per object
+
+> Auto Drive implements **`ListObjectsV2` only**. The legacy `ListObjects` (V1) API is not implemented. rclone users must set `list_version = 2` in their remote config (see [rclone integration](#rclone-integration)).
+
+```typescript
+import { ListObjectsV2Command } from "@aws-sdk/client-s3";
+
+const result = await s3Client.send(
+  new ListObjectsV2Command({
+    Bucket: "my-archive",
+    Prefix: "logs/",
+    Delimiter: "/",
+    MaxKeys: 100,
+  })
+);
+
+console.log(result.Contents);        // objects directly under "logs/"
+console.log(result.CommonPrefixes);  // virtual subdirectories like "logs/2026/"
+
+if (result.IsTruncated) {
+  // Fetch the next page using result.NextContinuationToken
+}
+```
+
+### 4. MD5 ETags + CID via `x-amz-meta-cid`
+
+`PutObject`, `GetObject`, `HeadObject`, `ListObjectsV2`, and `CompleteMultipartUpload` all return a **standard quoted MD5 ETag** (e.g. `"d41d8cd98f00b204e9800998ecf8427e"`). For multipart uploads, the composite ETag follows the AWS format `"<md5_of_part_md5s>-<N>"`.
+
+The Autonomys CID is exposed on every object response as a custom header:
+
+```http
+x-amz-meta-cid: bafkreig...
+```
+
+This makes `rclone check`, `rclone md5sum`, AWS CLI checksum verification, and any other MD5-based tooling work out of the box.
+
+> **Migration note.** Objects uploaded before the MD5 ETag feature shipped have a `NULL` MD5 in the database. They will not return an `ETag` header on `HEAD`/`GET` until they are re-uploaded. The CID is always available via `x-amz-meta-cid`. For listings of legacy objects, the CID is returned as a fallback.
+
+```typescript
+import { HeadObjectCommand } from "@aws-sdk/client-s3";
+
+const head = await s3Client.send(
+  new HeadObjectCommand({ Bucket: "my-archive", Key: "report.pdf" })
+);
+
+console.log(head.ETag);                    // '"d41d8cd98f00b204e9800998ecf8427e"' (MD5)
+console.log(head.Metadata?.cid);           // 'bafkreig...' (CID, via x-amz-meta-cid)
+```
+
+### 5. Deletion is Forbidden by Design
+
+`DeleteObject` always returns `403 Forbidden` with an informative message — Auto Drive storage is permanent. Tools that try to delete (e.g. `rclone delete`, `rclone purge`, `rclone sync` with deletions) will see the 403 and surface it as an error. Re-uploading the same key creates a new object pointing at new content; the prior data still exists on the DSN.
+
+### 6. Enhanced Metadata Support
+
+Custom user metadata is stored alongside the object and returned on subsequent `HEAD`/`GET` calls. Auto Drive recognizes `compression` and `encryption` metadata for content stored with those transforms applied client-side.
+
+```typescript
 const command = new PutObjectCommand({
-  Bucket: "https://public.auto-drive.autonomys.xyz/api/s3",
+  Bucket: "my-archive",
   Key: "file.txt",
   Body: buffer,
   Metadata: {
@@ -38,132 +123,136 @@ const command = new PutObjectCommand({
 });
 ```
 
-### 3. **Range Requests**
+### 7. Range Requests
 
-- Partial file downloads supported
-- Standard HTTP Range headers
+Partial file downloads using standard HTTP `Range` headers are supported.
 
 ```typescript
 const command = new GetObjectCommand({
-  Bucket: bucket,
-  Key: key,
-  Range: "bytes=0-9", // Download first 10 bytes
+  Bucket: "my-archive",
+  Key: "large-file.bin",
+  Range: "bytes=0-9", // first 10 bytes
 });
 ```
 
-### 4. **Multipart Upload Support**
+### 8. Multipart Uploads
 
-- Full multipart upload workflow
-- Create → Upload Parts → Complete pattern
-- Automatic chunking for large files
+The full multipart workflow (`CreateMultipartUpload` → `UploadPart` × N → `CompleteMultipartUpload`) is supported. `UploadPart` returns the MD5 of the part body; `CompleteMultipartUpload` returns the standard AWS composite ETag `"<md5_of_part_md5s>-<N>"`.
 
 ```typescript
-// Complete multipart upload example
-const key = "large-file.txt";
-const fileContent = Buffer.from("Large file content...");
+const key = "large-file.bin";
+const Bucket = "my-archive";
 
 // Step 1: Create multipart upload
-const createCommand = new CreateMultipartUploadCommand({
-  Bucket: "https://public.auto-drive.autonomys.xyz/api/s3",
-  Key: key,
-});
-const createResult = await s3Client.send(createCommand);
-const uploadId = createResult.UploadId!;
+const { UploadId } = await s3Client.send(
+  new CreateMultipartUploadCommand({ Bucket, Key: key })
+);
 
-// Step 2: Upload parts
-const uploadPartCommand = new UploadPartCommand({
-  Bucket: "https://public.auto-drive.autonomys.xyz/api/s3",
-  Key: key,
-  UploadId: uploadId,
-  PartNumber: 1,
-  Body: fileContent,
-});
-const partResult = await s3Client.send(uploadPartCommand);
+// Step 2: Upload one or more parts
+const part1 = await s3Client.send(
+  new UploadPartCommand({
+    Bucket,
+    Key: key,
+    UploadId: UploadId!,
+    PartNumber: 1,
+    Body: fileChunk1,
+  })
+);
 
+// Step 3: Complete the upload
+const result = await s3Client.send(
+  new CompleteMultipartUploadCommand({
+    Bucket,
+    Key: key,
+    UploadId: UploadId!,
+    MultipartUpload: {
+      Parts: [{ ETag: part1.ETag!, PartNumber: 1 }],
+    },
+  })
+);
 
-// Step 3: Complete multipart upload
-const completeCommand = new CompleteMultipartUploadCommand({
-  Bucket: "https://public.auto-drive.autonomys.xyz/api/s3",
-  Key: key,
-  UploadId: uploadId,
-  MultipartUpload: {
-    Parts: [
-      {
-        ETag: partResult.ETag!,
-        PartNumber: 1,
-      },
-    ],
-  },
-});
-const completeResult = await s3Client.send(completeCommand);
+console.log(result.ETag); // '"<composite_md5>-1"'
 ```
 
 ## Configuration
 
-### Client Setup
+### Endpoint
+
+| Environment | Endpoint |
+| --- | --- |
+| **Mainnet (public)** | `https://public.auto-drive.autonomys.xyz/s3` |
+| **Local development** | `http://localhost:3000/s3` |
+
+### Client Setup (AWS JS SDK)
 
 ```typescript
+import { S3Client } from "@aws-sdk/client-s3";
+
 const s3Client = new S3Client({
-  region: "us-east-1",
+  region: "us-east-1",                                // required by the SDK; ignored by Auto Drive
+  endpoint: "https://public.auto-drive.autonomys.xyz/s3",
   credentials: {
-    accessKeyId: "your-auto-drive-api-key", // Your Auto Drive API key
-    secretAccessKey: "", // Always empty for Auto Drive
+    accessKeyId: "your-auto-drive-api-key",          // your Auto Drive API key
+    secretAccessKey: "placeholder",                   // any non-empty string; ignored
   },
-  bucketEndpoint: true, // Required for custom endpoints
+  forcePathStyle: true,                               // required: bucket lives in the path
 });
 ```
 
-### Endpoint Configuration
+Then use bucket names as you would with AWS S3:
 
 ```typescript
-// The "Bucket" parameter becomes part of the endpoint URL
-const Bucket = `${baseURL}/s3`; // e.g., "https://public.auto-drive.autonomys.xyz/api/s3"
-// No actual S3 bucket is created - it's just URL routing
+await s3Client.send(
+  new PutObjectCommand({ Bucket: "my-archive", Key: "report.pdf", Body: buffer })
+);
 ```
-- Mainnet: `https://public.auto-drive.autonomys.xyz/api/s3`
-- Base URL: http://localhost:3000/s3 (development)
-- Bucket name becomes the full endpoint path
-- No actual bucket concept - uses path-based routing
 
 ## Authentication
 
-- Uses Auto Drive API key-based authentication
-- Integrates with Auto Drive's user management system
-- API key goes in `accessKeyId`, `secretAccessKey` remains empty
-- Supports the same authentication as the Auto Drive API
+- Uses Auto Drive API key-based authentication (the same keys as the native Auto Drive API)
+- The API key goes in `accessKeyId`; `secretAccessKey` must be present but is ignored (use any non-empty placeholder)
+- Files uploaded via the S3 API are owned by the user the API key belongs to
 
-## File Ownership & Access
+Get an API key from the **Developers** section at [ai3.storage](https://ai3.storage).
 
-- **Cross-API compatibility**: Files uploaded via S3 API are accessible through Auto Drive API and vice versa
-- **Centralized ownership**: File ownership is tracked centrally, not per-API
-- **Content deduplication**: Multiple users uploading identical content will share the same underlying CID
-- **Shared access**: If different users upload the same file via different APIs, both can access it through either API
+## File Ownership & Cross-API Access
+
+- **Cross-API compatibility** — files uploaded via the S3 API are accessible via the native Auto Drive API, and vice versa
+- **Centralized ownership** — file ownership is tracked centrally per user, not per API surface
+- **Content deduplication** — multiple users uploading identical content share the same underlying CID
+- **Shared access** — if different users upload the same file, both can access it through either API
 
 ## Storage Characteristics
 
 ### Content Addressing
 
-- Files are stored using Content Identifiers (CIDs)
-- ETag returned is the actual CID of the uploaded content
-- Immutable storage - same content always produces same CID
+- Files are stored using Content Identifiers (CIDs) on the Autonomys DSN
+- The CID is exposed via the `x-amz-meta-cid` response header on every object response (and as a fallback ETag for legacy objects)
+- Storage is **immutable** — the same content always produces the same CID
 
 ### Decentralized Backend
 
-- Files stored on the DSN of Autonomys Network (available on Autonomys Mainnet & Testnet)
+- Files are stored on the Distributed Storage Network of the Autonomys Network (Mainnet & Testnet)
 - Automatic replication and redundancy
 - No single point of failure
+
+## rclone Integration
+
+Auto Drive's S3 layer is fully [rclone](https://rclone.org)-compatible — including `rclone check`, `rclone md5sum`, virtual directory listings, multipart uploads, and pagination — so any rclone-driven workflow (archival, scheduled backups, mounts, cloud-to-cloud migration, CI/CD artifact storage) works against Auto Drive.
+
+For the dedicated walkthrough — quickstart, full config reference, every supported command, workflows, and troubleshooting — see the [Using rclone](./rclone) guide.
 
 ## Migrating from AWS S3
 
 For developers moving from traditional AWS S3:
 
-1. **Update endpoint** to Auto Drive server URL
-2. **Change credentials** to use Auto Drive API key (with empty secret)
-3. **Set `bucketEndpoint`**: true in S3Client configuration
-4. **Handle longer response times** due to blockchain network latency
-5. **Expect CIDs as ETags** instead of MD5 hashes
-6. **Update bucket references** to use full endpoint URLs
-7. **Test multipart uploads** as they may behave slightly differently
+1. **Update the endpoint** to `https://public.auto-drive.autonomys.xyz/s3`
+2. **Change credentials** to use your Auto Drive API key as `accessKeyId`; set `secretAccessKey` to a placeholder
+3. **Set `forcePathStyle: true`** in the S3 client configuration
+4. **Drop bucket-creation calls** — buckets are created implicitly on first write
+5. **Remove deletion logic** — `DeleteObject` returns 403; design around immutability
+6. **Read CIDs from `x-amz-meta-cid`**, not from the ETag (the ETag is the standard MD5)
+7. **Handle longer response times** due to network latency vs. AWS edge
 
 ```typescript
 // Before (AWS S3)
@@ -178,40 +267,76 @@ const s3Client = new S3Client({
 // After (Auto Drive)
 const s3Client = new S3Client({
   region: "us-east-1",
+  endpoint: "https://public.auto-drive.autonomys.xyz/s3",
   credentials: {
     accessKeyId: "your-auto-drive-api-key",
-    secretAccessKey: "",
+    secretAccessKey: "placeholder",
   },
-  bucketEndpoint: true,
+  forcePathStyle: true,
 });
 ```
+
+## Building Your Own S3-Compatible Layer
+
+If you are building your own S3-compatible service on top of Autonomys storage, the [Auto SDK](https://github.com/autonomys/auto-sdk) ships reusable, framework-agnostic S3 server-side helpers in [`@autonomys/file-server`](https://www.npmjs.com/package/@autonomys/file-server) (added in [auto-sdk#535](https://github.com/autonomys/auto-sdk/pull/535)):
+
+- `buildListResult(rows, prefix, delimiter, maxKeys)` — `ListObjectsV2` delimiter folding into `CommonPrefixes` plus `maxKeys` pagination with correct continuation-token placement
+- `computeListObjectsDbLimit(maxKeys, delimiter)` — how many rows to fetch from storage for a single page
+- `finalizeListObjects(params, fetchedRows, dbLimit)` — wraps `buildListResult` and applies the full-batch truncation override that prevents duplicate `CommonPrefixes` across page boundaries
+- `md5Hex`, `formatETag`, `multipartETag` — S3 ETag computation, including the AWS composite multipart format
+- Types: `S3ObjectListing`, `ListObjectsParams`, `ListObjectsResult`
+
+```typescript
+import {
+  computeListObjectsDbLimit,
+  finalizeListObjects,
+  multipartETag,
+} from "@autonomys/file-server";
+
+const dbLimit = computeListObjectsDbLimit(maxKeys, delimiter);
+const rows = await fetchSortedObjectsFromStorage(prefix, continuationToken, dbLimit);
+
+const result = finalizeListObjects(
+  { bucket, prefix, delimiter, maxKeys, continuationToken },
+  rows,
+  dbLimit,
+);
+// result is ready to render as ListObjectsV2 XML
+
+const completedETag = multipartETag(parts.map((p) => p.etag));
+```
+
+Auto Drive itself uses these helpers, so you get the same delimiter folding, pagination, and composite-ETag behavior the public service is validated against.
 
 ## Limitations & Considerations
 
 ### Performance
 
-- The DSN (on-chain) storage has higher latency than traditional S3
-- Multipart uploads recommended for files > 5MB
-- Range requests may have different performance characteristics
+- The DSN has higher write latency than traditional S3 — use multipart uploads for files > 5 MB
+- Listings paginate at the server's configured `maxKeys` (default 1,000)
+- Range requests may have different performance characteristics than AWS S3
 
 ### Compatibility Notes
 
-- Not all S3 features supported (e.g., versioning, lifecycle policies)
-- Custom metadata handling for compression/encryption
-- Bucket operations are virtual (no actual bucket creation)
+- **Implemented**: `ListBuckets`, `ListObjectsV2` (with `prefix`, `delimiter`, `max-keys`, `continuation-token`), `PutObject`, `GetObject`, `HeadObject`, multipart uploads
+- **Not implemented**: `ListObjects` (V1) — use V2; `CreateBucket` — buckets are created implicitly; `CopyObject`, `versioning`, `lifecycle policies`, `ACLs`, `bucket policies`, presigned URLs
+- **Forbidden by design**: `DeleteObject`, `DeleteObjects`, `DeleteBucket` (returns 403)
+- **Effectively no-ops**: any operation that assumes mutability
 
 ## Best Practices
 
-1. **Use Multipart Uploads** for files larger than 5MB
-2. **Leverage Range Requests** for partial file access
-3. **Include Compression/Encryption** metadata when needed
-4. **Handle ETags as CIDs** for content verification
-5. **Implement Retry Logic** for blockchain network delays
+1. **Treat storage as append-only** — design data models around immutability rather than fighting it
+2. **Use multipart uploads** for files larger than 5 MB
+3. **Read CIDs from `x-amz-meta-cid`**, not from the ETag
+4. **Use the MD5 ETag for integrity verification** — it matches `md5sum` of the content for non-multipart objects
+5. **Paginate listings** with `MaxKeys` + `NextContinuationToken` rather than fetching everything in one call
+6. **Implement retry logic** for occasional network-induced timeouts
+7. **For rclone**, always pass `--immutable` and set `list_version = 2`
 
 ## Error Handling
 
-- Standard S3 error responses
-- Additional blockchain-specific error codes
-- Network timeouts may be longer than traditional S3
+- Standard S3 XML error responses
+- `403 Forbidden` for any deletion attempt — distinguish this from a permissions error in your client
+- Network timeouts may be longer than traditional S3; configure your SDK accordingly
 
-This S3 layer provides a familiar interface while leveraging the benefits of decentralized storage, making it easy to migrate existing S3-based applications to Auto Drive.
+This S3 layer provides a familiar interface while leveraging the benefits of decentralized storage, making it easy to migrate existing S3-based applications — and S3-compatible tooling like rclone and the AWS CLI — to Auto Drive.
