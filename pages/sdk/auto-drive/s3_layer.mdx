@@ -80,7 +80,7 @@ if (result.IsTruncated) {
 
 ### 4. MD5 ETags + CID via `x-amz-meta-cid`
 
-`PutObject`, `GetObject`, `HeadObject`, `ListObjectsV2`, and `CompleteMultipartUpload` all return a **standard quoted MD5 ETag** (e.g. `"d41d8cd98f00b204e9800998ecf8427e"`). For multipart uploads, the composite ETag follows the AWS format `"<md5_of_part_md5s>-<N>"`.
+`PutObject`, `GetObject`, `HeadObject`, `ListObjectsV2`, and `CompleteMultipartUpload` return a **standard quoted MD5 ETag** (e.g. `"d41d8cd98f00b204e9800998ecf8427e"`) for objects uploaded after the MD5 ETag feature shipped. For multipart uploads, the composite ETag follows the AWS format `"<md5_of_part_md5s>-<N>"`. Legacy objects (those uploaded before the feature) have no stored MD5: `HEAD`/`GET` omit the `ETag` header entirely, and `ListObjectsV2` falls back to wrapping the CID as the ETag value. See the migration note below.
 
 The Autonomys CID is exposed on every object response as a custom header:
 
@@ -185,6 +185,8 @@ console.log(result.ETag); // '"<composite_md5>-1"'
 
 ### Client Setup (AWS JS SDK)
 
+The Auto Drive backend exposes objects under a single `/:key(*)` route and parses bucket and key from the path, so a path-style client works well in practice:
+
 ```typescript
 import { S3Client } from "@aws-sdk/client-s3";
 
@@ -195,7 +197,7 @@ const s3Client = new S3Client({
     accessKeyId: "your-auto-drive-api-key",          // your Auto Drive API key
     secretAccessKey: "placeholder",                   // any non-empty string; ignored
   },
-  forcePathStyle: true,                               // required: bucket lives in the path
+  forcePathStyle: true,                               // bucket lives in the path
 });
 ```
 
@@ -206,6 +208,8 @@ await s3Client.send(
   new PutObjectCommand({ Bucket: "my-archive", Key: "report.pdf", Body: buffer })
 );
 ```
+
+> **Alternative: `bucketEndpoint` style.** The upstream backend integration tests configure the SDK with `bucketEndpoint: true` and bake the bucket into the endpoint path (e.g. `Bucket: "my-archive/s3"`). Either pattern works against the `/:key(*)` route; `forcePathStyle: true` with a plain bucket name is shown here because it's the more familiar S3 configuration.
 
 ## Authentication
 
@@ -313,7 +317,7 @@ Auto Drive itself uses these helpers, so you get the same delimiter folding, pag
 ### Performance
 
 - The DSN has higher write latency than traditional S3 — use multipart uploads for files > 5 MB
-- Listings paginate at the server's configured `maxKeys` (default 1,000)
+- Listings paginate at the server's configured `maxKeys` (default 1,000); requested values larger than 1,000 are clamped to the 1,000 hard cap
 - Range requests may have different performance characteristics than AWS S3
 
 ### Compatibility Notes

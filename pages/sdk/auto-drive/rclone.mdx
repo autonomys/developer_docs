@@ -276,7 +276,7 @@ umount /mnt/autodrive          # macOS
 
 These commands require mutability and will fail:
 
-- `rclone delete` — returns `403 Access Denied: Auto Drive storage is immutable.`
+- `rclone delete` — returns `403 Access Denied: Auto Drive storage is immutable. Objects cannot be deleted from the Autonomys DSN.`
 - `rclone purge` — same 403
 - `rclone rmdir` / `rmdirs` — no `DeleteObject` to call
 - `rclone cleanup` — nothing to clean up
@@ -585,7 +585,7 @@ Objects uploaded after the MD5 ETag feature do not need this flag.
 **Symptom:**
 
 ```
-ERROR : file.txt: Failed to delete: 403 Access Denied: Auto Drive storage is immutable.
+ERROR : file.txt: Failed to delete: 403 Access Denied: Auto Drive storage is immutable. Objects cannot be deleted from the Autonomys DSN.
 ```
 
 **Cause:** Auto Drive storage is permanent by design. The S3 layer rejects all DELETE requests.
