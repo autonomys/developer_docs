@@ -10,7 +10,7 @@ For those unfamiliar, [Amazon Web Services Simple Storage Service (AWS S3)](http
 
 ## How It Works
 
-Auto Drive maintains an `object_mappings` table in the database that maps S3 (bucket, key) pairs to Content Identifiers (CIDs) and MD5 checksums. When you upload via the S3 API, the system:
+Auto Drive maps S3 (bucket, key) pairs to Content Identifiers (CIDs) and MD5 checksums. When you upload via the S3 API, the system:
 
 1. Stores the file content on the decentralized network (DSN)
 2. Computes the MD5 of the content and records the `(bucket, key) → (cid, md5)` mapping
@@ -181,7 +181,6 @@ console.log(result.ETag); // '"<composite_md5>-1"'
 | Environment | Endpoint |
 | --- | --- |
 | **Mainnet (public)** | `https://public.auto-drive.autonomys.xyz/s3` |
-| **Local development** | `http://localhost:3000/s3` |
 
 ### Client Setup (AWS JS SDK)
 
@@ -236,7 +235,7 @@ Get an API key from the **Developers** section at [ai3.storage](https://ai3.stor
 
 ### Decentralized Backend
 
-- Files are stored on the Distributed Storage Network of the Autonomys Network (Mainnet & Testnet)
+- Files are stored on the Distributed Storage Network of the Autonomys Network
 - Automatic replication and redundancy
 - No single point of failure
 
