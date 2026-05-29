@@ -281,7 +281,7 @@ const s3Client = new S3Client({
 
 ## Building Your Own S3-Compatible Layer
 
-If you are building your own S3-compatible service on top of Autonomys storage, the [Auto SDK](https://github.com/autonomys/auto-sdk) ships reusable, framework-agnostic S3 server-side helpers in [`@autonomys/file-server`](https://www.npmjs.com/package/@autonomys/file-server) (added in [auto-sdk#535](https://github.com/autonomys/auto-sdk/pull/535)):
+If you are building your own S3-compatible service on top of Autonomys storage, the [Auto SDK](https://github.com/autonomys/auto-sdk) ships reusable, framework-agnostic S3 server-side helpers in [`@autonomys/file-server`](https://www.npmjs.com/package/@autonomys/file-server):
 
 - `buildListResult(rows, prefix, delimiter, maxKeys)` — `ListObjectsV2` delimiter folding into `CommonPrefixes` plus `maxKeys` pagination with correct continuation-token placement
 - `computeListObjectsDbLimit(maxKeys, delimiter)` — how many rows to fetch from storage for a single page
