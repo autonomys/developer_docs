@@ -215,10 +215,11 @@ rclone tree autodrive:my-archive/
 
 ```bash
 rclone md5sum autodrive:my-archive/
+rclone hashsum md5 autodrive:my-archive/
 rclone check ./local/ autodrive:my-archive/
 ```
 
-Both use the MD5 ETag for verification. Add `--ignore-checksum` for legacy objects without a stored MD5.
+All three use the MD5 ETag for verification. `rclone md5sum` is shorthand for `rclone hashsum md5`; only `md5` is supported because Auto Drive stores MD5 ETags. Add `--ignore-checksum` for legacy objects without a stored MD5.
 
 #### `size` — total size and count
 
@@ -661,7 +662,7 @@ rclone version
 
 ## Further Reading
 
-- [Auto Drive S3 Layer Guide](./s3_layer) — the underlying S3-compatible API used by rclone
+- [Auto Drive S3 Layer Guide](/sdk/auto-drive/s3_layer) — the underlying S3-compatible API used by rclone
 - [Auto Drive dashboard](https://ai3.storage) — manage your account, API keys, and credits
 - [Autonomys Academy: Rewards and Fees](https://academy.autonomys.xyz/autonomys-network/rewards-and-fees) — how storage pricing works on the Autonomys Network
 - [rclone documentation](https://rclone.org/docs/) — full rclone reference

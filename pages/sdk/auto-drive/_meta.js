@@ -4,7 +4,6 @@ export default {
     'available_functions': 'Available Functions',
     'pay_with_ai3': 'Pay with AI3',
     's3_layer': 'S3 Layer (S3 compatibility)',
-    'rclone': 'Using rclone',
     'usage_examples': 'Usage Examples',
     'encryption': 'File Encryption Specification',
     'gateway': "Gateway",
