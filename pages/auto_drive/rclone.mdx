@@ -215,8 +215,8 @@ rclone tree autodrive:my-archive/
 
 ```bash
 rclone md5sum autodrive:my-archive/
-rclone hashsum md5 autodrive:my-archive/
 rclone check ./local/ autodrive:my-archive/
+rclone hashsum md5 autodrive:my-archive/
 ```
 
 All three use the MD5 ETag for verification. `rclone md5sum` is shorthand for `rclone hashsum md5`; only `md5` is supported because Auto Drive stores MD5 ETags. Add `--ignore-checksum` for legacy objects without a stored MD5.
