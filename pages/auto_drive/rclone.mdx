@@ -1,0 +1,669 @@
+# Using rclone with Auto Drive
+
+## What is rclone?
+
+[rclone](https://rclone.org) is an open-source command-line program — often described as "rsync for cloud storage" — that syncs, copies, and serves files between local disks and 70+ cloud storage providers through a single, consistent interface. It is widely used for backups, archival, migrations, and as the backbone of many self-hosted file workflows.
+
+Highlights of what rclone offers out of the box:
+
+- **One CLI for many backends.** S3-compatible providers, Google Drive, Dropbox, Backblaze B2, Azure Blob, SFTP, WebDAV, and many more — all behind the same commands (`copy`, `sync`, `ls`, `mount`, etc.).
+- **Resumable, parallel, deduplicating transfers.** Idempotent file copies, configurable parallelism, automatic retries, and skip-on-already-uploaded behavior make large transfers safe to interrupt and re-run.
+- **Integrity verification.** Built-in checksum comparison via `rclone check` and `rclone md5sum` confirms that what's stored matches what was sent.
+- **Mount as a filesystem.** `rclone mount` exposes a remote as a FUSE filesystem so any tool can read remote files as if they were local.
+- **Serve over HTTP, WebDAV, FTP, S3.** `rclone serve` turns any remote into a server that other tools can read from.
+- **Encryption, compression, and chunking.** Built-in transformers can transparently encrypt or compress data before upload.
+- **Scheduling-friendly.** Predictable exit codes, structured logs, and dry-run support make it easy to embed in cron, systemd timers, GitHub Actions, GitLab CI, or any orchestration system.
+
+Because Auto Drive exposes an S3-compatible API, you can use rclone to talk to it the same way you would to AWS S3 — with one important difference: **Auto Drive is permanent, immutable, decentralized storage.** Files stored on the Autonomys Distributed Storage Network (DSN) cannot be modified, overwritten, or deleted. That is the core guarantee. rclone operations that assume mutability (`delete`, `purge`, overwrite, rename) will not work — by design.
+
+The rest of this page is the technical reference for configuring rclone against Auto Drive and using it day-to-day.
+
+---
+
+## Quickstart
+
+**1. Get an API key.** Sign in at [ai3.storage](https://ai3.storage), open the **Developers** section, and create an API key. A free tier is available for getting started.
+
+**2. Install rclone.**
+
+```bash
+# macOS
+brew install rclone
+
+# Linux
+curl https://rclone.org/install.sh | sudo bash
+
+# Windows
+winget install Rclone.Rclone
+```
+
+**3. Configure the Auto Drive remote.** Create or edit `~/.config/rclone/rclone.conf` (Linux/macOS) or `%APPDATA%\rclone\rclone.conf` (Windows):
+
+```ini
+[autodrive]
+type = s3
+provider = Other
+access_key_id = YOUR_API_KEY_HERE
+secret_access_key = placeholder
+endpoint = https://public.auto-drive.autonomys.xyz/s3
+no_check_bucket = true
+list_version = 2
+```
+
+**4. Verify the connection.**
+
+```bash
+# List your buckets
+rclone lsd autodrive:
+
+# Copy a file to permanent storage
+rclone copy ./my-file.txt autodrive:my-archive/ --immutable
+
+# Download it back
+rclone copy autodrive:my-archive/my-file.txt ./downloaded/
+```
+
+---
+
+## Configuration Reference
+
+| Option | Value | Notes |
+| --- | --- | --- |
+| `type` | `s3` | Use the generic S3 backend |
+| `provider` | `Other` | Generic S3-compatible mode — no provider-specific assumptions |
+| `access_key_id` | Your Auto Drive API key | From the **Developers** tab at [ai3.storage](https://ai3.storage) |
+| `secret_access_key` | Any non-empty string | Required by rclone but ignored by Auto Drive |
+| `endpoint` | `https://public.auto-drive.autonomys.xyz/s3` | Auto Drive S3 API base URL |
+| `no_check_bucket` | `true` | Skip bucket existence check — buckets are created implicitly on first write |
+| `list_version` | `2` | **Required.** Auto Drive implements ListObjectsV2 only; without this, rclone defaults to V1 and listings fail |
+
+For local development against a self-hosted Auto Drive instance:
+
+```ini
+endpoint = http://localhost:3000/s3
+```
+
+### Interactive setup
+
+If you prefer the interactive flow, run:
+
+```bash
+rclone config
+```
+
+1. Select `n` for new remote
+2. Name it `autodrive`
+3. Select `s3` (Amazon S3 Compliant Storage Providers)
+4. Select `Other` as the provider
+5. Enter your API key as `access_key_id`
+6. Enter `placeholder` for `secret_access_key`
+7. Enter `https://public.auto-drive.autonomys.xyz/s3` as the endpoint
+8. Accept defaults for the remaining options
+
+Then manually add `no_check_bucket = true` and `list_version = 2` to the config section.
+
+---
+
+## Bucket Model
+
+Auto Drive treats the **first segment** of an object key as the bucket name. When you copy files to `autodrive:my-archive/`, rclone uses `my-archive` as the bucket and the remaining path as the key:
+
+| rclone path | Bucket | Key |
+| --- | --- | --- |
+| `autodrive:my-archive/file.txt` | `my-archive` | `file.txt` |
+| `autodrive:my-archive/sub/file.txt` | `my-archive` | `sub/file.txt` |
+
+Buckets are created implicitly on first write — there is no `CreateBucket` call. `rclone lsd autodrive:` lists every bucket you have written to.
+
+Objects uploaded before bucket support was introduced (flat keys with no `/`) remain accessible in the `default` bucket.
+
+---
+
+## Recommended Flags
+
+| Flag | Purpose | When to use |
+| --- | --- | --- |
+| `--immutable` | Prevent overwrite attempts on existing files | All upload commands |
+| `-v` / `--verbose` | Show progress and transfer details | Debugging |
+| `--log-file=FILE` | Write logs to a file | Production and CI/CD |
+| `--transfers=N` | Number of parallel transfers (default: 4) | Large jobs |
+| `--ignore-checksum` | Skip MD5 checksum comparison | Legacy objects without MD5 ETags |
+| `--size-only` | Compare by size instead of checksum | Alternative to `--ignore-checksum` |
+
+### A note on checksums
+
+Auto Drive returns standard MD5 hashes as S3 ETags for all objects uploaded after MD5 ETag support was introduced. `rclone check` and `rclone md5sum` work correctly on those objects without any special flags.
+
+Objects uploaded before MD5 ETag support have no stored MD5 — for those legacy objects, add `--ignore-checksum` or `--size-only` to skip checksum comparison.
+
+---
+
+## Operations Reference
+
+### Supported operations
+
+#### `copy` (upload)
+
+Copies files from source to destination without deleting source files. The primary command for archiving to Auto Drive.
+
+```bash
+# Single file
+rclone copy ./report.pdf autodrive:my-archive/reports/ --immutable
+
+# Whole directory
+rclone copy ./backup/ autodrive:my-archive/backup-2026-05-03/ --immutable -v
+```
+
+Files larger than 5 MB automatically use multipart upload.
+
+#### `copy` (download)
+
+```bash
+rclone copy autodrive:my-archive/reports/report.pdf ./downloaded/
+rclone copy autodrive:my-archive/backup-2026-05-03/ ./restored/
+```
+
+Byte-range downloads are also supported.
+
+#### `cat` — read file contents to stdout
+
+```bash
+rclone cat autodrive:my-archive/logs/app.log
+```
+
+#### `copyto` — copy a single file to a specific path
+
+```bash
+rclone copyto ./local-file.txt autodrive:my-archive/archive/renamed-file.txt --immutable
+```
+
+#### `rcat` — upload from stdin
+
+```bash
+echo "log entry" | rclone rcat autodrive:my-archive/logs/entry.txt --immutable
+tar czf - ./project/ | rclone rcat autodrive:my-archive/archives/project.tar.gz --immutable
+```
+
+#### `ls` / `lsl` — list files
+
+```bash
+rclone ls autodrive:my-archive/
+rclone lsl autodrive:my-archive/reports/
+```
+
+Uses ListObjectsV2 with prefix and delimiter folding.
+
+#### `lsd` — list buckets or directories
+
+```bash
+# All buckets
+rclone lsd autodrive:
+
+# Top-level virtual directories in a bucket
+rclone lsd autodrive:my-archive/
+```
+
+The top-level form uses `ListBuckets`; the per-bucket form uses `ListObjectsV2` with delimiter folding.
+
+#### `tree` — recursive tree view
+
+```bash
+rclone tree autodrive:my-archive/
+```
+
+#### `md5sum`, `check`, `hashsum`
+
+```bash
+rclone md5sum autodrive:my-archive/
+rclone check ./local/ autodrive:my-archive/
+rclone hashsum md5 autodrive:my-archive/
+```
+
+All three use the MD5 ETag for verification. `rclone md5sum` is shorthand for `rclone hashsum md5`; only `md5` is supported because Auto Drive stores MD5 ETags. Add `--ignore-checksum` for legacy objects without a stored MD5.
+
+#### `size` — total size and count
+
+```bash
+rclone size autodrive:my-archive/
+rclone size autodrive:my-archive/reports/
+```
+
+### Supported with caveats
+
+#### `sync` — partially supported
+
+`rclone sync` makes the destination match the source, including deletions on the destination side. With Auto Drive, the upload side works but deletions fail with `403`.
+
+```bash
+rclone sync ./local/ autodrive:my-archive/mirror/ --immutable
+```
+
+**Recommendation:** prefer `rclone copy` over `rclone sync`. The sync mental model assumes the ability to delete, which does not apply to permanent storage.
+
+#### `move` — partially supported
+
+```bash
+rclone move ./local-files/ autodrive:my-archive/archive/ --immutable
+```
+
+The upload succeeds. Local source deletion depends on rclone's post-transfer behavior. Moves *from* Auto Drive will fail at the remote-delete step.
+
+#### `mount` — read-only fully supported, read-write partial
+
+```bash
+mkdir -p /mnt/autodrive
+rclone mount autodrive:my-archive/ /mnt/autodrive \
+  --read-only \
+  --vfs-cache-mode full \
+  --vfs-read-chunk-size 5M
+```
+
+| Flag | Purpose |
+| --- | --- |
+| `--read-only` | Prevents confusing behavior from failed write/delete operations |
+| `--vfs-cache-mode full` | Caches files locally for better read performance |
+| `--vfs-read-chunk-size 5M` | Reads files in 5 MB chunks for efficient streaming |
+
+A read-write mount lets you create new files (which are uploaded normally), but `delete`, `rename`, and overwrite operations fail at the S3 layer. File explorers may show "deleted" files reappearing on refresh. Use `--read-only` unless you have a specific reason not to.
+
+Unmount with:
+
+```bash
+fusermount -u /mnt/autodrive   # Linux
+umount /mnt/autodrive          # macOS
+```
+
+### Unsupported by design
+
+These commands require mutability and will fail:
+
+- `rclone delete` — returns `403 Access Denied: Auto Drive storage is immutable. Objects cannot be deleted from the Autonomys DSN.`
+- `rclone purge` — same 403
+- `rclone rmdir` / `rmdirs` — no `DeleteObject` to call
+- `rclone cleanup` — returns `501`; the multipart-upload APIs it relies on (`ListMultipartUploads`, `AbortMultipartUpload`) are not implemented
+- `rclone mkdir` — buckets are created implicitly on first write; explicit `CreateBucket` is not implemented
+
+### Operations summary
+
+| Command | Status | Notes |
+| --- | --- | --- |
+| `copy` (upload) | ✅ Supported | Use `--immutable` |
+| `copy` (download) | ✅ Supported | Byte-range supported |
+| `cat` | ✅ Supported | Stream file to stdout |
+| `copyto` | ✅ Supported | Copy single file to specific path |
+| `rcat` | ✅ Supported | Upload from stdin |
+| `ls` / `lsl` | ✅ Supported | Uses ListObjectsV2 |
+| `lsd` | ✅ Supported | Bucket and directory listing |
+| `tree` | ✅ Supported | Recursive tree via ListObjectsV2 |
+| `md5sum` | ✅ Supported | MD5 ETags on new objects |
+| `check` | ✅ Supported | Same caveat as `md5sum` for legacy objects |
+| `size` | ✅ Supported | Aggregates across prefix |
+| `mount` (read-only) | ✅ Supported | Use `--read-only --vfs-cache-mode full` |
+| `sync` | ⚠️ Partial | Upload-only; deletions error |
+| `move` | ⚠️ Partial | Upload works; source delete may fail |
+| `mount` (read-write) | ⚠️ Partial | New files work; delete/rename fail |
+| `about` | ❌ Not implemented | No quota/usage API |
+| `delete` | ❌ Unsupported by design | Returns 403 |
+| `purge` | ❌ Unsupported by design | Returns 403 |
+| `rmdir` / `rmdirs` | ❌ Unsupported by design | No deletion |
+| `mkdir` | ❌ Not implemented | Buckets created implicitly |
+| `cleanup` | ❌ Not implemented | Returns 501; multipart-upload APIs not implemented |
+
+---
+
+## Workflows
+
+### Archive a local directory
+
+```bash
+rclone copy ./important-data/ autodrive:my-archive/important-data/ \
+  --immutable \
+  -v
+```
+
+Re-running the same command after adding files only uploads the new ones (existing keys are skipped due to `--immutable`), making large transfers safely resumable.
+
+### Scheduled archival with cron
+
+A cron-ready archive script template:
+
+```bash
+#!/usr/bin/env bash
+set -euo pipefail
+
+SOURCE_DIR="${SOURCE_DIR:-/path/to/your/data}"
+BUCKET="${BUCKET:-my-archive}"
+DEST_PREFIX="${DEST_PREFIX:-daily}"
+REMOTE="autodrive"
+TRANSFERS="${TRANSFERS:-4}"
+
+TIMESTAMP=$(date '+%Y-%m-%d %H:%M:%S')
+echo "[$TIMESTAMP] Starting archive: $SOURCE_DIR -> $REMOTE:$BUCKET/$DEST_PREFIX/"
+
+rclone copy "$SOURCE_DIR" "$REMOTE:$BUCKET/$DEST_PREFIX/" \
+  --immutable \
+  --transfers "$TRANSFERS" \
+  -v
+```
+
+Crontab entry (daily at 02:00):
+
+```
+0 2 * * * BUCKET=my-archive SOURCE_DIR=/path/to/data /path/to/archive-script.sh >> /var/log/autodrive-archive.log 2>&1
+```
+
+### Browse and verify
+
+```bash
+rclone lsd autodrive:                                 # all buckets
+rclone lsd autodrive:my-archive/                      # top-level dirs in bucket
+rclone ls  autodrive:my-archive/                      # all files
+rclone ls  autodrive:my-archive/reports/              # files under prefix
+rclone tree autodrive:my-archive/                     # recursive tree
+rclone check ./local/ autodrive:my-archive/           # verify checksums
+rclone cat autodrive:my-archive/logs/app.log          # stream a file
+```
+
+### Read-only mount
+
+```bash
+mkdir -p /mnt/autodrive
+rclone mount autodrive:my-archive/ /mnt/autodrive \
+  --read-only \
+  --vfs-cache-mode full \
+  --vfs-read-chunk-size 5M
+```
+
+Then browse with any standard tool:
+
+```bash
+ls /mnt/autodrive/
+cat /mnt/autodrive/reports/q1.pdf
+```
+
+### Migrate from another cloud provider
+
+The pattern is the same regardless of source remote:
+
+```bash
+rclone copy <source>:<source-path>/ autodrive:<bucket>/<dest-prefix>/ --immutable -v
+```
+
+```bash
+# AWS S3
+rclone copy s3:my-source-bucket/data/ autodrive:migrated/aws-data/ --immutable -v
+
+# Google Cloud Storage
+rclone copy gcs:my-gcs-bucket/archives/ autodrive:migrated/gcs-archives/ --immutable -v
+
+# Backblaze B2
+rclone copy b2:my-b2-bucket/ autodrive:migrated/b2-backup/ --immutable -v
+```
+
+Tips for large migrations:
+
+- Use `-v` or `--progress` to monitor progress
+- Tune `--transfers=N` to your bandwidth
+- Capture full logs with `--log-file=migration.log`
+- Run inside `screen` or `tmux` for long jobs
+- Use `--immutable` to make the migration resumable; if interrupted, just re-run the same command
+
+### CI/CD integration
+
+#### GitHub Actions
+
+```yaml
+name: Archive Build Artifacts
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  build-and-archive:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: make build
+
+      - name: Install rclone
+        run: curl https://rclone.org/install.sh | sudo bash
+
+      - name: Configure rclone
+        run: |
+          mkdir -p ~/.config/rclone
+          cat > ~/.config/rclone/rclone.conf << 'EOF'
+          [autodrive]
+          type = s3
+          provider = Other
+          access_key_id = ${{ secrets.AUTO_DRIVE_API_KEY }}
+          secret_access_key = placeholder
+          endpoint = https://public.auto-drive.autonomys.xyz/s3
+          no_check_bucket = true
+          list_version = 2
+          EOF
+
+      - name: Archive build artifacts
+        run: |
+          TIMESTAMP=$(date +%Y%m%d-%H%M%S)
+          rclone copy ./dist/ \
+            autodrive:ci-builds/${{ github.sha }}-${TIMESTAMP}/ \
+            --immutable -v
+```
+
+#### GitLab CI
+
+```yaml
+archive-artifacts:
+  stage: deploy
+  image: rclone/rclone:latest
+  script:
+    - mkdir -p ~/.config/rclone
+    - |
+      cat > ~/.config/rclone/rclone.conf << 'EOF'
+      [autodrive]
+      type = s3
+      provider = Other
+      access_key_id = ${AUTO_DRIVE_API_KEY}
+      secret_access_key = placeholder
+      endpoint = https://public.auto-drive.autonomys.xyz/s3
+      no_check_bucket = true
+      list_version = 2
+      EOF
+    - TIMESTAMP=$(date +%Y%m%d-%H%M%S)
+    - rclone copy ./dist/ autodrive:ci-builds/${CI_COMMIT_SHA}-${TIMESTAMP}/ --immutable -v
+  only:
+    - main
+```
+
+### Compliance and audit logs
+
+Permanent storage meets retention requirements by construction — records cannot be tampered with or accidentally deleted.
+
+```bash
+# Daily application logs
+rclone copy /var/log/app/ autodrive:compliance/logs/$(date +%Y/%m/%d)/ \
+  --immutable \
+  --include "*.log"
+
+# Database backup
+pg_dump mydb | rclone rcat autodrive:compliance/db-backups/$(date +%Y%m%d-%H%M%S).sql --immutable
+```
+
+### Pipe and stream
+
+```bash
+# Compressed tarball
+tar czf - ./project/ | rclone rcat autodrive:my-archive/archives/project-$(date +%Y%m%d).tar.gz --immutable
+
+# Database dump
+mysqldump --all-databases | rclone rcat autodrive:backups/mysql-$(date +%Y%m%d).sql --immutable
+
+# Docker image
+docker save my-app:latest | rclone rcat autodrive:docker-images/my-app-$(date +%Y%m%d).tar --immutable
+```
+
+### Run rclone in Docker
+
+The rclone official image works against Auto Drive with a config volume or env-driven config. Below is a `docker-compose.yml` that serves a bucket over HTTP (read-only) using `rclone serve http` — simpler than a FUSE mount in containers since FUSE requires `--privileged` or `--cap-add SYS_ADMIN`.
+
+```yaml
+services:
+  rclone:
+    image: rclone/rclone:latest
+    container_name: rclone-autodrive
+    restart: unless-stopped
+    environment:
+      - AUTO_DRIVE_API_KEY=${AUTO_DRIVE_API_KEY:?Set AUTO_DRIVE_API_KEY environment variable}
+      - AUTO_DRIVE_BUCKET=${AUTO_DRIVE_BUCKET:-my-archive}
+    volumes:
+      - ./data:/data:ro
+    ports:
+      - "8181:8181"
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - |
+        mkdir -p /root/.config/rclone
+        cat > /root/.config/rclone/rclone.conf << EOF
+        [autodrive]
+        type = s3
+        provider = Other
+        access_key_id = $${AUTO_DRIVE_API_KEY}
+        secret_access_key = placeholder
+        endpoint = https://public.auto-drive.autonomys.xyz/s3
+        no_check_bucket = true
+        list_version = 2
+        EOF
+
+        rclone serve http "autodrive:$${AUTO_DRIVE_BUCKET}/" \
+          --addr :8181 \
+          --read-only \
+          --vfs-cache-mode full
+```
+
+To upload from inside the container:
+
+```bash
+docker compose exec rclone rclone copy /data autodrive:my-archive/ --immutable
+```
+
+---
+
+## Troubleshooting
+
+### Listing fails (404 NoSuchKey, or 500 on older deployments)
+
+**Symptom:** `rclone ls`, `rclone lsd`, `rclone check`, or `rclone sync` fail with `ListObjects ... 404 NoSuchKey`. (Older Auto Drive deployments returned `500 InternalServerError` for the same cause.)
+
+**Cause:** Auto Drive implements **ListObjectsV2** only. By default rclone's generic S3 backend (`provider = Other`) uses the older **ListObjectsV1** API; Auto Drive does not recognise it and falls through to a per-object lookup, which reports the key as missing.
+
+**Fix:** Set `list_version = 2` in your rclone config.
+
+```bash
+rclone config update autodrive list_version 2
+```
+
+### Checksum mismatch on legacy objects
+
+**Symptom:**
+
+```
+ERROR : file.txt: corrupted on transfer: md5 hash differ "abc123" vs "bafkr..."
+```
+
+**Cause:** The object was uploaded before MD5 ETag support shipped, so its ETag is the CID, which rclone interprets as a failed checksum.
+
+**Fix:** Add `--ignore-checksum` (or `--size-only`) to your command:
+
+```bash
+rclone copy ./files/ autodrive:my-archive/ --immutable --ignore-checksum
+```
+
+Objects uploaded after the MD5 ETag feature do not need this flag.
+
+### Delete returns 403
+
+**Symptom:**
+
+```
+ERROR : file.txt: Failed to delete: 403 Access Denied: Auto Drive storage is immutable. Objects cannot be deleted from the Autonomys DSN.
+```
+
+**Cause:** Auto Drive storage is permanent by design. The S3 layer rejects all DELETE requests.
+
+**Affected commands:** `rclone delete`, `rclone purge`, `rclone rmdir`, `rclone move` (delete phase), `rclone sync` (when the destination has files no longer in the source).
+
+**Fix:** Use `rclone copy` instead of `rclone sync` or `rclone move`.
+
+### Authentication errors
+
+**Symptoms:** `AccessDenied`, `401 Unauthorized`.
+
+**Possible causes:**
+
+1. The API key is incorrect or has been revoked
+2. The API key has expired (if you set an expiry)
+3. Your account has no remaining credits
+
+**Fix:**
+
+- Verify the key at [ai3.storage](https://ai3.storage) → Developers
+- Create a new key if needed
+- Check your credit balance and top up if required
+- Confirm `access_key_id` in your rclone config matches the API key exactly
+
+### Connection timeouts
+
+**Symptom:** `Failed to copy: connection timed out`.
+
+**Fix:**
+
+- `curl -I https://public.auto-drive.autonomys.xyz/s3` to verify reachability
+- Increase the timeout: `--timeout=60s`
+- Add retries: `--retries=5 --retries-sleep=10s`
+
+### Immutable file conflict
+
+**Symptom:** `File exists and --immutable is set`.
+
+**Cause:** You are trying to upload a key that already exists, with `--immutable` set (as recommended).
+
+- If the content is the same, this is expected — the file is already safely stored.
+- If you want to publish a new version, write to a new key (e.g. add a timestamp or version suffix). Removing `--immutable` and re-uploading to the same key creates a new object and updates the key mapping, but the old data still persists on the DSN.
+
+### Bucket not found
+
+**Symptom:** `NoSuchBucket: The specified bucket does not exist`.
+
+**Cause:** You are referencing a bucket that has never had any objects written to it. Buckets exist implicitly only after the first write.
+
+**Fix:** Write an object first, or correct the bucket name. Also confirm `no_check_bucket = true` is in your config so rclone does not attempt a `HeadBucket` probe before each operation.
+
+### Diagnostic commands
+
+```bash
+# Inspect rclone config
+rclone config show autodrive
+
+# Test endpoint reachability
+curl -I https://public.auto-drive.autonomys.xyz/s3
+
+# Verbose upload with full logging
+rclone copy ./test.txt autodrive:test-bucket/ \
+  --immutable -vv \
+  --log-file=rclone-debug.log \
+  --dump headers
+
+# rclone version (use 1.60+ for full S3 compatibility)
+rclone version
+```
+
+---
+
+## Further Reading
+
+- [Auto Drive S3 Layer Guide](/sdk/auto-drive/s3_layer) — the underlying S3-compatible API used by rclone
+- [Auto Drive dashboard](https://ai3.storage) — manage your account, API keys, and credits
+- [Autonomys Academy: Rewards and Fees](https://academy.autonomys.xyz/autonomys-network/rewards-and-fees) — how storage pricing works on the Autonomys Network
+- [rclone documentation](https://rclone.org/docs/) — full rclone reference
+- [Auto Drive rclone examples](https://github.com/autonomys/auto-drive/tree/main/docs/rclone/examples) — annotated config, archive script, and Docker compose recipe
