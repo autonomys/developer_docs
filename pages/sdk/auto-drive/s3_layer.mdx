@@ -322,8 +322,8 @@ Auto Drive itself uses these helpers, so you get the same delimiter folding, pag
 ### Compatibility Notes
 
 - **Implemented**: `ListBuckets`, `ListObjectsV2` (with `prefix`, `delimiter`, `max-keys`, `continuation-token`), `PutObject`, `GetObject`, `HeadObject`, multipart uploads
-- **Not implemented**: `ListObjects` (V1) — use V2; `CreateBucket` — buckets are created implicitly; `CopyObject`, `versioning`, `lifecycle policies`, `ACLs`, `bucket policies`, presigned URLs
-- **Forbidden by design**: `DeleteObject`, `DeleteObjects`, `DeleteBucket` (returns 403)
+- **Not implemented (return 501)**: `ListObjects` (V1) — use V2; `CreateBucket` — buckets are created implicitly; `CopyObject`; `DeleteObjects` (bulk/multi-object delete); `versioning`, `lifecycle policies`, `ACLs`, `bucket policies`, presigned URLs
+- **Forbidden by design (return 403)**: `DeleteObject`, `DeleteBucket`
 - **Effectively no-ops**: any operation that assumes mutability
 
 ## Best Practices

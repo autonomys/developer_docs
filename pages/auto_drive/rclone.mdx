@@ -280,7 +280,7 @@ These commands require mutability and will fail:
 - `rclone delete` — returns `403 Access Denied: Auto Drive storage is immutable. Objects cannot be deleted from the Autonomys DSN.`
 - `rclone purge` — same 403
 - `rclone rmdir` / `rmdirs` — no `DeleteObject` to call
-- `rclone cleanup` — nothing to clean up
+- `rclone cleanup` — returns `501`; the multipart-upload APIs it relies on (`ListMultipartUploads`, `AbortMultipartUpload`) are not implemented
 - `rclone mkdir` — buckets are created implicitly on first write; explicit `CreateBucket` is not implemented
 
 ### Operations summary
@@ -307,7 +307,7 @@ These commands require mutability and will fail:
 | `purge` | ❌ Unsupported by design | Returns 403 |
 | `rmdir` / `rmdirs` | ❌ Unsupported by design | No deletion |
 | `mkdir` | ❌ Not implemented | Buckets created implicitly |
-| `cleanup` | ❌ Unsupported by design | Nothing to clean up |
+| `cleanup` | ❌ Not implemented | Returns 501; multipart-upload APIs not implemented |
 
 ---
 
@@ -551,11 +551,11 @@ docker compose exec rclone rclone copy /data autodrive:my-archive/ --immutable
 
 ## Troubleshooting
 
-### Listing fails with 500 Internal Server Error
+### Listing fails (404 NoSuchKey, or 500 on older deployments)
 
-**Symptom:** `rclone ls`, `rclone lsd`, `rclone check`, or `rclone sync` hang or fail with `ListObjects ... 500 InternalServerError`.
+**Symptom:** `rclone ls`, `rclone lsd`, `rclone check`, or `rclone sync` fail with `ListObjects ... 404 NoSuchKey`. (Older Auto Drive deployments returned `500 InternalServerError` for the same cause.)
 
-**Cause:** Auto Drive implements **ListObjectsV2** only. By default rclone's generic S3 backend (`provider = Other`) uses the older **ListObjectsV1** API.
+**Cause:** Auto Drive implements **ListObjectsV2** only. By default rclone's generic S3 backend (`provider = Other`) uses the older **ListObjectsV1** API; Auto Drive does not recognise it and falls through to a per-object lookup, which reports the key as missing.
 
 **Fix:** Set `list_version = 2` in your rclone config.
 
