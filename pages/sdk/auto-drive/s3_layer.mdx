@@ -180,7 +180,7 @@ console.log(result.ETag); // '"<composite_md5>-1"'
 
 | Environment | Endpoint |
 | --- | --- |
-| **Mainnet (public)** | `https://public.auto-drive.autonomys.xyz/s3` |
+| **Mainnet (public)** | `https://s3.auto-drive.autonomys.xyz` |
 
 ### Client Setup (AWS JS SDK)
 
@@ -191,7 +191,7 @@ import { S3Client } from "@aws-sdk/client-s3";
 
 const s3Client = new S3Client({
   region: "us-east-1",                                // required by the SDK; ignored by Auto Drive
-  endpoint: "https://public.auto-drive.autonomys.xyz/s3",
+  endpoint: "https://s3.auto-drive.autonomys.xyz",
   credentials: {
     accessKeyId: "your-auto-drive-api-key",          // your Auto Drive API key
     secretAccessKey: "placeholder",                   // any non-empty string; ignored
@@ -249,7 +249,7 @@ For the dedicated walkthrough — quickstart, full config reference, every suppo
 
 For developers moving from traditional AWS S3:
 
-1. **Update the endpoint** to `https://public.auto-drive.autonomys.xyz/s3`
+1. **Update the endpoint** to `https://s3.auto-drive.autonomys.xyz`
 2. **Change credentials** to use your Auto Drive API key as `accessKeyId`; set `secretAccessKey` to a placeholder
 3. **Set `forcePathStyle: true`** in the S3 client configuration
 4. **Drop bucket-creation calls** — buckets are created implicitly on first write
@@ -270,7 +270,7 @@ const s3Client = new S3Client({
 // After (Auto Drive)
 const s3Client = new S3Client({
   region: "us-east-1",
-  endpoint: "https://public.auto-drive.autonomys.xyz/s3",
+  endpoint: "https://s3.auto-drive.autonomys.xyz",
   credentials: {
     accessKeyId: "your-auto-drive-api-key",
     secretAccessKey: "placeholder",

@@ -45,7 +45,7 @@ type = s3
 provider = Other
 access_key_id = YOUR_API_KEY_HERE
 secret_access_key = placeholder
-endpoint = https://public.auto-drive.autonomys.xyz/s3
+endpoint = https://s3.auto-drive.autonomys.xyz
 no_check_bucket = true
 list_version = 2
 ```
@@ -73,7 +73,7 @@ rclone copy autodrive:my-archive/my-file.txt ./downloaded/
 | `provider` | `Other` | Generic S3-compatible mode — no provider-specific assumptions |
 | `access_key_id` | Your Auto Drive API key | From the **Developers** tab at [ai3.storage](https://ai3.storage) |
 | `secret_access_key` | Any non-empty string | Required by rclone but ignored by Auto Drive |
-| `endpoint` | `https://public.auto-drive.autonomys.xyz/s3` | Auto Drive S3 API base URL |
+| `endpoint` | `https://s3.auto-drive.autonomys.xyz` | Auto Drive S3 API base URL |
 | `no_check_bucket` | `true` | Skip bucket existence check — buckets are created implicitly on first write |
 | `list_version` | `2` | **Required.** Auto Drive implements ListObjectsV2 only; without this, rclone defaults to V1 and listings fail |
 
@@ -97,7 +97,7 @@ rclone config
 4. Select `Other` as the provider
 5. Enter your API key as `access_key_id`
 6. Enter `placeholder` for `secret_access_key`
-7. Enter `https://public.auto-drive.autonomys.xyz/s3` as the endpoint
+7. Enter `https://s3.auto-drive.autonomys.xyz` as the endpoint
 8. Accept defaults for the remaining options
 
 Then manually add `no_check_bucket = true` and `list_version = 2` to the config section.
@@ -438,7 +438,7 @@ jobs:
           provider = Other
           access_key_id = ${{ secrets.AUTO_DRIVE_API_KEY }}
           secret_access_key = placeholder
-          endpoint = https://public.auto-drive.autonomys.xyz/s3
+          endpoint = https://s3.auto-drive.autonomys.xyz
           no_check_bucket = true
           list_version = 2
           EOF
@@ -466,7 +466,7 @@ archive-artifacts:
       provider = Other
       access_key_id = ${AUTO_DRIVE_API_KEY}
       secret_access_key = placeholder
-      endpoint = https://public.auto-drive.autonomys.xyz/s3
+      endpoint = https://s3.auto-drive.autonomys.xyz
       no_check_bucket = true
       list_version = 2
       EOF
@@ -530,7 +530,7 @@ services:
         provider = Other
         access_key_id = $${AUTO_DRIVE_API_KEY}
         secret_access_key = placeholder
-        endpoint = https://public.auto-drive.autonomys.xyz/s3
+        endpoint = https://s3.auto-drive.autonomys.xyz
         no_check_bucket = true
         list_version = 2
         EOF
@@ -618,7 +618,7 @@ ERROR : file.txt: Failed to delete: 403 Access Denied: Auto Drive storage is imm
 
 **Fix:**
 
-- `curl -I https://public.auto-drive.autonomys.xyz/s3` to verify reachability
+- `curl -I https://s3.auto-drive.autonomys.xyz` to verify reachability
 - Increase the timeout: `--timeout=60s`
 - Add retries: `--retries=5 --retries-sleep=10s`
 
@@ -646,7 +646,7 @@ ERROR : file.txt: Failed to delete: 403 Access Denied: Auto Drive storage is imm
 rclone config show autodrive
 
 # Test endpoint reachability
-curl -I https://public.auto-drive.autonomys.xyz/s3
+curl -I https://s3.auto-drive.autonomys.xyz
 
 # Verbose upload with full logging
 rclone copy ./test.txt autodrive:test-bucket/ \
