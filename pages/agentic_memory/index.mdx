@@ -13,20 +13,12 @@ This page covers the ready-made agent skills for permanent memory and recovery, 
 
 | Skill | What it does | OpenClaw | Hermes Agent |
 |---|---|---|---|
-| **Auto Memory** | Saves agent memories as a CID-linked chain on the Autonomys DSN via Auto Drive, and walks the chain back to rebuild history | [`permanent-memory`](https://clawhub.ai/0xautonomys/skills/permanent-memory) | [Skills Hub](https://hermes-agent.nousresearch.com/docs/skills) |
-| **Auto Respawn** | Manages the agent's on-chain identity (wallet) and anchors the latest memory CID to the MemoryChain smart contract on Auto EVM | [`respawn`](https://clawhub.ai/0xautonomys/skills/respawn) | [Skills Hub](https://hermes-agent.nousresearch.com/docs/skills) |
+| **Auto Memory** | Saves agent memories as a CID-linked chain on the Autonomys DSN via Auto Drive, and walks the chain back to rebuild history | [`permanent-memory`](https://clawhub.ai/0xautonomys/skills/permanent-memory) | [Skills Hub](https://hermes-agent.nousresearch.com/docs/skills) (search for `Auto Memory`) |
+| **Auto Respawn** | Manages the agent's on-chain identity (wallet) and anchors the latest memory CID to the MemoryChain smart contract on Auto EVM | [`respawn`](https://clawhub.ai/0xautonomys/skills/respawn) | [Skills Hub](https://hermes-agent.nousresearch.com/docs/skills) (search for `Auto Respawn`) |
 
-Both skills work with agents powered by Claude, GPT, Gemini, or any LLM runtime that supports the SKILL.md format. Alternatively, you can install them via the CLI:
+Both skills work with agents powered by Claude, GPT, Gemini, or any LLM runtime that supports the SKILL.md format. Alternatively, you can install them via the CLI, for more details see the [Quickstart (CLI)](/agentic_memory/quickstart).
 
-```bash
-# OpenClaw
-openclaw skills install @0xautonomys/permanent-memory
-openclaw skills install @0xautonomys/respawn
 
-# Hermes Agent (installs from ClawHub as a skill source)
-hermes skills install clawhub/0xautonomys/permanent-memory
-hermes skills install clawhub/0xautonomys/respawn
-```
 
 ## Why Store Agent Memory on the Autonomys DSN?
 
@@ -66,7 +58,7 @@ A memory entry looks like this:
   },
   "data": {
     "type": "memory",
-    "content": "Decision: using React for the frontend. Reason: component reuse."
+    "content": "Decision: engaging with the user on the topic of AI agents on X (Twitter)."
   }
 }
 ```
