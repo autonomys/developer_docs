@@ -28,22 +28,18 @@ hermes skills install clawhub/0xautonomys/permanent-memory
 hermes skills install clawhub/0xautonomys/respawn
 ```
 
-The ClawHub pages linked in the table serve as the canonical skill documentation for both runtimes.
-
 ## Why Store Agent Memory on the Autonomys DSN?
 
 Most agent memory today lives in local files, vector databases, or cloud buckets — all of which share the same weakness: they are tied to a machine, an account, or an operator that can disappear. The Autonomys DSN offers properties that map unusually well to what long-lived agents actually need:
 
-- **Permanence without pinning.** Data written to the DSN becomes part of the archived chain history, stored by a global network of farmers incentivized through [Proof-of-Archival-Storage](https://academy.autonomys.xyz/autonomys-network/consensus) consensus. There is no pin to renew and no hosting bill that, once unpaid, deletes your agent's mind.
+- **Permanence without pinning.** Data written to the DSN becomes part of the archived chain history, stored by a global network of farmers incentivized through [Proof-of-Archival-Storage](https://academy.autonomys.xyz/autonomys-network/consensus) consensus. There is no pin to renew and no hosting bill that, once unpaid, deletes your agent's memories.
 - **Verifiability.** Every memory is content-addressed by its CID. An agent (or anyone auditing it) can prove that a given memory existed at a given time and was never altered — useful for provenance, accountability, and agent-to-agent trust.
 - **Survivability.** Because memories live on-chain rather than on the agent's host, total loss of local state is recoverable. The agent's hardware is disposable; its history is not.
 - **Interoperability.** A memory chain is plain JSON addressed by CIDs. Any framework, runtime, or future agent instance can read it — no vendor lock-in to a particular memory database.
 
-This pattern was pioneered in the [Autonomys Agents Framework](https://github.com/autonomys/autonomys-agents) (no longer maintained), where agents persisted every significant experience to the DSN and could be *resurrected* on fresh infrastructure from their on-chain memory alone. The skills on this page package that same architecture for modern agent runtimes.
-
 ## Memory Chains: Linked Lists of CIDs
 
-Each memory entry is a small JSON *experience* uploaded to Auto Drive. Its header contains a `previousCid` field pointing at the entry saved before it — forming a linked list that grows from a genesis entry (`previousCid: null`) to the current head:
+Each memory entry is a small JSON *experience* uploaded to Auto Drive. Its header contains a `previousCid` field pointing at the entry saved before it — forming a linked list that grows from a genesis entry to the current head:
 
 ```text
 ┌─────────────────────┐     ┌─────────────────────┐     ┌─────────────────────┐
@@ -77,7 +73,7 @@ A memory entry looks like this:
 
 Because every entry is immutable and permanently stored, the **head CID alone is sufficient to reconstruct the entire history**: walk the chain backwards, entry by entry, until you reach genesis. What goes into the chain is up to the agent — identity files, significant decisions with their reasoning, and long-term context are worth more in the chain than routine logs.
 
-This works with a minimal setup: the Auto Memory skill needs nothing more than a free Auto Drive API key. No wallet, no tokens, no smart contracts.
+This works with a minimal setup: the Auto Memory skill needs nothing more than a free Auto Drive API key. No wallet, no credit card, no tokens, no smart contracts.
 
 ## Beyond the Skills: All Familiar Auto Drive Interfaces
 
