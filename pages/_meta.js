@@ -13,6 +13,7 @@ export default {
     },
     introduction: "Introduction",
     auto_drive: 'Auto Drive',
+    agentic_memory: 'Agentic Memory',
     sdk: 'Auto SDK',
     evm: 'Auto EVM',
     application_examples: 'Example Applications',

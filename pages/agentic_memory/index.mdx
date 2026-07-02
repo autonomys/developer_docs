@@ -1,0 +1,122 @@
+---
+title: Agentic Memory
+description: Permanent, resurrectable memory for AI agents on the Autonomys Network
+---
+
+# Agentic Memory
+
+AI agents lose their state easily: a crashed process, a wiped container, or a migrated host erases what an agent has learned — its identity, its decisions, and the reasoning behind them. Storing memories with [Auto Drive](/auto_drive), on the permanent **Autonomys Distributed Storage Network (DSN)**, keeps an agent's history independent of any single machine or operator.
+
+This page covers the ready-made agent skills for permanent memory and recovery, how memory chains work under the hood, and the interfaces available for building your own integration. For step-by-step setup, see the [Quickstart (CLI)](/agentic_memory/quickstart).
+
+## Available Skills
+
+| Skill | What it does | OpenClaw | Hermes Agent |
+|---|---|---|---|
+| **Auto Memory** | Saves agent memories as a CID-linked chain on the Autonomys DSN via Auto Drive, and walks the chain back to rebuild history | [`permanent-memory`](https://clawhub.ai/0xautonomys/skills/permanent-memory) | [Skills Hub](https://hermes-agent.nousresearch.com/docs/skills) |
+| **Auto Respawn** | Manages the agent's on-chain identity (wallet) and anchors the latest memory CID to the MemoryChain smart contract on Auto EVM | [`respawn`](https://clawhub.ai/0xautonomys/skills/respawn) | [Skills Hub](https://hermes-agent.nousresearch.com/docs/skills) |
+
+Both skills work with agents powered by Claude, GPT, Gemini, or any LLM runtime that supports the SKILL.md format. Alternatively, you can install them via the CLI:
+
+```bash
+# OpenClaw
+openclaw skills install @0xautonomys/permanent-memory
+openclaw skills install @0xautonomys/respawn
+
+# Hermes Agent (installs from ClawHub as a skill source)
+hermes skills install clawhub/0xautonomys/permanent-memory
+hermes skills install clawhub/0xautonomys/respawn
+```
+
+The ClawHub pages linked in the table serve as the canonical skill documentation for both runtimes.
+
+## Why Store Agent Memory on the Autonomys DSN?
+
+Most agent memory today lives in local files, vector databases, or cloud buckets — all of which share the same weakness: they are tied to a machine, an account, or an operator that can disappear. The Autonomys DSN offers properties that map unusually well to what long-lived agents actually need:
+
+- **Permanence without pinning.** Data written to the DSN becomes part of the archived chain history, stored by a global network of farmers incentivized through [Proof-of-Archival-Storage](https://academy.autonomys.xyz/autonomys-network/consensus) consensus. There is no pin to renew and no hosting bill that, once unpaid, deletes your agent's mind.
+- **Verifiability.** Every memory is content-addressed by its CID. An agent (or anyone auditing it) can prove that a given memory existed at a given time and was never altered — useful for provenance, accountability, and agent-to-agent trust.
+- **Survivability.** Because memories live on-chain rather than on the agent's host, total loss of local state is recoverable. The agent's hardware is disposable; its history is not.
+- **Interoperability.** A memory chain is plain JSON addressed by CIDs. Any framework, runtime, or future agent instance can read it — no vendor lock-in to a particular memory database.
+
+This pattern was pioneered in the [Autonomys Agents Framework](https://github.com/autonomys/autonomys-agents) (no longer maintained), where agents persisted every significant experience to the DSN and could be *resurrected* on fresh infrastructure from their on-chain memory alone. The skills on this page package that same architecture for modern agent runtimes.
+
+## Memory Chains: Linked Lists of CIDs
+
+Each memory entry is a small JSON *experience* uploaded to Auto Drive. Its header contains a `previousCid` field pointing at the entry saved before it — forming a linked list that grows from a genesis entry (`previousCid: null`) to the current head:
+
+```text
+┌─────────────────────┐     ┌─────────────────────┐     ┌─────────────────────┐
+│  Experience #1      │     │  Experience #2      │     │  Experience #3      │
+│  CID: bafk...abc    │◄────│  CID: bafk...def    │◄────│  CID: bafk...xyz    │
+│  previousCid: null  │     │  previousCid:       │     │  previousCid:       │
+│  (genesis)          │     │  bafk...abc         │     │  bafk...def         │
+└─────────────────────┘     └─────────────────────┘     └─────────────────────┘
+                                                                   ▲
+                                                                   │
+                                                               HEAD CID
+                                                          (resurrection key)
+```
+
+A memory entry looks like this:
+
+```json
+{
+  "header": {
+    "agentName": "my-agent",
+    "agentVersion": "1.0.0",
+    "timestamp": "2026-07-02T00:00:00.000Z",
+    "previousCid": "bafk...def"
+  },
+  "data": {
+    "type": "memory",
+    "content": "Decision: using React for the frontend. Reason: component reuse."
+  }
+}
+```
+
+Because every entry is immutable and permanently stored, the **head CID alone is sufficient to reconstruct the entire history**: walk the chain backwards, entry by entry, until you reach genesis. What goes into the chain is up to the agent — identity files, significant decisions with their reasoning, and long-term context are worth more in the chain than routine logs.
+
+This works with a minimal setup: the Auto Memory skill needs nothing more than a free Auto Drive API key. No wallet, no tokens, no smart contracts.
+
+## Beyond the Skills: All Familiar Auto Drive Interfaces
+
+The skills are a convenience layer. Under the hood they talk to [Auto Drive](/auto_drive), which any agent architecture can integrate directly through the interfaces you already know:
+
+- **REST API** — see the [Auto Drive API Reference](/sdk/auto-drive/api_reference)
+- **TypeScript SDK** (`@autonomys/auto-drive`) — see [Overview & Setup](/sdk/auto-drive/overview_setup) and [Usage Examples](/sdk/auto-drive/usage_examples)
+- **S3-compatible layer** — point any S3 client at Auto Drive via the [S3 Layer](/sdk/auto-drive/s3_layer)
+- **rclone** — sync files from the command line with the [rclone integration](/auto_drive/rclone)
+- **Public gateway** — retrieve any file by CID at `https://gateway.autonomys.xyz/file/<CID>` ([Gateway docs](/sdk/auto-drive/gateway))
+
+## Free Storage: 20 MB per Month
+
+Every Auto Drive account includes **20 MB of free uploads per month** — and since a typical memory entry is a JSON document of a few kilobytes, that's thousands of memory saves per month. For most agents, the free tier is more than sufficient; downloads (including chain recall and resurrection) are unlimited. If an agent outgrows it, credits can be purchased permissionlessly with AI3 — see [Pay with AI3](/auto_drive/pay_with_ai3).
+
+## Going Further: Respawn and On-Chain Identity
+
+Auto Memory on its own has one remaining dependency on local state: the agent must remember its head CID to find its chain again. If you want to take it even further, the **Auto Respawn** skill removes that last dependency — a wallet becomes the agent's identity and its on-chain anchor.
+
+Auto Respawn builds on top of Auto Memory and expands it by storing the head CID on-chain. It gives the agent a wallet that derives two permanent addresses — a consensus address (`su...`) and an EVM address (`0x...`) — and uses the **MemoryChain** smart contract on [Auto EVM](/evm/introduction) to keep the chain discoverable:
+
+- **`anchor`** writes the latest head CID to the contract, keyed by the agent's EVM address (mainnet contract: `0x51DAedAFfFf631820a4650a773096A69cB199A3c`).
+- **`gethead`** is a free read call that returns the most recently anchored CID for any address.
+
+Writing the CID as a bare `system.remark` on the consensus layer would also be permanent, but there is no efficient way to query it back — you'd have to scan chain history. The contract turns recovery into a single instant read.
+
+Together, the two skills form the full resurrection loop:
+
+1. **Save** — Auto Memory uploads a new memory entry to Auto Drive and receives its CID.
+2. **Anchor** — Auto Respawn writes that CID to the MemoryChain contract on Auto EVM.
+3. **Lose everything** — the agent's local state is destroyed.
+4. **Respawn** — a fresh instance calls `gethead` with the agent's EVM address, retrieves the head CID, downloads it from Auto Drive, and walks the chain back to genesis.
+
+The agent's EVM address plus the MemoryChain contract equal instant access to its entire history — from any machine, at any time. Unlike the memory-only setup, this requires a wallet funded with AI3 for anchoring gas — see the [Quickstart (CLI)](/agentic_memory/quickstart) for the full walkthrough.
+
+## Further Reading
+
+- [Quickstart (CLI)](/agentic_memory/quickstart) — step-by-step setup for both skills
+- [Auto Drive Overview](/auto_drive) — the storage platform underneath the memory skills
+- [Auto Drive SDK](/sdk/auto-drive/overview_setup) and [API Reference](/sdk/auto-drive/api_reference) — build custom memory integrations
+- [Auto EVM](/evm/introduction) — the smart contract environment hosting the MemoryChain contract
+- [Autonomys Agents Framework](https://github.com/autonomys/autonomys-agents) — the original (now unmaintained) framework where on-chain agent memory and resurrection were first implemented, including the [AgentMemory contract](https://github.com/autonomys/autonomys-agents/tree/main/agent-contracts) and an [agent memory viewer](https://github.com/autonomys/autonomys-agents/tree/main/agent-memory-viewer)
