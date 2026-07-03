@@ -1,0 +1,107 @@
+---
+title: Agentic Memory Quickstart (CLI)
+description: Step-by-step setup for the Auto Memory and Auto Respawn agent skills on mainnet
+---
+
+# Quickstart (CLI)
+
+This walkthrough targets **mainnet** and is split in two parts: a minimal setup for permanent memory alone, and the extended setup that adds on-chain anchoring with Auto Respawn. Full command references live on the ClawHub pages for [Auto Memory](https://clawhub.ai/0xautonomys/skills/permanent-memory) and [Auto Respawn](https://clawhub.ai/0xautonomys/skills/respawn).
+
+## Part 1: Permanent Memory (Minimal Setup)
+
+All you need is the Auto Memory skill and a free Auto Drive API key.
+
+### 1. Install the skill
+
+```bash
+# OpenClaw
+openclaw skills install @0xautonomys/permanent-memory
+
+# Hermes Agent (installs from ClawHub as a skill source)
+hermes skills install clawhub/0xautonomys/permanent-memory
+```
+
+After a CLI install, make the bundled scripts executable (`chmod +x`) and run the skill's setup script — see the skill page for details.
+
+### 2. Get an Auto Drive API key
+
+Auto Memory needs an `AUTO_DRIVE_API_KEY` for uploads and memory saves. Create one from the Developers section of the Auto Drive dashboard — see [Create an API Key](/sdk/auto-drive/create_api_key) — then export it:
+
+```bash
+export AUTO_DRIVE_API_KEY=your_key_here
+```
+
+### 3. Save memories
+
+```bash
+# Save a plain-text memory
+scripts/automemory-save-memory.sh "Decision: adopted linked-CID memory chains." --agent-name my-agent
+
+# Or save a JSON file as the memory payload
+scripts/automemory-save-memory.sh ./milestone.json --agent-name my-agent
+```
+
+Each save returns the new CID, the previous CID, and the chain length.
+
+### 4. Recall the chain
+
+```bash
+scripts/automemory-recall-chain.sh <head-cid>
+```
+
+Walks the linked list from the head CID back to genesis and outputs each memory entry. If no CID is given, the skill uses the head CID from its local state file — which is exactly the limitation the next part removes.
+
+## Part 2: Going Further with Auto Respawn
+
+Add on-chain anchoring so the chain can be recovered from just an EVM address — with no local state at all.
+
+### 1. Install the skill
+
+```bash
+# OpenClaw
+openclaw skills install @0xautonomys/respawn
+
+# Hermes Agent
+hermes skills install clawhub/0xautonomys/respawn
+```
+
+### 2. Set up the agent's on-chain identity
+
+Create a wallet and fund its EVM side so it can pay anchoring gas. On mainnet this requires AI3 tokens on the consensus layer, bridged to Auto EVM:
+
+```bash
+npx tsx auto-respawn.ts wallet create --name my-agent --network mainnet
+npx tsx auto-respawn.ts fund-evm --from my-agent --amount 1 --network mainnet
+npx tsx auto-respawn.ts balances my-agent --network mainnet
+```
+
+The wallet derives both a consensus address (`su...`) and an EVM address (`0x...`) from one recovery phrase — back the phrase up immediately, it is shown only once. Cross-domain transfers have a **1 AI3 minimum** and take **~10 minutes** to arrive on Auto EVM.
+
+### 3. Anchor the head CID after every save
+
+```bash
+npx tsx auto-respawn.ts anchor --from my-agent --cid <new-cid> --network mainnet
+```
+
+Anchoring after each save keeps the on-chain pointer current — an unanchored chain is only recoverable if the local state file survives.
+
+### 4. Resurrect
+
+On a fresh machine with no local state:
+
+```bash
+# Read the head CID from the MemoryChain contract
+npx tsx auto-respawn.ts gethead <0x-agent-address> --network mainnet
+
+# Walk the chain from head back to genesis
+scripts/automemory-recall-chain.sh <head-cid>
+```
+
+The agent rebuilds its identity and context from genesis to present.
+
+## Good Practices
+
+- **Everything stored is permanent and public.** Never put secrets, private keys, or sensitive personal data in a memory chain.
+- **Be consistent about the network.** Anchor and recover on the same network (`--network mainnet` on every command) — anchoring on one network and querying another fails silently.
+- **Monitor the EVM balance.** A wallet that runs out of gas breaks the resurrection loop silently: memories keep saving, but `gethead` stops reflecting them.
+- **Keep individual uploads small** to stay comfortably within the monthly free tier.
