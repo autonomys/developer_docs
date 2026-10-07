@@ -1,0 +1,106 @@
+---
+title: Pay with USDC — Storage Credits
+---
+
+# Pay with USDC
+
+Pay with USDC lets you purchase **Auto Drive storage credits** with **USDC on Ethereum mainnet** — no intermediary, no grant form, no approval process. Payments are made on-chain to the contract on Ethereum, and credits become available after the payment is confirmed.
+
+> **USDC on Ethereum mainnet required.** Payments use USDC (ERC-20) on Ethereum mainnet. USDC on other chains (Base, Arbitrum, Solana, etc.) cannot be used. You also need a small amount of **ETH** in the same wallet to pay Ethereum gas fees.
+
+> **Prefer to pay with AI3?** See the [Pay with AI3 guide](/auto_drive/pay_with_ai3). Both methods buy the same credits, with the same limits.
+
+---
+
+## Step 1: Open Purchase Credits
+
+Sign in to [ai3.storage](https://ai3.storage/) via Google and click **"Buy more credits"** in the bottom-left sidebar of the dashboard.
+
+> **Google authentication is required, if you're using GitHub, Discord or a wallet, you will not see the option to purchase credits.**
+
+![PwAI3-1](/developers/PwAI3-1.png)
+
+---
+
+## Step 2: Select a Package
+
+Choose one of the preset packages or configure a custom amount. The current price per MB is shown at the top of the page and is derived from live protocol-level DSN storage costs.
+
+![PwAI3-2](/developers/PwAI3-2.png)
+
+---
+
+## Step 3: Choose USDC and Confirm the Order
+
+On the order screen, select **USDC — Stablecoin on Ethereum** as the payment method. Review the order details — storage amount, USD equivalent, and your credits balance before and after purchase. Click **"Confirm Purchase"** to proceed.
+
+> **The USD figure on this screen is an estimate.** The exact USDC amount is quoted and locked in the next step.
+
+![PwUSDC-3](/developers/PwUSDC-3.png)
+
+---
+
+## Step 4: Lock the Price, Connect Your Wallet and Pay
+
+![PwUSDC-4](/developers/PwUSDC-4.png)
+
+Connect a compatible EVM wallet that holds **USDC and ETH on Ethereum mainnet**. Click **"Get a price"** to lock the quote. The screen then shows the recipient contract address and the exact USDC amount to pay.
+
+> **The price is locked for 10 minutes from this point.** Complete the payment within the window. If the timer expires before the payment is sent, click **"Get a fresh price"** to request a new quote.
+
+Click **"Approve and pay USDC"**. Your wallet will ask you to confirm up to three actions:
+
+1. **Switch network** — if your wallet is not on Ethereum mainnet, confirm the switch.
+2. **Approve USDC** — gives the Auto Drive receiver contract permission to take the quoted amount. Approval does **not** send USDC yet.
+3. **Send payment** — sends the quoted USDC amount to the receiver contract.
+
+Some wallets combine the approval and the payment into a single confirmation.
+
+After sending, the page will show a confirmation progress bar. Wait for all block confirmations before continuing.
+
+> **Do not pay twice.** If the page reloads or your wallet is slow to respond, do not send another payment. The page keeps tracking your payment and resumes when you reconnect the same wallet.
+
+![PwUSDC-5](/developers/PwUSDC-5.png)
+
+
+---
+
+## Step 5: Payment Complete
+
+Once all confirmations are reached, you will see a payment receipt showing storage added, USDC paid, transaction hash, and your new purchased credits total. Click **"Continue to Dashboard"**.
+
+Your credits are immediately available and will be reflected in the sidebar balance. Credits are consumed in **FIFO expiry order** — credits closest to expiration are spent first.
+
+![PwUSDC-6](/developers/PwUSDC-6.png)
+
+---
+
+## A Note on Current Limitations
+
+These restrictions are deliberate economic protections, not permanent product decisions. The Autonomys Network is still in its early growth phase, and they exist to prevent storage credit hoarding or speculative accumulation. The goal is for storage credits to be used, not held.
+
+**Google authentication is required.** Purchasing credits requires signing in with a Google account. Server-side integrations work as long as the owning account authenticated with Google when creating the API key.
+
+**100 GB maximum purchased credits per account.** This limit applies across AI3 and USDC purchases combined. If a payment would push you past the cap, the intent moves to `OVER_CAP` — the payment is not lost and is recoverable.
+
+**Purchased credits expire after 90 days.** Unused bytes are forfeited at expiry. Work is underway on automated refunds for unused credits — for now, expiry forfeiture is recoverable through support.
+
+**USDC on Ethereum mainnet only.** Payments must be made in USDC on Ethereum mainnet, and you pay Ethereum gas fees in ETH for the approval and the payment.
+
+**USDC purchases can be paused temporarily.** New USDC quotes may be unavailable for short periods, for example when a reliable AI3/USD rate cannot be read. A quote you already locked stays payable for its full 10 minutes. If USDC is unavailable, you can [pay with AI3](/auto_drive/pay_with_ai3).
+
+**Pay within the 10-minute price lock.** A payment that arrives shortly after the lock ends can still be credited, but one that arrives too late, or USDC sent to a wrong quote, is not credited automatically. Such payments are recorded and recoverable through support.
+
+These constraints will be revisited as the network matures. If you are building something that these limits add friction to, reach out on the [forum](https://forum.autonomys.xyz/) or in [Discord](https://autonomys.xyz/discord).
+
+For full details, see the [Auto Drive Terms of Use](https://autonomys.xyz/auto-drive-terms-of-use).
+
+---
+
+## Further Reading
+
+- [Auto Drive Overview](/auto_drive)
+- [Pay with AI3](/auto_drive/pay_with_ai3) — purchase storage credits with AI3 tokens on Auto EVM
+- [Pay with AI3 & USDC — Developer Integration](/sdk/auto-drive/pay_with_ai3#pay-with-usdc) — integrate USDC credit purchasing into your own application
+- [File Encryption Specification](/sdk/auto-drive/encryption)
+- [Auto Drive SDK](/sdk/auto-drive)

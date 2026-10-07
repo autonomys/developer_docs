@@ -100,13 +100,15 @@ These functions implement the complete [Pay with AI3](/auto_drive/pay_with_ai3) 
 
 - `api.getPaymentContractInfo(): Promise<PaymentContractInfo>` — Returns the Auto-EVM contract address, chain ID, and `payIntent` ABI. No API key required. Called internally by `createPaymentIntent`; export this for client-side wallet pre-fetching.
 
-- `api.createPaymentIntent(sizeBytes): Promise<PaymentIntent>` — Locks the current storage price for the authenticated account and returns a payment intent. The price is locked for **10 minutes**.
+- `api.createPaymentIntent(sizeBytes, options?): Promise<PaymentIntent>` — Locks the current storage price for the authenticated account and returns a payment intent. The price is locked for **10 minutes**. Pass `{ checkCreditCap: true }` to have Auto Drive reject an over-cap purchase before anything is paid.
 
-- `api.watchPaymentTransaction(intentId, txHash): Promise<void>` — Submits the on-chain transaction hash to Auto Drive. The backend polls for 6 block confirmations before granting credits.
+- `api.watchPaymentTransaction(intentId, txHash): Promise<void>` — Submits the on-chain transaction hash to Auto Drive. The backend waits for 6 block confirmations before granting credits. Works for both AI3 and USDC intents.
 
 - `api.getPaymentIntentStatus(intentId): Promise<{ id: string; status: PaymentIntentStatus }>` — Returns the current status of a payment intent.
 
-- `api.waitForPaymentCompletion(intentId, options?): Promise<PaymentIntentTerminalStatus>` — Polls until the intent reaches a terminal state (`COMPLETED`, `EXPIRED`, `FAILED`, or `OVER_CAP`). Resolves with the terminal status.
+- `api.waitForPaymentCompletion(intentId, options?): Promise<PaymentIntentTerminalStatus>` — Polls until the intent reaches a terminal state (`COMPLETED`, `EXPIRED`, `FAILED`, or `OVER_CAP`). Resolves with the terminal status. Set `options.settleGraceMs` to keep polling through an HTTP `410` after the price lock lapses; without it, a `410` throws a `PaymentApiError`.
+
+The authenticated payment calls throw a `PaymentApiError` (with `status` and, for coded backend errors, `code`) when Auto Drive answers with a non-OK status. See [Handling Errors](/sdk/auto-drive/pay_with_ai3#handling-errors).
 
 **Supporting types:**
 
@@ -139,5 +141,80 @@ type PaymentIntentTerminalStatus = 'COMPLETED' | 'EXPIRED' | 'FAILED' | 'OVER_CA
 type PollOptions = {
   pollIntervalMs?: number  // default: 3000
   timeoutMs?: number       // default: 300000 (5 minutes)
+  settleGraceMs?: number   // keep polling through HTTP 410 for this long, then return 'EXPIRED'
+}
+
+type CreatePaymentIntentOptions = {
+  checkCreditCap?: boolean // send sizeBytes as requestedBytes for a pre-payment cap check. Default: false
+}
+
+class PaymentApiError extends Error {
+  readonly status: number                       // HTTP status
+  readonly code?: PaymentErrorCode | string     // machine-readable backend code, when present
+}
+
+type PaymentErrorCode =
+  | 'GOOGLE_ACCOUNT_REQUIRED'    // 403
+  | 'CREDIT_CAP_EXCEEDED'        // 403
+  | 'USDC_PAYMENTS_DISABLED'     // 403
+  | 'USDC_PAYMENTS_UNAVAILABLE'  // 503
+  | 'PRICE_ORACLE_UNAVAILABLE'   // 503
+  | 'PRICE_UNSTABLE'             // 503
+```
+
+---
+
+## Pay with USDC — Payment Intents
+
+These functions implement the [Pay with USDC](/auto_drive/pay_with_usdc) credit purchase flow (USDC on Ethereum mainnet). The SDK does not sign transactions: it returns the quote and where to pay, plus typed ABIs, and your wallet library sends the transactions. See the [developer integration guide](/sdk/auto-drive/pay_with_ai3#pay-with-usdc) for a full example.
+
+**Five-step flow:**
+```
+1. createUsdcPaymentIntent(sizeBytes)                 — locks a USDC price, returns amount + chain, token and receiver
+2. approve(receiverAddress, usdcAmount)               — on tokenAddress, on chainId (your wallet code)
+3. payIntentWithToken(intentId, usdcAmount)           — on receiverAddress, no value (your wallet code)
+4. watchPaymentTransaction(id, txHash)                — the hash from step 3, not step 2
+5. waitForPaymentCompletion(id, { settleGraceMs })    — poll until COMPLETED (credits applied)
+```
+
+- `api.getUsdcPaymentTarget(): Promise<UsdcPaymentTarget>` — Returns where to send a USDC payment: chain ID, receiver address, token address, token decimals, confirmations, and `settleGraceMs`. Requires an API key. Called internally by `createUsdcPaymentIntent`.
+
+- `api.createUsdcPaymentIntent(sizeBytes: number | bigint): Promise<UsdcPaymentIntent>` — Locks a USDC price for `sizeBytes` of storage and returns the exact amount to pay together with where to pay it. The price is locked for **10 minutes**.
+
+- `erc20ApprovalAbi` — Minimal ERC-20 ABI (`approve`, `allowance`, `balanceOf`) for the approval step. `transfer` and `transferFrom` are left out on purpose.
+
+- `usdcReceiverAbi` — Minimal ABI for `payIntentWithToken(bytes32 intentId, uint256 amount)` on `AutoDriveUSDCReceiver`.
+
+`watchPaymentTransaction`, `getPaymentIntentStatus` and `waitForPaymentCompletion` are shared with the AI3 flow (see above).
+
+**Supporting types:**
+
+```typescript
+type PaymentMethod = 'ai3_native' | 'usdc_eth'
+
+type UsdcPaymentTarget = {
+  chainId: number          // EIP-155 chain ID (1 for Ethereum mainnet)
+  receiverAddress: string  // AutoDriveUSDCReceiver — also the approve spender
+  tokenAddress: string     // USDC token address — call approve on this
+  tokenDecimals: number    // 6 for USDC
+  confirmations: number    // blocks the backend waits for before crediting
+  settleGraceMs: number    // pass to waitForPaymentCompletion
+}
+
+type UsdcPaymentIntent = {
+  intentId: string             // bytes32 arg to payIntentWithToken()
+  paymentMethod: 'usdc_eth'
+  usdcAmount: string           // exact amount in base units (6 decimals), BigInt-safe string
+  usdcAmountFormatted: string  // human-readable, e.g. "27.498"
+  receiverAddress: string
+  tokenAddress: string
+  chainId: number
+  tokenDecimals: number
+  confirmations: number
+  settleGraceMs: number
+  expiresAt: string            // ISO 8601 timestamp when the price lock ends
+  shannonsPerByte: string      // locked AI3 price per byte
+  quotedAi3Shannons: string    // AI3 amount the USDC quote was made for
+  usdRateAtCreation: string    // AI3/USD rate × 1e18, for reporting only
 }
 ```

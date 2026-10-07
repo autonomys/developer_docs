@@ -35,7 +35,7 @@ import { CopyButton } from '../components/CopyButton'
     const ext = path.extname(file).toLowerCase();
     return ['.mdx', '.md'].includes(ext) && 
            !file.includes('_meta.json') && 
-           file !== 'llm-friendly-docs.mdx';
+           file !== path.basename(outputFile);
   };
 
   // Function to process a single file
