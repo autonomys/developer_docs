@@ -7,6 +7,235 @@ import { CopyButton } from '../components/CopyButton'
 <div className="raw-content">
 
 ```text
+### File: agentic_memory/index.mdx
+
+---
+title: Agentic Memory
+description: Permanent, resurrectable memory for AI agents on the Autonomys Network
+---
+
+# Agentic Memory
+
+AI agents lose their state easily: a crashed process, a wiped container, or a migrated host erases what an agent has learned — its identity, its decisions, and the reasoning behind them. Storing memories with [Auto Drive](/auto_drive), on the permanent **Autonomys Distributed Storage Network (DSN)**, keeps an agent's history independent of any single machine or operator.
+
+This page covers the ready-made agent skills for permanent memory and recovery, how memory chains work under the hood, and the interfaces available for building your own integration. For step-by-step setup, see the [Quickstart (CLI)](/agentic_memory/quickstart).
+
+## Available Skills
+
+| Skill | What it does | OpenClaw | Hermes Agent |
+|---|---|---|---|
+| **Auto Memory** | Saves agent memories as a CID-linked chain on the Autonomys DSN via Auto Drive, and walks the chain back to rebuild history | [\`permanent-memory\`](https://clawhub.ai/0xautonomys/skills/permanent-memory) | [Skills Hub](https://hermes-agent.nousresearch.com/docs/skills) (search for \`Auto Memory\`) |
+| **Auto Respawn** | Manages the agent's on-chain identity (wallet) and anchors the latest memory CID to the MemoryChain smart contract on Auto EVM | [\`respawn\`](https://clawhub.ai/0xautonomys/skills/respawn) | [Skills Hub](https://hermes-agent.nousresearch.com/docs/skills) (search for \`Auto Respawn\`) |
+
+Both skills work with agents powered by Claude, GPT, Gemini, or any LLM runtime that supports the SKILL.md format. Alternatively, you can install them via the CLI, for more details see the [Quickstart (CLI)](/agentic_memory/quickstart).
+
+
+
+## Why Store Agent Memory on the Autonomys DSN?
+
+Most agent memory today lives in local files, vector databases, or cloud buckets — all of which share the same weakness: they are tied to a machine, an account, or an operator that can disappear. The Autonomys DSN offers properties that map unusually well to what long-lived agents actually need:
+
+- **Permanence without pinning.** Data written to the DSN becomes part of the archived chain history, stored by a global network of farmers incentivized through [Proof-of-Archival-Storage](https://academy.autonomys.xyz/autonomys-network/consensus) consensus. There is no pin to renew and no hosting bill that, once unpaid, deletes your agent's memories.
+- **Verifiability.** Every memory is content-addressed by its CID. An agent (or anyone auditing it) can prove that a given memory existed at a given time and was never altered — useful for provenance, accountability, and agent-to-agent trust.
+- **Survivability.** Because memories live on-chain rather than on the agent's host, total loss of local state is recoverable. The agent's hardware is disposable; its history is not.
+- **Interoperability.** A memory chain is plain JSON addressed by CIDs. Any framework, runtime, or future agent instance can read it — no vendor lock-in to a particular memory database.
+
+## Memory Chains: Linked Lists of CIDs
+
+Each memory entry is a small JSON *experience* uploaded to Auto Drive. Its header contains a \`previousCid\` field pointing at the entry saved before it — forming a linked list that grows from a genesis entry to the current head:
+
+\`\`\`text
+┌─────────────────────┐     ┌─────────────────────┐     ┌─────────────────────┐
+│  Experience #1      │     │  Experience #2      │     │  Experience #3      │
+│  CID: bafk...abc    │◄────│  CID: bafk...def    │◄────│  CID: bafk...xyz    │
+│  previousCid: null  │     │  previousCid:       │     │  previousCid:       │
+│  (genesis)          │     │  bafk...abc         │     │  bafk...def         │
+└─────────────────────┘     └─────────────────────┘     └─────────────────────┘
+                                                                   ▲
+                                                                   │
+                                                               HEAD CID
+                                                          (resurrection key)
+\`\`\`
+
+A memory entry looks like this:
+
+\`\`\`json
+\{
+  "header": \{
+    "agentName": "my-agent",
+    "agentVersion": "1.0.0",
+    "timestamp": "2026-07-02T00:00:00.000Z",
+    "previousCid": "bafk...def"
+  \},
+  "data": \{
+    "type": "memory",
+    "content": "Decision: engaging with the user on the topic of AI agents on X (Twitter)."
+  \}
+\}
+\`\`\`
+
+Because every entry is immutable and permanently stored, the **head CID alone is sufficient to reconstruct the entire history**: walk the chain backwards, entry by entry, until you reach genesis. What goes into the chain is up to the agent — identity files, significant decisions with their reasoning, and long-term context are worth more in the chain than routine logs.
+
+This works with a minimal setup: the Auto Memory skill needs nothing more than a free Auto Drive API key. No wallet, no credit card, no tokens, no smart contracts.
+
+## Beyond the Skills: All Familiar Auto Drive Interfaces
+
+The skills are a convenience layer. Under the hood they talk to [Auto Drive](/auto_drive), which any agent architecture can integrate directly through the interfaces you already know:
+
+- **REST API** — see the [Auto Drive API Reference](/sdk/auto-drive/api_reference)
+- **TypeScript SDK** (\`@autonomys/auto-drive\`) — see [Overview & Setup](/sdk/auto-drive/overview_setup) and [Usage Examples](/sdk/auto-drive/usage_examples)
+- **S3-compatible layer** — point any S3 client at Auto Drive via the [S3 Layer](/sdk/auto-drive/s3_layer)
+- **rclone** — sync files from the command line with the [rclone integration](/auto_drive/rclone)
+- **Public gateway** — retrieve any file by CID at \`https://gateway.autonomys.xyz/file/<CID>\` ([Gateway docs](/sdk/auto-drive/gateway))
+
+## Free Storage: 20 MB per Month
+
+Every Auto Drive account includes **20 MB of free uploads per month** — and since a typical memory entry is a JSON document of a few kilobytes, that's thousands of memory saves per month. For most agents, the free tier is more than sufficient; downloads (including chain recall and resurrection) are unlimited. If an agent outgrows it, credits can be purchased permissionlessly with AI3 — see [Pay with AI3](/auto_drive/pay_with_ai3).
+
+## Going Further: Respawn and On-Chain Identity
+
+Auto Memory on its own has one remaining dependency on local state: the agent must remember its head CID to find its chain again. If you want to take it even further, the **Auto Respawn** skill removes that last dependency — a wallet becomes the agent's identity and its on-chain anchor.
+
+Auto Respawn builds on top of Auto Memory and expands it by storing the head CID on-chain. It gives the agent a wallet that derives two permanent addresses — a consensus address (\`su...\`) and an EVM address (\`0x...\`) — and uses the **MemoryChain** smart contract on [Auto EVM](/evm/introduction) to keep the chain discoverable:
+
+- **\`anchor\`** writes the latest head CID to the contract, keyed by the agent's EVM address (mainnet contract: \`0x51DAedAFfFf631820a4650a773096A69cB199A3c\`).
+- **\`gethead\`** is a free read call that returns the most recently anchored CID for any address.
+
+Writing the CID as a bare \`system.remark\` on the consensus layer would also be permanent, but there is no efficient way to query it back — you'd have to scan chain history. The contract turns recovery into a single instant read.
+
+Together, the two skills form the full resurrection loop:
+
+1. **Save** — Auto Memory uploads a new memory entry to Auto Drive and receives its CID.
+2. **Anchor** — Auto Respawn writes that CID to the MemoryChain contract on Auto EVM.
+3. **Lose everything** — the agent's local state is destroyed.
+4. **Respawn** — a fresh instance calls \`gethead\` with the agent's EVM address, retrieves the head CID, downloads it from Auto Drive, and walks the chain back to genesis.
+
+The agent's EVM address plus the MemoryChain contract equal instant access to its entire history — from any machine, at any time. Unlike the memory-only setup, this requires a wallet funded with AI3 for anchoring gas — see the [Quickstart (CLI)](/agentic_memory/quickstart) for the full walkthrough.
+
+## Further Reading
+
+- [Quickstart (CLI)](/agentic_memory/quickstart) — step-by-step setup for both skills
+- [Auto Drive Overview](/auto_drive) — the storage platform underneath the memory skills
+- [Auto Drive SDK](/sdk/auto-drive/overview_setup) and [API Reference](/sdk/auto-drive/api_reference) — build custom memory integrations
+- [Auto EVM](/evm/introduction) — the smart contract environment hosting the MemoryChain contract
+- [Autonomys Agents Framework](https://github.com/autonomys/autonomys-agents) — the original (now unmaintained) framework where on-chain agent memory and resurrection were first implemented, including the [AgentMemory contract](https://github.com/autonomys/autonomys-agents/tree/main/agent-contracts) and an [agent memory viewer](https://github.com/autonomys/autonomys-agents/tree/main/agent-memory-viewer)
+
+
+---
+
+### File: agentic_memory/quickstart.mdx
+
+---
+title: Agentic Memory Quickstart (CLI)
+description: Step-by-step setup for the Auto Memory and Auto Respawn agent skills on mainnet
+---
+
+# Quickstart (CLI)
+
+This walkthrough targets **mainnet** and is split in two parts: a minimal setup for permanent memory alone, and the extended setup that adds on-chain anchoring with Auto Respawn. Full command references live on the ClawHub pages for [Auto Memory](https://clawhub.ai/0xautonomys/skills/permanent-memory) and [Auto Respawn](https://clawhub.ai/0xautonomys/skills/respawn).
+
+## Part 1: Permanent Memory (Minimal Setup)
+
+All you need is the Auto Memory skill and a free Auto Drive API key.
+
+### 1. Install the skill
+
+\`\`\`bash
+# OpenClaw
+openclaw skills install @0xautonomys/permanent-memory
+
+# Hermes Agent (installs from ClawHub as a skill source)
+hermes skills install clawhub/0xautonomys/permanent-memory
+\`\`\`
+
+After a CLI install, make the bundled scripts executable (\`chmod +x\`) and run the skill's setup script — see the skill page for details.
+
+### 2. Get an Auto Drive API key
+
+Auto Memory needs an \`AUTO_DRIVE_API_KEY\` for uploads and memory saves. Create one from the Developers section of the Auto Drive dashboard — see [Create an API Key](/sdk/auto-drive/create_api_key) — then export it:
+
+\`\`\`bash
+export AUTO_DRIVE_API_KEY=your_key_here
+\`\`\`
+
+### 3. Save memories
+
+\`\`\`bash
+# Save a plain-text memory
+scripts/automemory-save-memory.sh "Decision: adopted linked-CID memory chains." --agent-name my-agent
+
+# Or save a JSON file as the memory payload
+scripts/automemory-save-memory.sh ./milestone.json --agent-name my-agent
+\`\`\`
+
+Each save returns the new CID, the previous CID, and the chain length.
+
+### 4. Recall the chain
+
+\`\`\`bash
+scripts/automemory-recall-chain.sh <head-cid>
+\`\`\`
+
+Walks the linked list from the head CID back to genesis and outputs each memory entry. If no CID is given, the skill uses the head CID from its local state file — which is exactly the limitation the next part removes.
+
+## Part 2: Going Further with Auto Respawn
+
+Add on-chain anchoring so the chain can be recovered from just an EVM address — with no local state at all.
+
+### 1. Install the skill
+
+\`\`\`bash
+# OpenClaw
+openclaw skills install @0xautonomys/respawn
+
+# Hermes Agent
+hermes skills install clawhub/0xautonomys/respawn
+\`\`\`
+
+### 2. Set up the agent's on-chain identity
+
+Create a wallet and fund its EVM side so it can pay anchoring gas. On mainnet this requires AI3 tokens on the consensus layer, bridged to Auto EVM:
+
+\`\`\`bash
+npx tsx auto-respawn.ts wallet create --name my-agent --network mainnet
+npx tsx auto-respawn.ts fund-evm --from my-agent --amount 1 --network mainnet
+npx tsx auto-respawn.ts balances my-agent --network mainnet
+\`\`\`
+
+The wallet derives both a consensus address (\`su...\`) and an EVM address (\`0x...\`) from one recovery phrase — back the phrase up immediately, it is shown only once. Cross-domain transfers have a **1 AI3 minimum** and take **~10 minutes** to arrive on Auto EVM.
+
+### 3. Anchor the head CID after every save
+
+\`\`\`bash
+npx tsx auto-respawn.ts anchor --from my-agent --cid <new-cid> --network mainnet
+\`\`\`
+
+Anchoring after each save keeps the on-chain pointer current — an unanchored chain is only recoverable if the local state file survives.
+
+### 4. Resurrect
+
+On a fresh machine with no local state:
+
+\`\`\`bash
+# Read the head CID from the MemoryChain contract
+npx tsx auto-respawn.ts gethead <0x-agent-address> --network mainnet
+
+# Walk the chain from head back to genesis
+scripts/automemory-recall-chain.sh <head-cid>
+\`\`\`
+
+The agent rebuilds its identity and context from genesis to present.
+
+## Good Practices
+
+- **Everything stored is permanent and public.** Never put secrets, private keys, or sensitive personal data in a memory chain.
+- **Be consistent about the network.** Anchor and recover on the same network (\`--network mainnet\` on every command) — anchoring on one network and querying another fails silently.
+- **Monitor the EVM balance.** A wallet that runs out of gas breaks the resurrection loop silently: memories keep saving, but \`gethead\` stops reflecting them.
+- **Keep individual uploads small** to stay comfortably within the monthly free tier.
+
+
+---
+
 ### File: application_examples/argu-mint.mdx
 
 ---
@@ -61,43 +290,173 @@ Argu-mint and Agree-mint leverage multiple components of the Autonomys Network:
 
 ---
 
-### File: application_examples/auto-drive.mdx
+### File: application_examples/eulonomys.mdx
 
 ---
-title: Auto Drive
-description: Permanent Distributed Storage
+title: Eulonomys
+description: A reference application that preserves eulogies permanently using Auto Drive storage and Pay with AI3
 ---
 
-## [Auto Drive](https://ai3.storage/): Permanent distributed data storage
+## Eulonomys: Permanent Eulogies on the Autonomys Network
 
-### What is Auto Drive?
-[Auto Drive](https://ai3.storage/) is a **next-generation distributed storage platform** that ensures data is always accessible, immutable, and secure. Unlike traditional systems like IPFS, which rely on pinning or hosting services, Auto Drive guarantees **permanent availability** through a distributed network of incentivized storage nodes (farmers).
+Eulonomys is a reference application that preserves eulogies permanently using Auto Drive storage. Every tribute created with Eulonomys is immutable, censorship-resistant, and independent of any company or server.
 
-Whether you’re building a super dApp or Auto Agent, archiving important data, or hosting files for the web3 world, Auto Drive offers a seamless, developer-friendly solution.
+This walkthrough highlights a new Auto Drive capability: **Pay with AI3**. Users can now pay for permanent storage on the Autonomys DSN directly with AI3 tokens from their wallet. No subscriptions. No intermediaries. Your words, preserved forever.
 
-![Auto-Drive](/developers/Auto-Drive-2.png)
+The real purpose of this app is to show developers how to build on Autonomys. Every pattern is meant to be copied, extended, and improved.
 
-### Key features
+---
 
-- **Always-On Availability**: Ensures your files are always online (unlike IPFS, which requires pinning to maintain availability), making it ideal for applications that demand reliability.
+### Video walkthrough
 
-- **True Data Permanence**: Offers a permanent, tamper-proof solution for storing important data, removing any uncertainty about data loss, making it perfect for long-term archival.
+<iframe
+  width="100%"
+  height="430"
+  src="https://www.youtube.com/embed/cMlaWvectS8"
+  title="Eulonomys Walkthrough"
+  frameBorder="0"
+  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+  allowFullScreen
+  style=\{\{ borderRadius: '8px', marginTop: '1rem' \}\}
+/>
 
-- **Built for Developers**: Simplifies complex decentralized storage operations with easy-to-use tools and APIs, allowing for easy integration, whether you’re a seasoned developer or a first-time builder.
+---
 
-- **Sustainable and Scalable**: Decentralized, open-source, and community-driven. Incentivizes high-performing storage nodes, ensuring scalability and sustainability for years to come.
+### Try it
 
-### Why Auto Drive?
-**Auto Drive** bridges the gap between IPFS and truly permanent storage. IPFS can be problematic as files are removed if they aren’t pinned or hosted. Auto Drive solves this by guaranteeing data availability using advanced blockchain-backed storage proofs and redundancy that make data tamper-proof and permanently accessible without relying on pinning services.
+🕊️ **Live app**: [eulonomys.vercel.app](https://eulonomys.vercel.app/)
 
-### Use cases
-- Host decentralized applications.
-- Transparently store on-chain agent data.
-- Permanently archive important files.
+---
 
-**Auto Drive** is the future of distributed storage. Whether you’re safeguarding critical data or building the next web3 innovation, Auto Drive is here to make it easier, faster and more secure.
+### Source code
 
-**[Start building](http://develop.autonomys.xyz/sdk/auto-drive/overview_setup)**
+The full source is open and meant to be forked:
+
+**[github.com/autonomys-community/eulonomys](https://github.com/autonomys-community/eulonomys)**
+
+---
+
+## Pay with AI3 — Code Walkthrough
+
+The following snippets are taken directly from the Eulonomys repository and show how Pay with AI3 is integrated end-to-end.
+
+### Creating a payment intent
+
+The server-side API route creates a payment intent, watches the on-chain transaction, and polls for completion — all through the \`@autonomys/auto-drive\` SDK:
+
+\`\`\`typescript
+// src/app/api/payment/route.ts
+
+import \{ createAutoDriveApi \} from "@autonomys/auto-drive";
+import \{ NextRequest, NextResponse \} from "next/server";
+import \{ config \} from "@/config/app";
+
+function getApi() \{
+  return createAutoDriveApi(\{
+    apiKey: config.autoDrive.apiKey,
+    apiUrl: config.autoDrive.apiUrl,
+  \});
+\}
+
+export async function POST(request: NextRequest) \{
+  const body = await request.json();
+  const \{ action \} = body;
+
+  // Step 1: Create an intent (locks price for 10 minutes)
+  if (action === "createIntent") \{
+    const \{ contentSizeBytes \} = body;
+    const intent = await getApi().createPaymentIntent(contentSizeBytes);
+    return NextResponse.json(intent);
+  \}
+
+  // Step 2: User has sent the on-chain tx — submit hash for watching
+  if (action === "watch") \{
+    const \{ intentId, txHash \} = body;
+    await getApi().watchPaymentTransaction(intentId, txHash);
+    return NextResponse.json(\{ success: true \});
+  \}
+
+  // Step 3: Wait for intent to complete (long-poll)
+  if (action === "waitForCompletion") \{
+    const \{ intentId \} = body;
+    const status = await getApi().waitForPaymentCompletion(intentId, \{
+      pollIntervalMs: 3000,
+      timeoutMs: 300000,
+    \});
+    return NextResponse.json(\{ status \});
+  \}
+\}
+\`\`\`
+
+### Uploading to Auto Drive after payment
+
+Once credits land, the app uploads the eulogy content using the SDK. The \`SdkAutoDriveClient\` wraps the SDK and provides a clean interface for the rest of the app:
+
+\`\`\`typescript
+// src/services/autoDrive.ts
+
+import \{ createAutoDriveApi \} from "@autonomys/auto-drive";
+import \{ config \} from "@/config/app";
+
+export class SdkAutoDriveClient \{
+  private api: ReturnType<typeof createAutoDriveApi>;
+
+  constructor() \{
+    this.api = createAutoDriveApi(\{
+      provider: "apikey",
+      apiKey: config.autoDrive.apiKey,
+      apiUrl: config.autoDrive.apiUrl,
+    \});
+  \}
+
+  async uploadFile(buffer: Buffer, filename: string) \{
+    const cid = await this.api.uploadFileFromBuffer(buffer, filename, \{
+      compression: true,
+    \});
+    return \{ cid \};
+  \}
+
+  async uploadJson(data: Record<string, unknown>, filename: string) \{
+    const cid = await this.api.uploadObjectAsJSON(data, filename, \{
+      compression: true,
+    \});
+    return \{ cid \};
+  \}
+\}
+\`\`\`
+
+### App configuration
+
+Minimal configuration is required — an API key and the network endpoints:
+
+\`\`\`typescript
+// src/config/app.ts
+
+export const config = \{
+  autoDrive: \{
+    gatewayUrl:
+      process.env.NEXT_PUBLIC_AUTO_DRIVE_GATEWAY_URL ||
+      "https://gateway.autonomys.xyz/file",
+    apiUrl:
+      process.env.AUTO_DRIVE_API_URL ||
+      "https://mainnet.auto-drive.autonomys.xyz/api",
+    apiKey: process.env.AUTO_DRIVE_API_KEY || "",
+  \},
+  payment: \{
+    pollIntervalMs: 3000,
+    pollTimeoutMs: 300000,
+  \},
+\} as const;
+\`\`\`
+
+---
+
+## Further reading
+
+- [Auto Drive Overview](/auto_drive)
+- [Pay with AI3 — Storage Credits](/auto_drive/pay_with_ai3)
+- [Pay with AI3 — Developer Integration](/sdk/auto-drive/pay_with_ai3)
+- [Auto Drive SDK](/sdk/auto-drive)
 
 
 ---
@@ -845,11 +1204,11 @@ Unlike other decentralized storage solutions that distribute data across servers
 
 Some services require active pinning or hosting to keep files online — when a pin expires or a node goes offline, the file disappears. Auto Drive eliminates this problem entirely.
 
-The Autonomys **Distributed Storage Network (DSN)** is a permissionless on-chain storage layer supported by a globally distributed network of **farmers** who collectively pledge over **40 PB of SSD space**. Farmers are economically incentivized via **Proof-of-Archival-Storage (PoAS)** consensus to store as many provably unique segments of chain history as their disk space allows.
+The Autonomys **Distributed Storage Network (DSN)** is a permissionless on-chain storage layer supported by a globally distributed network of **farmers** who collectively pledge over **40 PB of SSD space**. Farmers are economically incentivized via **[Proof-of-Archival-Storage (PoAS)](https://academy.autonomys.xyz/autonomys-network/consensus)** consensus to store as many provably unique segments of chain history as their disk space allows.
 
 ### Tamper-Proof by Design
 
-Autonomys maintains data redundancy via **erasure-coded replication** across the network — each data chunk is stored on multiple nodes, guaranteeing data availability and integrity. It becomes exponentially more difficult for a single actor to control the majority of copies.
+Autonomys maintains data redundancy via **erasure-coded replication** across the network — each data chunk is stored on multiple nodes, guaranteeing data availability and integrity.
 
 ---
 
@@ -863,21 +1222,20 @@ Auto Drive provides access to genuine on-chain blockspace. This means your data 
 
 Auto Drive supports optional client-side encryption using **AES-256-GCM**. Files are encrypted on your device before they are transmitted to the network, so storage nodes never see your plaintext data. See the [File Encryption Specification](/sdk/auto-drive/encryption) for full technical details.
 
-### Permissionless Storage Credits — Pay with AI3
+### Permissionless Storage Credits — Pay with AI3 or USDC
 
-Storage on Auto Drive is paid for with **credits**. Beyond the free monthly tier, credits can be purchased directly with native **AI3 tokens** on the Auto-EVM network — no intermediary, no grant form, no foundation approval. Payments settle on-chain and credits become available within a few blocks.
+Storage on Auto Drive is paid for with **credits**. Beyond the free monthly tier, credits can be purchased directly with native **AI3 tokens** on the Auto-EVM network or with **USDC** on Ethereum mainnet — no intermediary, no grant form, no foundation approval. Payments settle on-chain and credits become available within a few blocks.
 
-→ See the full guide: **[Pay with AI3](/auto_drive/pay_with_ai3)**
+→ See the full guides: **[Pay with AI3](/auto_drive/pay_with_ai3)** · **[Pay with USDC](/auto_drive/pay_with_usdc)**
 
 ### User-Friendly Dashboard
 
 [ai3.storage](https://ai3.storage/) provides an intuitive web interface for managing your files and account:
 
-- Drag and drop file uploads
-- Create and manage directories
+- Drag and drop file uploads and folders
 - Share files via direct link or Public ID
 - Manage API keys
-- Track upload and download credits
+- Track and purchase upload credits
 
 Sign in with Google, Discord, GitHub, or a wallet.
 
@@ -895,7 +1253,7 @@ Sign in with Google, Discord, GitHub, or a wallet.
 
 ## Storage Credits
 
-Every account includes a free monthly allocation. When you need more, there are two options — grants for projects early in development, and permissionless on-chain purchase for production use.
+Every account includes a free monthly allocation. When you need more, there are two options — grants for projects early in development, and permissionless on-chain purchase (with AI3 or USDC) for production use.
 
 ### Free Tier
 
@@ -914,11 +1272,18 @@ For production applications, credits can be purchased permissionlessly with nati
 
 **[→ Pay with AI3 guide](/auto_drive/pay_with_ai3)** — covers step by step process on how to purchase credits with AI3 tokens.
 
+### Pay with USDC
+
+Credits can also be purchased with **USDC on Ethereum mainnet**. The flow is the same as Pay with AI3: pick a package, lock the price, and pay on-chain from your wallet.
+
+**[→ Pay with USDC guide](/auto_drive/pay_with_usdc)** — covers step by step process on how to purchase credits with USDC.
+
 ---
 
 ## Further Reading
 
 - [Pay with AI3](/auto_drive/pay_with_ai3) — purchase storage credits permissionlessly with AI3 tokens
+- [Pay with USDC](/auto_drive/pay_with_usdc) — purchase storage credits permissionlessly with USDC on Ethereum
 - [File Encryption Specification](/sdk/auto-drive/encryption) — AES-256-GCM encryption details
 - [Auto Drive SDK](/sdk/auto-drive) — full SDK reference including all available functions, S3 compatibility layer, and API reference
 
@@ -935,13 +1300,29 @@ title: Pay with AI3 — Storage Credits
 
 Pay with AI3 lets you purchase **Auto Drive storage credits** directly with native AI3 tokens — no intermediary, no grant form, no approval process. Payments are made on-chain on the **Auto-EVM network** (Chain ID 870) and credits become available within a few blocks of confirmation.
 
-> **AI3 on Auto EVM required.** Payments use AI3 on the Auto-EVM network, not on the consensus chain. If your AI3 is on the consensus chain, you will need to bridge it to Auto EVM first — see the [Bridging guide](https://docs.autonomys.xyz/bridge).
+> **AI3 on Auto EVM required.** Payments use AI3 on the Auto-EVM network, not on the consensus chain. If your AI3 is on the consensus chain, you will need to move it to Auto EVM using Cross Domain Messaging (XDM) first — see the [XDM guide](https://docs.autonomys.xyz/xdm).
+
+### Video walkthrough
+
+<iframe
+  width="100%"
+  height="430"
+  src="https://www.youtube.com/embed/KMpVhpOaFgU"
+  title="Pay with AI3 Demo"
+  frameBorder="0"
+  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+  allowFullScreen
+  style=\{\{ borderRadius: '8px', marginTop: '1rem' \}\}
+/>
 
 ---
 
 ## Step 1: Open Purchase Credits
 
-Sign in to [ai3.storage](https://ai3.storage/) and click **"Buy more credits"** in the bottom-left sidebar of the dashboard.
+Sign in to [ai3.storage](https://ai3.storage/) via Google and click **"Buy more credits"** in the bottom-left sidebar of the dashboard. 
+
+> **Google authentication is required, if you're using GitHub, Discord or a wallet, you will not see the option to purchase credits.** 
+
 
 ![PwAI3-1](/developers/PwAI3-1.png)
 
@@ -949,7 +1330,7 @@ Sign in to [ai3.storage](https://ai3.storage/) and click **"Buy more credits"** 
 
 ## Step 2: Select a Package
 
-Choose one of the preset packages or configure a custom amount. The current price per MB is shown at the top of the page and reflects live protocol-level DSN storage costs and a service fee.
+Choose one of the preset packages or configure a custom amount. The current price per MB is shown at the top of the page and is derived from live protocol-level DSN storage costs.
 
 ![PwAI3-2](/developers/PwAI3-2.png)
 
@@ -969,7 +1350,7 @@ After selecting a package or entering a custom amount, review the order details 
 
 The next screen shows the transfer details: your connected wallet address, the recipient contract address, and the exact AI3 amount. Connect a compatible EVM wallet and click **"Send Transfer"**.
 
-Your wallet must hold **AI3 on the Auto-EVM network** (Chain ID 870). If your AI3 is on the consensus chain, bridge it first — see the [Bridging guide](https://docs.autonomys.xyz/bridge). If needed, add Auto EVM to your wallet:
+Your wallet must hold **AI3 on the Auto-EVM network** (Chain ID 870). If your AI3 is on the consensus chain, XDM it first — see the [Cross Domain Messaging guide](https://docs.autonomys.xyz/xdm). If needed, add Auto EVM to your wallet:
 
 \`\`\`
 Network Name: Autonomys EVM
@@ -988,7 +1369,7 @@ After sending, the page will show a confirmation progress bar. Wait for **6 out 
 
 Once all 6 confirmations are reached, you will see a payment receipt showing storage added, AI3 paid, transaction hash, and your new purchased credits total. Click **"Continue to Dashboard"**.
 
-Your credits are immediately available and will be reflected in the sidebar balance. Credits are consumed in **FIFO expiry order** — credits closest to expiration are spent first. Your free monthly allocation is always spent before purchased credits.
+Your credits are immediately available and will be reflected in the sidebar balance. Credits are consumed in **FIFO expiry order** — credits closest to expiration are spent first.
 
 ![PwAI3-5](/developers/PwAI3-5.png)
 
@@ -1014,8 +1395,796 @@ For full details, see the [Auto Drive Terms of Use](https://autonomys.xyz/auto-d
 
 - [Auto Drive Overview](/auto_drive)
 - [Pay with AI3 — Developer Integration](/sdk/auto-drive/pay_with_ai3) — integrate permissionless credit purchasing into your own application
+- [Eulonomys](/application_examples/eulonomys) — reference app built with Pay with AI3
 - [File Encryption Specification](/sdk/auto-drive/encryption)
 - [Auto Drive SDK](/sdk/auto-drive)
+
+
+---
+
+### File: auto_drive/pay_with_usdc.mdx
+
+---
+title: Pay with USDC — Storage Credits
+---
+
+# Pay with USDC
+
+Pay with USDC lets you purchase **Auto Drive storage credits** with **USDC on Ethereum mainnet** — no intermediary, no grant form, no approval process. Payments are made on-chain to the contract on Ethereum, and credits become available after the payment is confirmed.
+
+> **USDC on Ethereum mainnet required.** Payments use USDC (ERC-20) on Ethereum mainnet. USDC on other chains (Base, Arbitrum, Solana, etc.) cannot be used. You also need a small amount of **ETH** in the same wallet to pay Ethereum gas fees.
+
+> **Prefer to pay with AI3?** See the [Pay with AI3 guide](/auto_drive/pay_with_ai3). Both methods buy the same credits, with the same limits.
+
+---
+
+## Step 1: Open Purchase Credits
+
+Sign in to [ai3.storage](https://ai3.storage/) via Google and click **"Buy more credits"** in the bottom-left sidebar of the dashboard.
+
+> **Google authentication is required, if you're using GitHub, Discord or a wallet, you will not see the option to purchase credits.**
+
+![PwAI3-1](/developers/PwAI3-1.png)
+
+---
+
+## Step 2: Select a Package
+
+Choose one of the preset packages or configure a custom amount. The current price per MB is shown at the top of the page and is derived from live protocol-level DSN storage costs.
+
+![PwAI3-2](/developers/PwAI3-2.png)
+
+---
+
+## Step 3: Choose USDC and Confirm the Order
+
+On the order screen, select **USDC — Stablecoin on Ethereum** as the payment method. Review the order details — storage amount, USD equivalent, and your credits balance before and after purchase. Click **"Confirm Purchase"** to proceed.
+
+> **The USD figure on this screen is an estimate.** The exact USDC amount is quoted and locked in the next step.
+
+![PwUSDC-3](/developers/PwUSDC-3.png)
+
+---
+
+## Step 4: Lock the Price, Connect Your Wallet and Pay
+
+![PwUSDC-4](/developers/PwUSDC-4.png)
+
+Connect a compatible EVM wallet that holds **USDC and ETH on Ethereum mainnet**. Click **"Get a price"** to lock the quote. The screen then shows the recipient contract address and the exact USDC amount to pay.
+
+> **The price is locked for 10 minutes from this point.** Complete the payment within the window. If the timer expires before the payment is sent, click **"Get a fresh price"** to request a new quote.
+
+Click **"Approve and pay USDC"**. Your wallet will ask you to confirm up to three actions:
+
+1. **Switch network** — if your wallet is not on Ethereum mainnet, confirm the switch.
+2. **Approve USDC** — gives the Auto Drive receiver contract permission to take the quoted amount. Approval does **not** send USDC yet.
+3. **Send payment** — sends the quoted USDC amount to the receiver contract.
+
+Some wallets combine the approval and the payment into a single confirmation.
+
+After sending, the page will show a confirmation progress bar. Wait for all block confirmations before continuing.
+
+> **Do not pay twice.** If the page reloads or your wallet is slow to respond, do not send another payment. The page keeps tracking your payment and resumes when you reconnect the same wallet.
+
+![PwUSDC-5](/developers/PwUSDC-5.png)
+
+
+---
+
+## Step 5: Payment Complete
+
+Once all confirmations are reached, you will see a payment receipt showing storage added, USDC paid, transaction hash, and your new purchased credits total. Click **"Continue to Dashboard"**.
+
+Your credits are immediately available and will be reflected in the sidebar balance. Credits are consumed in **FIFO expiry order** — credits closest to expiration are spent first.
+
+![PwUSDC-6](/developers/PwUSDC-6.png)
+
+---
+
+## A Note on Current Limitations
+
+These restrictions are deliberate economic protections, not permanent product decisions. The Autonomys Network is still in its early growth phase, and they exist to prevent storage credit hoarding or speculative accumulation. The goal is for storage credits to be used, not held.
+
+**Google authentication is required.** Purchasing credits requires signing in with a Google account. Server-side integrations work as long as the owning account authenticated with Google when creating the API key.
+
+**100 GB maximum purchased credits per account.** This limit applies across AI3 and USDC purchases combined. If a payment would push you past the cap, the intent moves to \`OVER_CAP\` — the payment is not lost and is recoverable.
+
+**Purchased credits expire after 90 days.** Unused bytes are forfeited at expiry. Work is underway on automated refunds for unused credits — for now, expiry forfeiture is recoverable through support.
+
+**USDC on Ethereum mainnet only.** Payments must be made in USDC on Ethereum mainnet, and you pay Ethereum gas fees in ETH for the approval and the payment.
+
+**USDC purchases can be paused temporarily.** New USDC quotes may be unavailable for short periods, for example when a reliable AI3/USD rate cannot be read. A quote you already locked stays payable for its full 10 minutes. If USDC is unavailable, you can [pay with AI3](/auto_drive/pay_with_ai3).
+
+**Pay within the 10-minute price lock.** A payment that arrives shortly after the lock ends can still be credited, but one that arrives too late, or USDC sent to a wrong quote, is not credited automatically. Such payments are recorded and recoverable through support.
+
+These constraints will be revisited as the network matures. If you are building something that these limits add friction to, reach out on the [forum](https://forum.autonomys.xyz/) or in [Discord](https://autonomys.xyz/discord).
+
+For full details, see the [Auto Drive Terms of Use](https://autonomys.xyz/auto-drive-terms-of-use).
+
+---
+
+## Further Reading
+
+- [Auto Drive Overview](/auto_drive)
+- [Pay with AI3](/auto_drive/pay_with_ai3) — purchase storage credits with AI3 tokens on Auto EVM
+- [Pay with AI3 & USDC — Developer Integration](/sdk/auto-drive/pay_with_ai3#pay-with-usdc) — integrate USDC credit purchasing into your own application
+- [File Encryption Specification](/sdk/auto-drive/encryption)
+- [Auto Drive SDK](/sdk/auto-drive)
+
+
+---
+
+### File: auto_drive/rclone.mdx
+
+# Using rclone with Auto Drive
+
+## What is rclone?
+
+[rclone](https://rclone.org) is an open-source command-line program — often described as "rsync for cloud storage" — that syncs, copies, and serves files between local disks and 70+ cloud storage providers through a single, consistent interface. It is widely used for backups, archival, migrations, and as the backbone of many self-hosted file workflows.
+
+Highlights of what rclone offers out of the box:
+
+- **One CLI for many backends.** S3-compatible providers, Google Drive, Dropbox, Backblaze B2, Azure Blob, SFTP, WebDAV, and many more — all behind the same commands (\`copy\`, \`sync\`, \`ls\`, \`mount\`, etc.).
+- **Resumable, parallel, deduplicating transfers.** Idempotent file copies, configurable parallelism, automatic retries, and skip-on-already-uploaded behavior make large transfers safe to interrupt and re-run.
+- **Integrity verification.** Built-in checksum comparison via \`rclone check\` and \`rclone md5sum\` confirms that what's stored matches what was sent.
+- **Mount as a filesystem.** \`rclone mount\` exposes a remote as a FUSE filesystem so any tool can read remote files as if they were local.
+- **Serve over HTTP, WebDAV, FTP, S3.** \`rclone serve\` turns any remote into a server that other tools can read from.
+- **Encryption, compression, and chunking.** Built-in transformers can transparently encrypt or compress data before upload.
+- **Scheduling-friendly.** Predictable exit codes, structured logs, and dry-run support make it easy to embed in cron, systemd timers, GitHub Actions, GitLab CI, or any orchestration system.
+
+Because Auto Drive exposes an S3-compatible API, you can use rclone to talk to it the same way you would to AWS S3 — with one important difference: **Auto Drive is permanent, immutable, decentralized storage.** Files stored on the Autonomys Distributed Storage Network (DSN) cannot be modified, overwritten, or deleted. That is the core guarantee. rclone operations that assume mutability (\`delete\`, \`purge\`, overwrite, rename) will not work — by design.
+
+The rest of this page is the technical reference for configuring rclone against Auto Drive and using it day-to-day.
+
+---
+
+## Quickstart
+
+**1. Get an API key.** Sign in at [ai3.storage](https://ai3.storage), open the **Developers** section, and create an API key. A free tier is available for getting started.
+
+**2. Install rclone.**
+
+\`\`\`bash
+# macOS
+brew install rclone
+
+# Linux
+curl https://rclone.org/install.sh | sudo bash
+
+# Windows
+winget install Rclone.Rclone
+\`\`\`
+
+**3. Configure the Auto Drive remote.** Create or edit \`~/.config/rclone/rclone.conf\` (Linux/macOS) or \`%APPDATA%\rclone\rclone.conf\` (Windows):
+
+\`\`\`ini
+[autodrive]
+type = s3
+provider = Other
+access_key_id = YOUR_API_KEY_HERE
+secret_access_key = placeholder
+endpoint = https://s3.auto-drive.autonomys.xyz
+no_check_bucket = true
+list_version = 2
+\`\`\`
+
+**4. Verify the connection.**
+
+\`\`\`bash
+# List your buckets
+rclone lsd autodrive:
+
+# Copy a file to permanent storage
+rclone copy ./my-file.txt autodrive:my-archive/ --immutable
+
+# Download it back
+rclone copy autodrive:my-archive/my-file.txt ./downloaded/
+\`\`\`
+
+---
+
+## Configuration Reference
+
+| Option | Value | Notes |
+| --- | --- | --- |
+| \`type\` | \`s3\` | Use the generic S3 backend |
+| \`provider\` | \`Other\` | Generic S3-compatible mode — no provider-specific assumptions |
+| \`access_key_id\` | Your Auto Drive API key | From the **Developers** tab at [ai3.storage](https://ai3.storage) |
+| \`secret_access_key\` | Any non-empty string | Required by rclone but ignored by Auto Drive |
+| \`endpoint\` | \`https://s3.auto-drive.autonomys.xyz\` | Auto Drive S3 API base URL |
+| \`no_check_bucket\` | \`true\` | Skip bucket existence check — buckets are created implicitly on first write |
+| \`list_version\` | \`2\` | **Required.** Auto Drive implements ListObjectsV2 only; without this, rclone defaults to V1 and listings fail |
+
+For local development against a self-hosted Auto Drive instance:
+
+\`\`\`ini
+endpoint = http://localhost:3000/s3
+\`\`\`
+
+### Interactive setup
+
+If you prefer the interactive flow, run:
+
+\`\`\`bash
+rclone config
+\`\`\`
+
+1. Select \`n\` for new remote
+2. Name it \`autodrive\`
+3. Select \`s3\` (Amazon S3 Compliant Storage Providers)
+4. Select \`Other\` as the provider
+5. Enter your API key as \`access_key_id\`
+6. Enter \`placeholder\` for \`secret_access_key\`
+7. Enter \`https://s3.auto-drive.autonomys.xyz\` as the endpoint
+8. Accept defaults for the remaining options
+
+Then manually add \`no_check_bucket = true\` and \`list_version = 2\` to the config section.
+
+---
+
+## Bucket Model
+
+Auto Drive treats the **first segment** of an object key as the bucket name. When you copy files to \`autodrive:my-archive/\`, rclone uses \`my-archive\` as the bucket and the remaining path as the key:
+
+| rclone path | Bucket | Key |
+| --- | --- | --- |
+| \`autodrive:my-archive/file.txt\` | \`my-archive\` | \`file.txt\` |
+| \`autodrive:my-archive/sub/file.txt\` | \`my-archive\` | \`sub/file.txt\` |
+
+Buckets are created implicitly on first write — there is no \`CreateBucket\` call. \`rclone lsd autodrive:\` lists every bucket you have written to.
+
+Objects uploaded before bucket support was introduced (flat keys with no \`/\`) remain accessible in the \`default\` bucket.
+
+---
+
+## Recommended Flags
+
+| Flag | Purpose | When to use |
+| --- | --- | --- |
+| \`--immutable\` | Prevent overwrite attempts on existing files | All upload commands |
+| \`-v\` / \`--verbose\` | Show progress and transfer details | Debugging |
+| \`--log-file=FILE\` | Write logs to a file | Production and CI/CD |
+| \`--transfers=N\` | Number of parallel transfers (default: 4) | Large jobs |
+| \`--ignore-checksum\` | Skip MD5 checksum comparison | Legacy objects without MD5 ETags |
+| \`--size-only\` | Compare by size instead of checksum | Alternative to \`--ignore-checksum\` |
+
+### A note on checksums
+
+Auto Drive returns standard MD5 hashes as S3 ETags for all objects uploaded after MD5 ETag support was introduced. \`rclone check\` and \`rclone md5sum\` work correctly on those objects without any special flags.
+
+Objects uploaded before MD5 ETag support have no stored MD5 — for those legacy objects, add \`--ignore-checksum\` or \`--size-only\` to skip checksum comparison.
+
+---
+
+## Operations Reference
+
+### Supported operations
+
+#### \`copy\` (upload)
+
+Copies files from source to destination without deleting source files. The primary command for archiving to Auto Drive.
+
+\`\`\`bash
+# Single file
+rclone copy ./report.pdf autodrive:my-archive/reports/ --immutable
+
+# Whole directory
+rclone copy ./backup/ autodrive:my-archive/backup-2026-05-03/ --immutable -v
+\`\`\`
+
+Files larger than 5 MB automatically use multipart upload.
+
+#### \`copy\` (download)
+
+\`\`\`bash
+rclone copy autodrive:my-archive/reports/report.pdf ./downloaded/
+rclone copy autodrive:my-archive/backup-2026-05-03/ ./restored/
+\`\`\`
+
+Byte-range downloads are also supported.
+
+#### \`cat\` — read file contents to stdout
+
+\`\`\`bash
+rclone cat autodrive:my-archive/logs/app.log
+\`\`\`
+
+#### \`copyto\` — copy a single file to a specific path
+
+\`\`\`bash
+rclone copyto ./local-file.txt autodrive:my-archive/archive/renamed-file.txt --immutable
+\`\`\`
+
+#### \`rcat\` — upload from stdin
+
+\`\`\`bash
+echo "log entry" | rclone rcat autodrive:my-archive/logs/entry.txt --immutable
+tar czf - ./project/ | rclone rcat autodrive:my-archive/archives/project.tar.gz --immutable
+\`\`\`
+
+#### \`ls\` / \`lsl\` — list files
+
+\`\`\`bash
+rclone ls autodrive:my-archive/
+rclone lsl autodrive:my-archive/reports/
+\`\`\`
+
+Uses ListObjectsV2 with prefix and delimiter folding.
+
+#### \`lsd\` — list buckets or directories
+
+\`\`\`bash
+# All buckets
+rclone lsd autodrive:
+
+# Top-level virtual directories in a bucket
+rclone lsd autodrive:my-archive/
+\`\`\`
+
+The top-level form uses \`ListBuckets\`; the per-bucket form uses \`ListObjectsV2\` with delimiter folding.
+
+#### \`tree\` — recursive tree view
+
+\`\`\`bash
+rclone tree autodrive:my-archive/
+\`\`\`
+
+#### \`md5sum\`, \`check\`, \`hashsum\`
+
+\`\`\`bash
+rclone md5sum autodrive:my-archive/
+rclone check ./local/ autodrive:my-archive/
+rclone hashsum md5 autodrive:my-archive/
+\`\`\`
+
+All three use the MD5 ETag for verification. \`rclone md5sum\` is shorthand for \`rclone hashsum md5\`; only \`md5\` is supported because Auto Drive stores MD5 ETags. Add \`--ignore-checksum\` for legacy objects without a stored MD5.
+
+#### \`size\` — total size and count
+
+\`\`\`bash
+rclone size autodrive:my-archive/
+rclone size autodrive:my-archive/reports/
+\`\`\`
+
+### Supported with caveats
+
+#### \`sync\` — partially supported
+
+\`rclone sync\` makes the destination match the source, including deletions on the destination side. With Auto Drive, the upload side works but deletions fail with \`403\`.
+
+\`\`\`bash
+rclone sync ./local/ autodrive:my-archive/mirror/ --immutable
+\`\`\`
+
+**Recommendation:** prefer \`rclone copy\` over \`rclone sync\`. The sync mental model assumes the ability to delete, which does not apply to permanent storage.
+
+#### \`move\` — partially supported
+
+\`\`\`bash
+rclone move ./local-files/ autodrive:my-archive/archive/ --immutable
+\`\`\`
+
+The upload succeeds. Local source deletion depends on rclone's post-transfer behavior. Moves *from* Auto Drive will fail at the remote-delete step.
+
+#### \`mount\` — read-only fully supported, read-write partial
+
+\`\`\`bash
+mkdir -p /mnt/autodrive
+rclone mount autodrive:my-archive/ /mnt/autodrive \
+  --read-only \
+  --vfs-cache-mode full \
+  --vfs-read-chunk-size 5M
+\`\`\`
+
+| Flag | Purpose |
+| --- | --- |
+| \`--read-only\` | Prevents confusing behavior from failed write/delete operations |
+| \`--vfs-cache-mode full\` | Caches files locally for better read performance |
+| \`--vfs-read-chunk-size 5M\` | Reads files in 5 MB chunks for efficient streaming |
+
+A read-write mount lets you create new files (which are uploaded normally), but \`delete\`, \`rename\`, and overwrite operations fail at the S3 layer. File explorers may show "deleted" files reappearing on refresh. Use \`--read-only\` unless you have a specific reason not to.
+
+Unmount with:
+
+\`\`\`bash
+fusermount -u /mnt/autodrive   # Linux
+umount /mnt/autodrive          # macOS
+\`\`\`
+
+### Unsupported by design
+
+These commands require mutability and will fail:
+
+- \`rclone delete\` — returns \`403 Access Denied: Auto Drive storage is immutable. Objects cannot be deleted from the Autonomys DSN.\`
+- \`rclone purge\` — same 403
+- \`rclone rmdir\` / \`rmdirs\` — no \`DeleteObject\` to call
+- \`rclone cleanup\` — returns \`501\`; the multipart-upload APIs it relies on (\`ListMultipartUploads\`, \`AbortMultipartUpload\`) are not implemented
+- \`rclone mkdir\` — buckets are created implicitly on first write; explicit \`CreateBucket\` is not implemented
+
+### Operations summary
+
+| Command | Status | Notes |
+| --- | --- | --- |
+| \`copy\` (upload) | ✅ Supported | Use \`--immutable\` |
+| \`copy\` (download) | ✅ Supported | Byte-range supported |
+| \`cat\` | ✅ Supported | Stream file to stdout |
+| \`copyto\` | ✅ Supported | Copy single file to specific path |
+| \`rcat\` | ✅ Supported | Upload from stdin |
+| \`ls\` / \`lsl\` | ✅ Supported | Uses ListObjectsV2 |
+| \`lsd\` | ✅ Supported | Bucket and directory listing |
+| \`tree\` | ✅ Supported | Recursive tree via ListObjectsV2 |
+| \`md5sum\` | ✅ Supported | MD5 ETags on new objects |
+| \`check\` | ✅ Supported | Same caveat as \`md5sum\` for legacy objects |
+| \`size\` | ✅ Supported | Aggregates across prefix |
+| \`mount\` (read-only) | ✅ Supported | Use \`--read-only --vfs-cache-mode full\` |
+| \`sync\` | ⚠️ Partial | Upload-only; deletions error |
+| \`move\` | ⚠️ Partial | Upload works; source delete may fail |
+| \`mount\` (read-write) | ⚠️ Partial | New files work; delete/rename fail |
+| \`about\` | ❌ Not implemented | No quota/usage API |
+| \`delete\` | ❌ Unsupported by design | Returns 403 |
+| \`purge\` | ❌ Unsupported by design | Returns 403 |
+| \`rmdir\` / \`rmdirs\` | ❌ Unsupported by design | No deletion |
+| \`mkdir\` | ❌ Not implemented | Buckets created implicitly |
+| \`cleanup\` | ❌ Not implemented | Returns 501; multipart-upload APIs not implemented |
+
+---
+
+## Workflows
+
+### Archive a local directory
+
+\`\`\`bash
+rclone copy ./important-data/ autodrive:my-archive/important-data/ \
+  --immutable \
+  -v
+\`\`\`
+
+Re-running the same command after adding files only uploads the new ones (existing keys are skipped due to \`--immutable\`), making large transfers safely resumable.
+
+### Scheduled archival with cron
+
+A cron-ready archive script template:
+
+\`\`\`bash
+#!/usr/bin/env bash
+set -euo pipefail
+
+SOURCE_DIR="\$\{SOURCE_DIR:-/path/to/your/data\}"
+BUCKET="\$\{BUCKET:-my-archive\}"
+DEST_PREFIX="\$\{DEST_PREFIX:-daily\}"
+REMOTE="autodrive"
+TRANSFERS="\$\{TRANSFERS:-4\}"
+
+TIMESTAMP=\$(date '+%Y-%m-%d %H:%M:%S')
+echo "[\$TIMESTAMP] Starting archive: \$SOURCE_DIR -> \$REMOTE:\$BUCKET/\$DEST_PREFIX/"
+
+rclone copy "\$SOURCE_DIR" "\$REMOTE:\$BUCKET/\$DEST_PREFIX/" \
+  --immutable \
+  --transfers "\$TRANSFERS" \
+  -v
+\`\`\`
+
+Crontab entry (daily at 02:00):
+
+\`\`\`
+0 2 * * * BUCKET=my-archive SOURCE_DIR=/path/to/data /path/to/archive-script.sh >> /var/log/autodrive-archive.log 2>&1
+\`\`\`
+
+### Browse and verify
+
+\`\`\`bash
+rclone lsd autodrive:                                 # all buckets
+rclone lsd autodrive:my-archive/                      # top-level dirs in bucket
+rclone ls  autodrive:my-archive/                      # all files
+rclone ls  autodrive:my-archive/reports/              # files under prefix
+rclone tree autodrive:my-archive/                     # recursive tree
+rclone check ./local/ autodrive:my-archive/           # verify checksums
+rclone cat autodrive:my-archive/logs/app.log          # stream a file
+\`\`\`
+
+### Read-only mount
+
+\`\`\`bash
+mkdir -p /mnt/autodrive
+rclone mount autodrive:my-archive/ /mnt/autodrive \
+  --read-only \
+  --vfs-cache-mode full \
+  --vfs-read-chunk-size 5M
+\`\`\`
+
+Then browse with any standard tool:
+
+\`\`\`bash
+ls /mnt/autodrive/
+cat /mnt/autodrive/reports/q1.pdf
+\`\`\`
+
+### Migrate from another cloud provider
+
+The pattern is the same regardless of source remote:
+
+\`\`\`bash
+rclone copy <source>:<source-path>/ autodrive:<bucket>/<dest-prefix>/ --immutable -v
+\`\`\`
+
+\`\`\`bash
+# AWS S3
+rclone copy s3:my-source-bucket/data/ autodrive:migrated/aws-data/ --immutable -v
+
+# Google Cloud Storage
+rclone copy gcs:my-gcs-bucket/archives/ autodrive:migrated/gcs-archives/ --immutable -v
+
+# Backblaze B2
+rclone copy b2:my-b2-bucket/ autodrive:migrated/b2-backup/ --immutable -v
+\`\`\`
+
+Tips for large migrations:
+
+- Use \`-v\` or \`--progress\` to monitor progress
+- Tune \`--transfers=N\` to your bandwidth
+- Capture full logs with \`--log-file=migration.log\`
+- Run inside \`screen\` or \`tmux\` for long jobs
+- Use \`--immutable\` to make the migration resumable; if interrupted, just re-run the same command
+
+### CI/CD integration
+
+#### GitHub Actions
+
+\`\`\`yaml
+name: Archive Build Artifacts
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  build-and-archive:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: make build
+
+      - name: Install rclone
+        run: curl https://rclone.org/install.sh | sudo bash
+
+      - name: Configure rclone
+        run: |
+          mkdir -p ~/.config/rclone
+          cat > ~/.config/rclone/rclone.conf << 'EOF'
+          [autodrive]
+          type = s3
+          provider = Other
+          access_key_id = \$\{\{ secrets.AUTO_DRIVE_API_KEY \}\}
+          secret_access_key = placeholder
+          endpoint = https://s3.auto-drive.autonomys.xyz
+          no_check_bucket = true
+          list_version = 2
+          EOF
+
+      - name: Archive build artifacts
+        run: |
+          TIMESTAMP=\$(date +%Y%m%d-%H%M%S)
+          rclone copy ./dist/ \
+            autodrive:ci-builds/\$\{\{ github.sha \}\}-\$\{TIMESTAMP\}/ \
+            --immutable -v
+\`\`\`
+
+#### GitLab CI
+
+\`\`\`yaml
+archive-artifacts:
+  stage: deploy
+  image: rclone/rclone:latest
+  script:
+    - mkdir -p ~/.config/rclone
+    - |
+      cat > ~/.config/rclone/rclone.conf << 'EOF'
+      [autodrive]
+      type = s3
+      provider = Other
+      access_key_id = \$\{AUTO_DRIVE_API_KEY\}
+      secret_access_key = placeholder
+      endpoint = https://s3.auto-drive.autonomys.xyz
+      no_check_bucket = true
+      list_version = 2
+      EOF
+    - TIMESTAMP=\$(date +%Y%m%d-%H%M%S)
+    - rclone copy ./dist/ autodrive:ci-builds/\$\{CI_COMMIT_SHA\}-\$\{TIMESTAMP\}/ --immutable -v
+  only:
+    - main
+\`\`\`
+
+### Compliance and audit logs
+
+Permanent storage meets retention requirements by construction — records cannot be tampered with or accidentally deleted.
+
+\`\`\`bash
+# Daily application logs
+rclone copy /var/log/app/ autodrive:compliance/logs/\$(date +%Y/%m/%d)/ \
+  --immutable \
+  --include "*.log"
+
+# Database backup
+pg_dump mydb | rclone rcat autodrive:compliance/db-backups/\$(date +%Y%m%d-%H%M%S).sql --immutable
+\`\`\`
+
+### Pipe and stream
+
+\`\`\`bash
+# Compressed tarball
+tar czf - ./project/ | rclone rcat autodrive:my-archive/archives/project-\$(date +%Y%m%d).tar.gz --immutable
+
+# Database dump
+mysqldump --all-databases | rclone rcat autodrive:backups/mysql-\$(date +%Y%m%d).sql --immutable
+
+# Docker image
+docker save my-app:latest | rclone rcat autodrive:docker-images/my-app-\$(date +%Y%m%d).tar --immutable
+\`\`\`
+
+### Run rclone in Docker
+
+The rclone official image works against Auto Drive with a config volume or env-driven config. Below is a \`docker-compose.yml\` that serves a bucket over HTTP (read-only) using \`rclone serve http\` — simpler than a FUSE mount in containers since FUSE requires \`--privileged\` or \`--cap-add SYS_ADMIN\`.
+
+\`\`\`yaml
+services:
+  rclone:
+    image: rclone/rclone:latest
+    container_name: rclone-autodrive
+    restart: unless-stopped
+    environment:
+      - AUTO_DRIVE_API_KEY=\$\{AUTO_DRIVE_API_KEY:?Set AUTO_DRIVE_API_KEY environment variable\}
+      - AUTO_DRIVE_BUCKET=\$\{AUTO_DRIVE_BUCKET:-my-archive\}
+    volumes:
+      - ./data:/data:ro
+    ports:
+      - "8181:8181"
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - |
+        mkdir -p /root/.config/rclone
+        cat > /root/.config/rclone/rclone.conf << EOF
+        [autodrive]
+        type = s3
+        provider = Other
+        access_key_id = \$\$\{AUTO_DRIVE_API_KEY\}
+        secret_access_key = placeholder
+        endpoint = https://s3.auto-drive.autonomys.xyz
+        no_check_bucket = true
+        list_version = 2
+        EOF
+
+        rclone serve http "autodrive:\$\$\{AUTO_DRIVE_BUCKET\}/" \
+          --addr :8181 \
+          --read-only \
+          --vfs-cache-mode full
+\`\`\`
+
+To upload from inside the container:
+
+\`\`\`bash
+docker compose exec rclone rclone copy /data autodrive:my-archive/ --immutable
+\`\`\`
+
+---
+
+## Troubleshooting
+
+### Listing fails (404 NoSuchKey, or 500 on older deployments)
+
+**Symptom:** \`rclone ls\`, \`rclone lsd\`, \`rclone check\`, or \`rclone sync\` fail with \`ListObjects ... 404 NoSuchKey\`. (Older Auto Drive deployments returned \`500 InternalServerError\` for the same cause.)
+
+**Cause:** Auto Drive implements **ListObjectsV2** only. By default rclone's generic S3 backend (\`provider = Other\`) uses the older **ListObjectsV1** API; Auto Drive does not recognise it and falls through to a per-object lookup, which reports the key as missing.
+
+**Fix:** Set \`list_version = 2\` in your rclone config.
+
+\`\`\`bash
+rclone config update autodrive list_version 2
+\`\`\`
+
+### Checksum mismatch on legacy objects
+
+**Symptom:**
+
+\`\`\`
+ERROR : file.txt: corrupted on transfer: md5 hash differ "abc123" vs "bafkr..."
+\`\`\`
+
+**Cause:** The object was uploaded before MD5 ETag support shipped, so its ETag is the CID, which rclone interprets as a failed checksum.
+
+**Fix:** Add \`--ignore-checksum\` (or \`--size-only\`) to your command:
+
+\`\`\`bash
+rclone copy ./files/ autodrive:my-archive/ --immutable --ignore-checksum
+\`\`\`
+
+Objects uploaded after the MD5 ETag feature do not need this flag.
+
+### Delete returns 403
+
+**Symptom:**
+
+\`\`\`
+ERROR : file.txt: Failed to delete: 403 Access Denied: Auto Drive storage is immutable. Objects cannot be deleted from the Autonomys DSN.
+\`\`\`
+
+**Cause:** Auto Drive storage is permanent by design. The S3 layer rejects all DELETE requests.
+
+**Affected commands:** \`rclone delete\`, \`rclone purge\`, \`rclone rmdir\`, \`rclone move\` (delete phase), \`rclone sync\` (when the destination has files no longer in the source).
+
+**Fix:** Use \`rclone copy\` instead of \`rclone sync\` or \`rclone move\`.
+
+### Authentication errors
+
+**Symptoms:** \`AccessDenied\`, \`401 Unauthorized\`.
+
+**Possible causes:**
+
+1. The API key is incorrect or has been revoked
+2. The API key has expired (if you set an expiry)
+3. Your account has no remaining credits
+
+**Fix:**
+
+- Verify the key at [ai3.storage](https://ai3.storage) → Developers
+- Create a new key if needed
+- Check your credit balance and top up if required
+- Confirm \`access_key_id\` in your rclone config matches the API key exactly
+
+### Connection timeouts
+
+**Symptom:** \`Failed to copy: connection timed out\`.
+
+**Fix:**
+
+- \`curl -I https://s3.auto-drive.autonomys.xyz\` to verify reachability
+- Increase the timeout: \`--timeout=60s\`
+- Add retries: \`--retries=5 --retries-sleep=10s\`
+
+### Immutable file conflict
+
+**Symptom:** \`File exists and --immutable is set\`.
+
+**Cause:** You are trying to upload a key that already exists, with \`--immutable\` set (as recommended).
+
+- If the content is the same, this is expected — the file is already safely stored.
+- If you want to publish a new version, write to a new key (e.g. add a timestamp or version suffix). Removing \`--immutable\` and re-uploading to the same key creates a new object and updates the key mapping, but the old data still persists on the DSN.
+
+### Bucket not found
+
+**Symptom:** \`NoSuchBucket: The specified bucket does not exist\`.
+
+**Cause:** You are referencing a bucket that has never had any objects written to it. Buckets exist implicitly only after the first write.
+
+**Fix:** Write an object first, or correct the bucket name. Also confirm \`no_check_bucket = true\` is in your config so rclone does not attempt a \`HeadBucket\` probe before each operation.
+
+### Diagnostic commands
+
+\`\`\`bash
+# Inspect rclone config
+rclone config show autodrive
+
+# Test endpoint reachability
+curl -I https://s3.auto-drive.autonomys.xyz
+
+# Verbose upload with full logging
+rclone copy ./test.txt autodrive:test-bucket/ \
+  --immutable -vv \
+  --log-file=rclone-debug.log \
+  --dump headers
+
+# rclone version (use 1.60+ for full S3 compatibility)
+rclone version
+\`\`\`
+
+---
+
+## Further Reading
+
+- [Auto Drive S3 Layer Guide](/sdk/auto-drive/s3_layer) — the underlying S3-compatible API used by rclone
+- [Auto Drive dashboard](https://ai3.storage) — manage your account, API keys, and credits
+- [Autonomys Academy: Rewards and Fees](https://academy.autonomys.xyz/autonomys-network/rewards-and-fees) — how storage pricing works on the Autonomys Network
+- [rclone documentation](https://rclone.org/docs/) — full rclone reference
+- [Auto Drive rclone examples](https://github.com/autonomys/auto-drive/tree/main/docs/rclone/examples) — annotated config, archive script, and Docker compose recipe
 
 
 ---
@@ -1219,6 +2388,7 @@ Developer utility binary that boots a local Subspace consensus node (mocked farm
 
 ### Prerequisites
 
+- Cloned [Subspace Repository](https://github.com/autonomys/subspace)
 - Rust toolchain with \`cargo\`
 - Workspace dependencies built once (\`cargo build -p subspace-farmerless-dev-node\`)
 
@@ -1326,7 +2496,7 @@ curl -H "Content-Type: application/json" \
 
 ### Docker Setup
 
-For easy setup using Docker, you can use the provided \`docker-compose.yml\` file. This setup automatically builds and runs the farmerless dev node with the EVM domain enabled.
+For easy setup using Docker, you can use the [provided \`farmerless-dev-node.yml\`](https://github.com/autonomys/subspace/blob/main/docker/farmerless-dev-node.Dockerfile) file. This setup automatically builds and runs the farmerless dev node with the EVM domain enabled.
 
 #### Prerequisites
 
@@ -1334,7 +2504,7 @@ For easy setup using Docker, you can use the provided \`docker-compose.yml\` fil
 
 #### Quick Start with Docker
 
-1. Ensure you're in the workspace root directory (where \`docker-compose.yml\` is located).
+1. Ensure you're in the workspace root directory (where \`farmerless-dev-node.yml\` is located).
 
 2. Start the farmerless dev node:
 
@@ -2197,6 +3367,8 @@ Safe (formerly Gnosis Safe) is now available on the Autonomys network, providing
 
 Safe is a battle-tested smart contract wallet infrastructure that enables multi-signature security across blockchain networks. With its deployment on Autonomys, teams, DAOs, and individual users can now benefit from enhanced security features and shared asset control on both our mainnet and testnet environments.
 
+> **⚠️ Do not transfer directly to a centralized exchange from a Safe.** A Safe is a smart contract wallet, not a standard externally owned account (EOA). Many centralized exchanges do not support deposits originating from smart contract wallets, and funds sent from a Safe to an unsupported exchange deposit address can be lost or require a manual, time-consuming recovery process. Before sending any assets from a Safe on Autonomys to an exchange, confirm with that exchange that it supports deposits from smart contract (Safe) wallets. If you are unsure, first move the funds to a standard wallet address you control and deposit from there.
+
 ## Network Availability
 
 Safe is currently deployed and accessible at: [https://safe.autonomys.xyz](https://safe.autonomys.xyz/welcome)
@@ -2611,7 +3783,7 @@ When planning transactions:
 
 ### File: evm/wrapping_ai3.mdx
 
-# How to Wrap AI3 Tokens (Mainnet and Taurus Testnet)
+# How to Wrap AI3 Tokens (Mainnet and Chronos Testnet)
 
 Native AI3 tokens on Auto EVM are similar to ETH on the Ethereum network - they are not ERC-20 tokens, which is sometimes a requirement for certain use-cases.
 
@@ -2802,12 +3974,6 @@ To access the developer role-gated *#developer-chat* channel:
 
 3. Link your GitHub account to attain the developer role and gain access to *#developer-chat*. 
    ![Discord-2](/developers/Discord-2.png)
-
-
----
-
-### File: llm_friendly_docs.mdx
-
 
 
 ---
@@ -3559,7 +4725,6 @@ The API is organized into several main categories:
 ## Base URLs
 
 - **Mainnet**: \`https://mainnet.auto-drive.autonomys.xyz\`
-- **Taurus Testnet**: \`https://taurus.auto-drive.autonomys.xyz\`
 
 ## Authentication
 
@@ -3741,13 +4906,15 @@ These functions implement the complete [Pay with AI3](/auto_drive/pay_with_ai3) 
 
 - \`api.getPaymentContractInfo(): Promise<PaymentContractInfo>\` — Returns the Auto-EVM contract address, chain ID, and \`payIntent\` ABI. No API key required. Called internally by \`createPaymentIntent\`; export this for client-side wallet pre-fetching.
 
-- \`api.createPaymentIntent(sizeBytes): Promise<PaymentIntent>\` — Locks the current storage price for the authenticated account and returns a payment intent. The price is locked for **10 minutes**.
+- \`api.createPaymentIntent(sizeBytes, options?): Promise<PaymentIntent>\` — Locks the current storage price for the authenticated account and returns a payment intent. The price is locked for **10 minutes**. Pass \`\{ checkCreditCap: true \}\` to have Auto Drive reject an over-cap purchase before anything is paid.
 
-- \`api.watchPaymentTransaction(intentId, txHash): Promise<void>\` — Submits the on-chain transaction hash to Auto Drive. The backend polls for 6 block confirmations before granting credits.
+- \`api.watchPaymentTransaction(intentId, txHash): Promise<void>\` — Submits the on-chain transaction hash to Auto Drive. The backend waits for 6 block confirmations before granting credits. Works for both AI3 and USDC intents.
 
 - \`api.getPaymentIntentStatus(intentId): Promise<\{ id: string; status: PaymentIntentStatus \}>\` — Returns the current status of a payment intent.
 
-- \`api.waitForPaymentCompletion(intentId, options?): Promise<PaymentIntentTerminalStatus>\` — Polls until the intent reaches a terminal state (\`COMPLETED\`, \`EXPIRED\`, \`FAILED\`, or \`OVER_CAP\`). Resolves with the terminal status.
+- \`api.waitForPaymentCompletion(intentId, options?): Promise<PaymentIntentTerminalStatus>\` — Polls until the intent reaches a terminal state (\`COMPLETED\`, \`EXPIRED\`, \`FAILED\`, or \`OVER_CAP\`). Resolves with the terminal status. Set \`options.settleGraceMs\` to keep polling through an HTTP \`410\` after the price lock lapses; without it, a \`410\` throws a \`PaymentApiError\`.
+
+The authenticated payment calls throw a \`PaymentApiError\` (with \`status\` and, for coded backend errors, \`code\`) when Auto Drive answers with a non-OK status. See [Handling Errors](/sdk/auto-drive/pay_with_ai3#handling-errors).
 
 **Supporting types:**
 
@@ -3780,6 +4947,81 @@ type PaymentIntentTerminalStatus = 'COMPLETED' | 'EXPIRED' | 'FAILED' | 'OVER_CA
 type PollOptions = \{
   pollIntervalMs?: number  // default: 3000
   timeoutMs?: number       // default: 300000 (5 minutes)
+  settleGraceMs?: number   // keep polling through HTTP 410 for this long, then return 'EXPIRED'
+\}
+
+type CreatePaymentIntentOptions = \{
+  checkCreditCap?: boolean // send sizeBytes as requestedBytes for a pre-payment cap check. Default: false
+\}
+
+class PaymentApiError extends Error \{
+  readonly status: number                       // HTTP status
+  readonly code?: PaymentErrorCode | string     // machine-readable backend code, when present
+\}
+
+type PaymentErrorCode =
+  | 'GOOGLE_ACCOUNT_REQUIRED'    // 403
+  | 'CREDIT_CAP_EXCEEDED'        // 403
+  | 'USDC_PAYMENTS_DISABLED'     // 403
+  | 'USDC_PAYMENTS_UNAVAILABLE'  // 503
+  | 'PRICE_ORACLE_UNAVAILABLE'   // 503
+  | 'PRICE_UNSTABLE'             // 503
+\`\`\`
+
+---
+
+## Pay with USDC — Payment Intents
+
+These functions implement the [Pay with USDC](/auto_drive/pay_with_usdc) credit purchase flow (USDC on Ethereum mainnet). The SDK does not sign transactions: it returns the quote and where to pay, plus typed ABIs, and your wallet library sends the transactions. See the [developer integration guide](/sdk/auto-drive/pay_with_ai3#pay-with-usdc) for a full example.
+
+**Five-step flow:**
+\`\`\`
+1. createUsdcPaymentIntent(sizeBytes)                 — locks a USDC price, returns amount + chain, token and receiver
+2. approve(receiverAddress, usdcAmount)               — on tokenAddress, on chainId (your wallet code)
+3. payIntentWithToken(intentId, usdcAmount)           — on receiverAddress, no value (your wallet code)
+4. watchPaymentTransaction(id, txHash)                — the hash from step 3, not step 2
+5. waitForPaymentCompletion(id, \{ settleGraceMs \})    — poll until COMPLETED (credits applied)
+\`\`\`
+
+- \`api.getUsdcPaymentTarget(): Promise<UsdcPaymentTarget>\` — Returns where to send a USDC payment: chain ID, receiver address, token address, token decimals, confirmations, and \`settleGraceMs\`. Requires an API key. Called internally by \`createUsdcPaymentIntent\`.
+
+- \`api.createUsdcPaymentIntent(sizeBytes: number | bigint): Promise<UsdcPaymentIntent>\` — Locks a USDC price for \`sizeBytes\` of storage and returns the exact amount to pay together with where to pay it. The price is locked for **10 minutes**.
+
+- \`erc20ApprovalAbi\` — Minimal ERC-20 ABI (\`approve\`, \`allowance\`, \`balanceOf\`) for the approval step. \`transfer\` and \`transferFrom\` are left out on purpose.
+
+- \`usdcReceiverAbi\` — Minimal ABI for \`payIntentWithToken(bytes32 intentId, uint256 amount)\` on \`AutoDriveUSDCReceiver\`.
+
+\`watchPaymentTransaction\`, \`getPaymentIntentStatus\` and \`waitForPaymentCompletion\` are shared with the AI3 flow (see above).
+
+**Supporting types:**
+
+\`\`\`typescript
+type PaymentMethod = 'ai3_native' | 'usdc_eth'
+
+type UsdcPaymentTarget = \{
+  chainId: number          // EIP-155 chain ID (1 for Ethereum mainnet)
+  receiverAddress: string  // AutoDriveUSDCReceiver — also the approve spender
+  tokenAddress: string     // USDC token address — call approve on this
+  tokenDecimals: number    // 6 for USDC
+  confirmations: number    // blocks the backend waits for before crediting
+  settleGraceMs: number    // pass to waitForPaymentCompletion
+\}
+
+type UsdcPaymentIntent = \{
+  intentId: string             // bytes32 arg to payIntentWithToken()
+  paymentMethod: 'usdc_eth'
+  usdcAmount: string           // exact amount in base units (6 decimals), BigInt-safe string
+  usdcAmountFormatted: string  // human-readable, e.g. "27.498"
+  receiverAddress: string
+  tokenAddress: string
+  chainId: number
+  tokenDecimals: number
+  confirmations: number
+  settleGraceMs: number
+  expiresAt: string            // ISO 8601 timestamp when the price lock ends
+  shannonsPerByte: string      // locked AI3 price per byte
+  quotedAi3Shannons: string    // AI3 amount the USDC quote was made for
+  usdRateAtCreation: string    // AI3/USD rate × 1e18, for reporting only
 \}
 \`\`\`
 
@@ -3822,12 +5064,11 @@ You can also create an API key through your profile:
 
 Once logged in, your Dashboard will show:
 
-- Your upload limit (currently **20MB** per month on mainnet and **100MB** per month on Taurus testnet)  
-- Your download limit (currently **5GB** per month on both mainnet and Taurus testnet)  
+- Your upload limit (currently **20MB** per month on mainnet)   
 - A list of **uploaded files** and their **CIDs**
 - Options to **Download**, **Share** or **Remove** each file
 
-![Auto-Drive-2](/developers/Auto-Drive-2.png)
+![Auto-Drive-5](/developers/Auto-Drive-5.png)
 
 > *Note:* Removing a file does not delete it from the DSN as it is permanent storage. It only removes the file from your Dashboard.
 
@@ -3841,17 +5082,14 @@ import \{ NetworkId \} from '@autonomys/auto-utils'
 
 const api = createAutoDriveApi(\{
   apiKey: 'your-api-key-here',
-  network: NetworkId.TAURUS // or NetworkId.MAINNET
+  network: NetworkId.MAINNET
 \})
 \`\`\`
 
 ## Network Selection
 
-Auto Drive is available on both:
+Auto Drive is available on:
 - **Mainnet** (\`NetworkId.MAINNET\`) - Production environment
-- **Taurus Testnet** (\`NetworkId.TAURUS\`) - Testing environment
-
-Choose the appropriate network based on your needs.
 
 ## Security Best Practices
 
@@ -4010,7 +5248,7 @@ const stream = await api.downloadFile(cid, \{ password: 'your-strong-password' \
 
 ## What is the Auto Drive Gateway?
 
-Auto Gateway is a unified gateway solution designed for seamlessly accessing files or folders permanently stored on the Autonomys Mainnet & Taurus testnet through a single, streamlined interface. The gateway is available [here](https://gateway.autonomys.xyz/).
+Auto Gateway is a unified gateway solution designed for seamlessly accessing files or folders permanently stored on the Autonomys Mainnet through a single, streamlined interface. The gateway is available [here](https://gateway.autonomys.xyz/).
 
 ![Auto-Gateway-1](/developers/Auto-Gateway-1.png)
 
@@ -4168,14 +5406,14 @@ import \{ NetworkId \} from '@autonomys/auto-utils'
 
 ## Network Configuration
 
-As [Auto Drive](https://ai3.storage) is available on both Mainnet and the Taurus testnet, you need to configure the network when using the package:
+[Auto Drive](https://ai3.storage) is available on Mainnet. To connect to it, you need to configure the network using \`auto-utils\` package:
 
 \`\`\`ts
 import \{ NetworkId \} from '@autonomys/auto-utils'
 
 const api = createAutoDriveApi(\{
   apiKey: 'your-api-key',
-  network: NetworkId.TAURUS | NetworkId.MAINNET
+  network: NetworkId.MAINNET
 \})
 \`\`\`
 
@@ -4184,58 +5422,78 @@ const api = createAutoDriveApi(\{
 ### File: sdk/auto-drive/pay_with_ai3.mdx
 
 ---
-title: Pay with AI3 — Developer Integration
+title: Pay with AI3 & USDC — Developer Integration
 ---
 
-# Pay with AI3 — Developer Integration
+# Pay with AI3 & USDC — Developer Integration
 
-This page covers how to integrate permissionless Auto Drive credit purchasing into your own application using the \`AutoDriveCreditsReceiver\` smart contract and the credits API.
+This page covers how to integrate permissionless Auto Drive credit purchasing into your own application using the credits API and one of two payment methods:
 
-For the end-user purchase walkthrough, see the [Pay with AI3 guide](/auto_drive/pay_with_ai3).
+| Payment method | Asset | Network | Contract |
+|---|---|---|---|
+| **AI3** (\`ai3_native\`) | Native AI3 | Autonomys Auto-EVM (Chain ID \`870\`) | \`AutoDriveCreditsReceiver\` |
+| **USDC** (\`usdc_eth\`) | USDC (ERC-20) | Ethereum mainnet (Chain ID \`1\`) | \`AutoDriveUSDCReceiver\` |
+
+Both methods use the same **payment intent** model and the same credits, limits, and expiry. The AI3 flow is described first; the differences for USDC are covered in [Pay with USDC](#pay-with-usdc).
+
+For the end-user purchase walkthroughs, see the [Pay with AI3 guide](/auto_drive/pay_with_ai3) and the [Pay with USDC guide](/auto_drive/pay_with_usdc).
+
+For a complete working example of Pay with AI3 in a real application, see [Eulonomys](/application_examples/eulonomys) — a reference app with full source code showing the payment intent flow, on-chain contract calls, and Auto Drive uploads end-to-end.
 
 ---
 
 ## How It Works
 
-The payment system is built around a **payment intent** model. Each purchase follows four steps:
+The payment system is built around a **payment intent** model. An AI3 purchase follows these steps:
 
-1. Your app fetches a **price quote** from the backend — reflects the live protocol-level DSN storage cost via a Substrate RPC connection to the Autonomys consensus chain, plus a service fee.
-2. The backend creates a **payment intent** — a server-side record that locks the price and binds a \`bytes32\` intent ID to the authenticated account for up to 10 minutes.
-3. Your app calls \`payIntent(intentId)\` on the \`AutoDriveCreditsReceiver\` contract on Auto-EVM, sending the exact quoted AI3 amount as \`msg.value\`.
-4. Your app submits the transaction hash to the watch endpoint; the backend polls for **6 block confirmations** and then grants the credits.
+1. *(Optional)* Your app fetches the current **storage price** (\`GET /intents/price\`) to show an estimate. The price reflects the live protocol-level DSN storage cost, read from the Autonomys consensus chain, plus a service fee.
+2. Your app asks the Auto Drive backend to create a **payment intent** (\`POST /intents\`) — a server-side record that locks the price per byte (\`shannonsPerByte\`) and binds a \`bytes32\` intent ID to the authenticated account for **10 minutes**.
+3. Your app calls \`payIntent(intentId)\` on the \`AutoDriveCreditsReceiver\` contract on Auto-EVM, sending \`shannonsPerByte × bytes\` AI3 as \`msg.value\`.
+4. Your app submits the transaction hash to the watch endpoint (\`POST /intents/:id/watch\`); the backend waits for **6 block confirmations** and then grants the credits.
+5. Your app polls the intent (\`GET /intents/:id\`) until it reaches a terminal status.
 
-Credits are available immediately after confirmation and can be used via the dashboard, the AutoSDK, or the REST API.
+Credits are granted as \`paymentAmount ÷ shannonsPerByte\` bytes (rounded down). They are available immediately after confirmation and can be used via the dashboard, the Auto SDK, or the REST API.
 
 ---
 
-## Smart Contract
+## Smart Contracts
+
+| Contract | Payment method | Network | Chain ID | Address |
+|---|---|---|---|---|
+| \`AutoDriveCreditsReceiver\` | AI3 | Autonomys Auto-EVM | \`870\` | [\`0xBa5bed8325183c0807EcBC80C82D40Dc7Ac5cbf7\`](https://explorer.auto-evm.mainnet.autonomys.xyz/address/0xBa5bed8325183c0807EcBC80C82D40Dc7Ac5cbf7) |
+| \`AutoDriveUSDCReceiver\` | USDC | Ethereum mainnet | \`1\` | [\`0x9c508Fa594f52032D574137585DD2F8A48F92261\`](https://etherscan.io/address/0x9c508Fa594f52032D574137585DD2F8A48F92261) |
+
+The AI3 contract is described below. For the USDC contract, see [Smart Contract (USDC)](#smart-contract-usdc).
+
+### \`AutoDriveCreditsReceiver\` (AI3)
 
 | Field | Value |
 |---|---|
-| **Contract** | \`AutoDriveCreditsReceiver\` |
 | **Network** | Autonomys Auto-EVM |
 | **Chain ID** | \`870\` |
 | **Address** | \`0xBa5bed8325183c0807EcBC80C82D40Dc7Ac5cbf7\` |
 
 View on Blockscout: [AutoDriveCreditsReceiver](https://explorer.auto-evm.mainnet.autonomys.xyz/address/0xBa5bed8325183c0807EcBC80C82D40Dc7Ac5cbf7)
 
-### \`payIntent\`
+The chain ID, address, and \`payIntent\` ABI are also served by \`GET /intents/contract\`.
+
+#### \`payIntent\`
 
 \`\`\`solidity
 function payIntent(bytes32 intentId) public payable whenNotPaused;
 \`\`\`
 
-\`intentId\` is the \`bytes32\` value returned by \`POST /intents/\`. Send the exact quoted amount as \`msg.value\` — the transaction will fail if the value does not match.
+\`intentId\` is the \`id\` returned by \`POST /intents\`. Send \`shannonsPerByte × bytes\` as \`msg.value\`. The contract accepts any non-zero amount and does not check it against the quote: the backend grants credits in proportion to what was actually paid, so paying less buys less storage.
 
-The \`whenNotPaused\` modifier allows the protocol team to pause payments in the event of a critical issue.
+The call reverts with \`InvalidAmount(0)\` when \`msg.value\` is zero, and with \`EnforcedPause()\` when the protocol team has paused payments in the event of a critical issue.
 
-### Event
+#### Event
 
 \`\`\`solidity
 event IntentPaymentReceived(bytes32 indexed intentId, uint256 paymentAmount);
 \`\`\`
 
-Emitted on successful payment. Listen for this event to confirm receipt before calling the watch endpoint.
+Emitted on successful payment. The backend reads this event from the transaction receipt to confirm the payment.
 
 ---
 
@@ -4243,36 +5501,88 @@ Emitted on successful payment. Listen for this event to confirm receipt before c
 
 \`\`\`
 PENDING ──► CONFIRMED ──► COMPLETED
+   │            │
+   │            ├──► OVER_CAP  (account's 100 GB purchased credit limit exceeded)
+   │            │
+   │            └──► FAILED    (payment could not be converted to credits, e.g. too small to buy one byte)
    │
-   ├──► EXPIRED   (no payment received within 10 minutes)
-   │
-   └──► FAILED    (payment amount below the quoted price)
-
-CONFIRMED ──► OVER_CAP  (account's 100 GB purchased credit limit exceeded)
+   └──► EXPIRED   (no payment received before the price lock ended)
 \`\`\`
 
-> Always fetch a fresh quote immediately before creating an intent. Prices reflect live protocol costs and can change between requests.
+The API returns statuses in lowercase (\`pending\`, \`confirmed\`, \`completed\`, \`expired\`, \`failed\`, \`over_cap\`). The SDK converts them to uppercase.
+
+> Always create a fresh intent immediately before paying. Prices reflect live protocol storage cost and can change between requests.
 
 ---
 
 ## API Reference
 
-Base URL: \`https://api.autonomys.xyz\`
+Base URL (mainnet): \`https://mainnet.auto-drive.autonomys.xyz/api\`
 
-### Get a Price Quote
+**Authentication:** endpoints marked as authenticated need both headers below. The API key must belong to a Google-authenticated account.
+
+\`\`\`http
+Authorization: Bearer <your-api-key>
+X-Auth-Provider: apikey
+\`\`\`
+
+### Get the Storage Price
 
 \`\`\`http
 GET /intents/price
 \`\`\`
 
-Returns the current AI3 cost (in Shannons) per GB. No authentication required.
+Returns the current price. No authentication required.
 
 **Example response:**
 
 \`\`\`json
 \{
-  "pricePerGb": "1000000000000000000",
-  "currency": "AI3"
+  "price": 4273583470658,
+  "pricePerGB": 4588.73,
+  "usd": \{
+    "usdPerAi3": 0.00139,
+    "pricePerGBUsd": 6.39,
+    "asOf": "2026-10-07T18:08:26.587Z",
+    "lastTradeAt": "2026-10-06T01:38:35.000Z",
+    "stale": false
+  \},
+  "usdUnavailableReason": null
+\}
+\`\`\`
+
+| Field | Description |
+|---|---|
+| \`price\` | Price per byte, in Shannons (1 AI3 = 10^18 Shannons) |
+| \`pricePerGB\` | Price per GiB (1,073,741,824 bytes), in AI3 |
+| \`usd\` | USD estimate, or \`null\` when no AI3/USD rate is available. For display only — never use it to settle a payment |
+| \`usdUnavailableReason\` | Why \`usd\` is \`null\`; \`null\` when \`usd\` is present |
+
+---
+
+### Get the Contract Info
+
+\`\`\`http
+GET /intents/contract
+\`\`\`
+
+Returns the Auto-EVM chain ID, the \`AutoDriveCreditsReceiver\` address, and the minimal \`payIntent\` ABI. No authentication required.
+
+**Example response:**
+
+\`\`\`json
+\{
+  "chainId": 870,
+  "contractAddress": "0xBa5bed8325183c0807EcBC80C82D40Dc7Ac5cbf7",
+  "payIntentAbi": [
+    \{
+      "inputs": [\{ "name": "intentId", "type": "bytes32" \}],
+      "name": "payIntent",
+      "outputs": [],
+      "stateMutability": "payable",
+      "type": "function"
+    \}
+  ]
 \}
 \`\`\`
 
@@ -4281,32 +5591,59 @@ Returns the current AI3 cost (in Shannons) per GB. No authentication required.
 ### Create a Payment Intent
 
 \`\`\`http
-POST /intents/
+POST /intents
 \`\`\`
 
-Locks the current price for the authenticated account and returns an intent ID.
+Locks the current price per byte for the authenticated account for 10 minutes and returns the intent. **Authenticated.**
 
-> **Authentication:** Requires a Google OAuth token in the \`Authorization\` header. The intent is bound to this account — credits cannot be redirected elsewhere.
-
-**Request body:**
+**Request body (optional for AI3):**
 
 \`\`\`json
 \{
-  "storageGb": 10
+  "requestedBytes": "10737418240"
 \}
 \`\`\`
+
+| Field | Description |
+|---|---|
+| \`requestedBytes\` | Optional for AI3. Size of the purchase as a decimal string. When sent, Auto Drive checks it against the per-account cap and rejects an over-cap purchase before anything is paid |
+| \`paymentMethod\` | \`ai3_native\` (default) or \`usdc_eth\`. See [Pay with USDC](#pay-with-usdc) |
 
 **Response:**
 
 \`\`\`json
 \{
-  "intentId": "0xabc123...",
-  "amount": "10000000000000000000",
-  "expiresAt": "2026-05-12T12:10:00Z"
+  "id": "0xabc123...",
+  "userPublicId": "user-public-id",
+  "status": "pending",
+  "paymentMethod": "ai3_native",
+  "shannonsPerByte": "4273583470658",
+  "expiresAt": "2026-10-07T12:10:00.000Z"
 \}
 \`\`\`
 
-Pass \`intentId\` as the argument to \`payIntent\` and \`amount\` as \`msg.value\`.
+The response does not include a total amount. Compute it yourself: \`msg.value = shannonsPerByte × bytes\`. Pass \`id\` as the \`intentId\` argument to \`payIntent\`.
+
+**Errors:**
+
+| Status | Code | Meaning |
+|---|---|---|
+| \`400\` | — | \`requestedBytes\` is invalid or larger than the whole credit cap, or \`paymentMethod\` is not recognised |
+| \`401\` | — | Missing or invalid credentials |
+| \`403\` | \`GOOGLE_ACCOUNT_REQUIRED\` | The account is not Google-authenticated |
+| \`403\` | \`CREDIT_CAP_EXCEEDED\` | The purchase would exceed the per-account cap (only when \`requestedBytes\` is sent) |
+| \`404\` | — | Buying credits is not available to this account |
+| \`503\` | — | Storage could not be priced — retry unchanged |
+
+---
+
+### Get an Intent
+
+\`\`\`http
+GET /intents/:id
+\`\`\`
+
+Returns the intent, including its \`status\`. **Authenticated.** Only the owner of the intent can read it (\`403\` otherwise). Returns \`410\` once the price lock has lapsed on an intent that has no recorded transaction hash; see [Polling after the Price Lock](#polling-after-the-price-lock).
 
 ---
 
@@ -4316,7 +5653,7 @@ Pass \`intentId\` as the argument to \`payIntent\` and \`amount\` as \`msg.value
 POST /intents/:id/watch
 \`\`\`
 
-Submit the on-chain transaction hash. The backend polls for 6 confirmations before crediting the account.
+Submits the on-chain transaction hash. **Authenticated.** The backend waits for 6 confirmations before crediting the account.
 
 **Request body:**
 
@@ -4326,60 +5663,376 @@ Submit the on-chain transaction hash. The backend polls for 6 confirmations befo
 \}
 \`\`\`
 
+\`txHash\` must be a \`0x\`-prefixed 32-byte hex hash. Returns \`204 No Content\` on success, \`400\` for a missing or malformed hash, and \`410\` if the intent has expired.
+
 ---
 
 ## Integration Patterns
 
 ### Pattern 1 — App-managed credits
 
-Your application holds a funded Auto-EVM wallet and purchases credits on behalf of users. Useful for apps that abstract storage costs away entirely.
+Your application holds a funded Auto-EVM wallet and purchases credits on behalf of users. Useful for apps that abstract storage costs away entirely. The SDK makes the Auto Drive API calls; your wallet library sends the transaction.
 
 \`\`\`typescript
+import \{ createAutoDriveApi \} from '@autonomys/auto-drive'
+import \{ NetworkId \} from '@autonomys/auto-utils'
 import \{ ethers \} from 'ethers'
 
-const CONTRACT_ADDRESS = '0xBa5bed8325183c0807EcBC80C82D40Dc7Ac5cbf7'
-const ABI = [
-  'function payIntent(bytes32 intentId) payable',
-  'event IntentPaymentReceived(bytes32 indexed intentId, uint256 paymentAmount)',
-]
+const api = createAutoDriveApi(\{
+  apiKey: process.env.AUTO_DRIVE_API_KEY!,
+  network: NetworkId.MAINNET,
+\})
 
-async function purchaseCredits(signer: ethers.Signer, authToken: string, storageGb: number) \{
-  // 1. Fetch fresh quote
-  const quoteRes = await fetch('https://api.autonomys.xyz/intents/price')
-  const \{ pricePerGb \} = await quoteRes.json()
+async function purchaseCredits(signer: ethers.Signer, sizeBytes: number) \{
+  // 1. Create intent — price locked for 10 minutes.
+  //    The SDK computes ai3AmountWei = shannonsPerByte × sizeBytes for you.
+  const intent = await api.createPaymentIntent(sizeBytes, \{ checkCreditCap: true \})
 
-  // 2. Create intent — price locked for 10 minutes
-  const intentRes = await fetch('https://api.autonomys.xyz/intents/', \{
-    method: 'POST',
-    headers: \{
-      'Content-Type': 'application/json',
-      Authorization: \`Bearer \$\{authToken\}\`,
-    \},
-    body: JSON.stringify(\{ storageGb \}),
-  \})
-  const \{ intentId, amount \} = await intentRes.json()
-
-  // 3. Call payIntent on Auto-EVM — send exact quoted amount
-  const contract = new ethers.Contract(CONTRACT_ADDRESS, ABI, signer)
-  const tx = await contract.payIntent(intentId, \{ value: amount \})
+  // 2. Call payIntent on Auto-EVM, sending the computed amount
+  const \{ payIntentAbi \} = await api.getPaymentContractInfo()
+  const contract = new ethers.Contract(intent.contractAddress, payIntentAbi as ethers.InterfaceAbi, signer)
+  const tx = await contract.payIntent(intent.intentId, \{ value: BigInt(intent.ai3AmountWei) \})
   await tx.wait()
 
-  // 4. Submit tx hash — backend confirms 6 blocks then grants credits
-  await fetch(\`https://api.autonomys.xyz/intents/\$\{intentId\}/watch\`, \{
-    method: 'POST',
-    headers: \{ 'Content-Type': 'application/json' \},
-    body: JSON.stringify(\{ txHash: tx.hash \}),
-  \})
+  // 3. Submit tx hash — backend waits for 6 confirmations, then grants credits
+  await api.watchPaymentTransaction(intent.intentId, tx.hash)
 
-  return tx.hash
+  // 4. Wait for the intent to reach a terminal status
+  const status = await api.waitForPaymentCompletion(intent.intentId)
+  return \{ txHash: tx.hash, status \} // 'COMPLETED' | 'EXPIRED' | 'FAILED' | 'OVER_CAP'
 \}
 \`\`\`
 
+If you call the REST API directly instead of using the SDK, send the [authentication headers](#api-reference) on \`POST /intents\`, \`GET /intents/:id\`, and \`POST /intents/:id/watch\`.
+
 ### Pattern 2 — User-managed credits
 
-Direct users to the [Auto Drive dashboard](https://ai3.storage/) to purchase credits themselves using the [Pay with AI3 guide](/auto_drive/pay_with_ai3). Your application uses the AutoSDK with the user's API key — no on-chain interaction required in your code.
+Direct users to the [Auto Drive dashboard](https://ai3.storage/) to purchase credits themselves using the [Pay with AI3 guide](/auto_drive/pay_with_ai3) or the [Pay with USDC guide](/auto_drive/pay_with_usdc). Your application uses the AutoSDK with the user's API key — no on-chain interaction required in your code.
 
 This is the lower-complexity option and is suitable for most applications.
+
+### Checking the Credit Cap Before Payment (SDK)
+
+By default, \`api.createPaymentIntent(sizeBytes)\` does not send the purchase size to Auto Drive. Pass \`\{ checkCreditCap: true \}\` to send it as \`requestedBytes\`. Auto Drive then rejects a purchase that would exceed the per-account cap **before** anything is paid, instead of the intent ending as \`OVER_CAP\` after an on-chain payment.
+
+\`\`\`typescript
+import \{ PaymentApiError \} from '@autonomys/auto-drive'
+
+try \{
+  const intent = await api.createPaymentIntent(sizeBytes, \{ checkCreditCap: true \})
+\} catch (error) \{
+  if (
+    error instanceof PaymentApiError &&
+    (error.code === 'CREDIT_CAP_EXCEEDED' || error.status === 400)
+  ) \{
+    // Nothing was paid. Try a smaller size.
+  \}
+\}
+\`\`\`
+
+A purchase that does not fit in the remaining headroom fails with \`CREDIT_CAP_EXCEEDED\` (403). A single purchase larger than the whole cap fails with HTTP 400 and no code. See [Handling Errors](#handling-errors) for all \`PaymentApiError\` codes.
+
+---
+
+## Pay with USDC
+
+Credits can also be purchased with **USDC on Ethereum mainnet**. The intent model is the same as for AI3, with three differences:
+
+- The intent is created with \`paymentMethod: "usdc_eth"\` and an explicit \`requestedBytes\`. The backend returns the exact USDC amount to pay as \`quotedTokenAmount\`, locked for 10 minutes.
+- USDC is an ERC-20 token, so the payer first **approves** the \`AutoDriveUSDCReceiver\` contract and then calls \`payIntentWithToken(intentId, amount)\`. There is no \`msg.value\`.
+- The payment is made on **Ethereum mainnet**, not on Auto-EVM. The chain, receiver address, and token address are served by the API at \`GET /payments/usdc/target\` — always read them from there (the SDK does this for you) rather than hardcoding them.
+
+### How It Works
+
+With the SDK, steps 1 and 2 are a single call to \`api.createUsdcPaymentIntent(sizeBytes)\`.
+
+1. Your app fetches the **payment target** (\`GET /payments/usdc/target\`): chain ID, receiver address, USDC token address, token decimals, and the number of confirmations the backend waits for.
+2. Your app creates a **USDC payment intent** (\`POST /intents\` with \`paymentMethod: "usdc_eth"\` and \`requestedBytes\`). The backend converts the AI3 storage cost to USDC at the current AI3/USD rate, adds a small quote margin, and returns \`quotedTokenAmount\` (USDC base units, 6 decimals).
+3. The payer calls \`approve(receiverAddress, quotedTokenAmount)\` on the USDC token contract, then \`payIntentWithToken(intentId, quotedTokenAmount)\` on \`AutoDriveUSDCReceiver\`.
+4. Your app submits the payment transaction hash to the watch endpoint; the backend waits for the required Ethereum confirmations (currently **6**) and then grants the credits.
+
+Credits are granted in proportion to the USDC actually received. Paying exactly \`quotedTokenAmount\` grants exactly \`requestedBytes\`.
+
+### Smart Contract (USDC)
+
+| Field | Value |
+|---|---|
+| **Contract** | \`AutoDriveUSDCReceiver\` |
+| **Network** | Ethereum mainnet |
+| **Chain ID** | \`1\` |
+| **Address** | \`0x9c508Fa594f52032D574137585DD2F8A48F92261\` |
+| **Accepted token** | USDC — \`0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48\` |
+
+View on Etherscan: [AutoDriveUSDCReceiver](https://etherscan.io/address/0x9c508Fa594f52032D574137585DD2F8A48F92261)
+
+The same values are served by \`GET /payments/usdc/target\`. In code, read them from there (the SDK does this for you) rather than hardcoding them.
+
+#### \`payIntentWithToken\`
+
+\`\`\`solidity
+function payIntentWithToken(bytes32 intentId, uint256 amount) external nonReentrant whenNotPaused;
+\`\`\`
+
+\`intentId\` is the \`id\` returned by \`POST /intents\`. \`amount\` is the USDC amount in base units (USDC has 6 decimals) — pass \`quotedTokenAmount\` exactly. The caller must have approved the receiver for at least \`amount\` beforehand; the contract pulls the tokens with \`transferFrom\`.
+
+The \`whenNotPaused\` modifier allows the protocol team to pause payments in the event of a critical issue.
+
+#### Event
+
+\`\`\`solidity
+event IntentTokenPaymentReceived(
+    bytes32 indexed intentId,
+    address token,
+    uint256 amount,
+    address indexed payer
+);
+\`\`\`
+
+Emitted on successful payment. \`amount\` is the amount actually received by the contract, and \`payer\` is the account whose USDC allowance funded the payment.
+
+#### On-chain errors
+
+| Error | Description |
+|---|---|
+| \`InvalidAmount(uint256)\` | \`amount\` is zero, or nothing was received |
+| \`EnforcedPause()\` | Contract is paused by the owner |
+| ERC-20 allowance / balance errors | The payer did not approve enough USDC, or does not hold enough USDC |
+
+### API Reference (USDC)
+
+#### Get the Payment Target
+
+\`\`\`http
+GET /payments/usdc/target
+\`\`\`
+
+Returns where to send a USDC payment. **Authenticated** (see [API Reference](#api-reference) for the headers). Returns \`403 USDC_PAYMENTS_DISABLED\` when USDC is not available on this deployment.
+
+**Example response:**
+
+\`\`\`json
+\{
+  "chainId": 1,
+  "receiverAddress": "0x9c508Fa594f52032D574137585DD2F8A48F92261",
+  "tokenAddress": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+  "tokenDecimals": 6,
+  "confirmations": 6,
+  "settleGraceMs": 120000
+\}
+\`\`\`
+
+---
+
+#### Create a USDC Payment Intent
+
+\`\`\`http
+POST /intents
+\`\`\`
+
+**Authenticated** (see [API Reference](#api-reference) for the headers).
+
+**Request body:**
+
+\`\`\`json
+\{
+  "paymentMethod": "usdc_eth",
+  "requestedBytes": "10737418240"
+\}
+\`\`\`
+
+\`requestedBytes\` is **required** for USDC intents (decimal string). It is also checked against the 100 GB per-account cap before the intent is created.
+
+**Response:**
+
+\`\`\`json
+\{
+  "id": "0xabc123...",
+  "userPublicId": "user-public-id",
+  "status": "pending",
+  "paymentMethod": "usdc_eth",
+  "shannonsPerByte": "4273583470658",
+  "quotedTokenAmount": "67071093",
+  "quotedAi3Shannons": "45887253108005714001920",
+  "usdRateAtCreation": "1392047389045704",
+  "expiresAt": "2026-10-07T12:10:00.000Z"
+\}
+\`\`\`
+
+Pass \`id\` as the \`intentId\` argument and \`quotedTokenAmount\` as the \`amount\` argument of \`payIntentWithToken\`. In this example, \`67071093\` base units = **67.071093 USDC** for 10 GiB (about 45,887 AI3 at 0.00139 USD per AI3, plus the quote margin). \`usdRateAtCreation\` is the raw AI3/USD rate scaled by 10^18, without the margin, and is for reporting only.
+
+**USDC-specific errors:**
+
+| Status | Code | Meaning |
+|---|---|---|
+| \`400\` | — | \`requestedBytes\` missing or invalid (including larger than the whole credit cap), or \`paymentMethod\` not recognised |
+| \`403\` | \`USDC_PAYMENTS_DISABLED\` | USDC is not available to this account or deployment — pay with AI3 |
+| \`403\` | \`CREDIT_CAP_EXCEEDED\` | The purchase would exceed the 100 GB per-account cap — buy less |
+| \`503\` | \`USDC_PAYMENTS_UNAVAILABLE\` | USDC is closed for now — pay with AI3, or retry later |
+| \`503\` | \`PRICE_ORACLE_UNAVAILABLE\` / \`PRICE_UNSTABLE\` | No reliable AI3/USD rate right now — retry unchanged |
+
+---
+
+#### Confirm a Transaction
+
+Same endpoint as for AI3: \`POST /intents/:id/watch\` with the \`payIntentWithToken\` transaction hash (not the approval hash). If the price lock has already lapsed, this call can return \`410\`. The payment can still be credited from the on-chain event, so continue to wait for completion.
+
+### SDK Functions (USDC)
+
+\`@autonomys/auto-drive\` wraps the USDC endpoints. As with AI3, the SDK does not sign anything: it returns the quote and where to pay, plus typed ABIs, and your wallet library sends the transactions.
+
+| Function / export | Description |
+|---|---|
+| \`api.getUsdcPaymentTarget()\` | Returns the \`UsdcPaymentTarget\` (chain ID, receiver, token, decimals, confirmations, \`settleGraceMs\`) |
+| \`api.createUsdcPaymentIntent(sizeBytes)\` | Creates a price-locked USDC intent for \`sizeBytes\` (\`number\` or \`bigint\`). Fetches the target for you and returns a \`UsdcPaymentIntent\` |
+| \`api.watchPaymentTransaction(intentId, txHash)\` | Same as for AI3 — pass the \`payIntentWithToken\` hash |
+| \`api.waitForPaymentCompletion(intentId, \{ settleGraceMs \})\` | Same as for AI3 — pass \`intent.settleGraceMs\` so a \`410\` after the lock lapses does not end the wait early |
+| \`erc20ApprovalAbi\` | Minimal ERC-20 ABI: \`approve\`, \`allowance\`, \`balanceOf\` |
+| \`usdcReceiverAbi\` | Minimal ABI for \`payIntentWithToken(bytes32, uint256)\` |
+| \`PaymentApiError\` | Error thrown on non-OK payment responses, with \`status\` and \`code\` |
+
+See [Available Functions](/sdk/auto-drive/available_functions#pay-with-usdc--payment-intents) for the full type definitions.
+
+### Integration Example (USDC)
+
+The example below uses an Auto Drive API key and a funded Ethereum wallet (USDC for the payment, ETH for gas). All Auto Drive calls need the API key, so run this on your server.
+
+\`\`\`typescript
+import \{
+  createAutoDriveApi,
+  erc20ApprovalAbi,
+  PaymentApiError,
+  usdcReceiverAbi,
+\} from '@autonomys/auto-drive'
+import \{ NetworkId \} from '@autonomys/auto-utils'
+import \{ createPublicClient, createWalletClient, http, type Hex \} from 'viem'
+import \{ privateKeyToAccount \} from 'viem/accounts'
+import \{ mainnet \} from 'viem/chains'
+
+async function purchaseCreditsWithUsdc(sizeBytes: bigint) \{
+  const api = createAutoDriveApi(\{
+    apiKey: process.env.AUTO_DRIVE_API_KEY!,
+    network: NetworkId.MAINNET,
+  \})
+
+  // 1. Lock a USDC price. The SDK also fetches where to pay — never hardcode it.
+  const intent = await api.createUsdcPaymentIntent(sizeBytes)
+  // intent.usdcAmount          — exact amount in base units (6 decimals)
+  // intent.usdcAmountFormatted — human-readable amount, e.g. "27.498"
+  // intent.chainId, intent.tokenAddress, intent.receiverAddress — where to pay
+  if (intent.chainId !== mainnet.id) throw new Error(\`Unexpected USDC chain \$\{intent.chainId\}\`)
+
+  const account = privateKeyToAccount(process.env.PAYER_PRIVATE_KEY as Hex)
+  const transport = http(process.env.ETH_RPC_URL)
+  const publicClient = createPublicClient(\{ chain: mainnet, transport \})
+  const walletClient = createWalletClient(\{ account, chain: mainnet, transport \})
+
+  const amount = BigInt(intent.usdcAmount)
+  const token = intent.tokenAddress as Hex
+  const receiver = intent.receiverAddress as Hex
+
+  // 2. Approve the receiver to pull the USDC (skip if the allowance is enough)
+  const allowance = await publicClient.readContract(\{
+    address: token,
+    abi: erc20ApprovalAbi,
+    functionName: 'allowance',
+    args: [account.address, receiver],
+  \})
+  if (allowance < amount) \{
+    const approveHash = await walletClient.writeContract(\{
+      address: token,
+      abi: erc20ApprovalAbi,
+      functionName: 'approve',
+      args: [receiver, amount],
+    \})
+    await publicClient.waitForTransactionReceipt(\{ hash: approveHash \})
+  \}
+
+  // 3. Pay the intent. No value: the receiver pulls the approved USDC.
+  //    Wait for the receipt first, so block time does not use up the 410 grace.
+  const txHash = await walletClient.writeContract(\{
+    address: receiver,
+    abi: usdcReceiverAbi,
+    functionName: 'payIntentWithToken',
+    args: [intent.intentId as Hex, amount],
+  \})
+  const receipt = await publicClient.waitForTransactionReceipt(\{ hash: txHash \})
+  if (receipt.status !== 'success') throw new Error(\`USDC payment reverted: \$\{txHash\}\`)
+
+  // 4. Tell Auto Drive about the payment transaction (not the approval)
+  try \{
+    await api.watchPaymentTransaction(intent.intentId, txHash)
+  \} catch (error) \{
+    // 410: the price lock has lapsed. The payment can still settle, so continue.
+    if (!(error instanceof PaymentApiError && error.status === 410)) throw error
+  \}
+
+  // 5. Wait for credits. settleGraceMs keeps polling through a 410 after the lock lapses.
+  const status = await api.waitForPaymentCompletion(intent.intentId, \{
+    settleGraceMs: intent.settleGraceMs,
+  \})
+
+  return \{ txHash, status \} // 'COMPLETED' | 'EXPIRED' | 'FAILED' | 'OVER_CAP'
+\}
+\`\`\`
+
+### Handling Errors
+
+When Auto Drive refuses a payment request, the SDK throws a \`PaymentApiError\` with the HTTP \`status\` and, for coded errors, a machine-readable \`code\`. Branch on \`code\`, not on \`message\`.
+
+| \`code\` | Status | What to do |
+|---|---|---|
+| \`PRICE_ORACLE_UNAVAILABLE\` | 503 | Retry the same request later |
+| \`PRICE_UNSTABLE\` | 503 | Retry the same request later |
+| \`USDC_PAYMENTS_UNAVAILABLE\` | 503 | USDC is closed for now — pay with AI3, or retry later |
+| \`USDC_PAYMENTS_DISABLED\` | 403 | USDC is not available to you — pay with AI3 |
+| \`CREDIT_CAP_EXCEEDED\` | 403 | The purchase would exceed your credit cap — buy less |
+| \`GOOGLE_ACCOUNT_REQUIRED\` | 403 | Use an API key from a Google-registered account |
+
+Some failures have no \`code\`, so check \`status\`:
+
+- **400** — the request is invalid, for example the size is larger than the whole credit cap.
+- **404 on \`/intents\`** — the account cannot buy credits. Accounts that are not Google-registered usually get this rather than \`GOOGLE_ACCOUNT_REQUIRED\`.
+- **410** — the price lock has lapsed. See [Polling after the price lock](#polling-after-the-price-lock).
+
+\`\`\`typescript
+import \{ PaymentApiError \} from '@autonomys/auto-drive'
+
+try \{
+  const intent = await api.createUsdcPaymentIntent(sizeBytes)
+  // ...pay as above
+\} catch (error) \{
+  if (!(error instanceof PaymentApiError)) throw error
+  switch (error.code) \{
+    case 'PRICE_ORACLE_UNAVAILABLE':
+    case 'PRICE_UNSTABLE':
+      // retry later
+      break
+    case 'USDC_PAYMENTS_DISABLED':
+    case 'USDC_PAYMENTS_UNAVAILABLE':
+      // fall back to api.createPaymentIntent (AI3)
+      break
+    default:
+      throw error
+  \}
+\}
+\`\`\`
+
+### Polling after the Price Lock
+
+\`GET /intents/:id\` answers \`410\` once the price lock has lapsed on an intent that has no recorded transaction hash — for example when \`watchPaymentTransaction\` itself got a \`410\`. With a recorded hash, the \`410\` starts only when Auto Drive stops accepting payments for the intent, currently **20 minutes after \`expiresAt\`**. A payment sent near the end of the lock can still be credited after the first \`410\`.
+
+With \`settleGraceMs\` set, \`waitForPaymentCompletion\` keeps polling through \`410\` for that long and only then returns \`'EXPIRED'\`. A successful read in between resets the clock. Without it, a \`410\` throws a \`PaymentApiError\`, as in earlier SDK versions. This option works for AI3 intents too.
+
+- \`'EXPIRED'\` from this path means the SDK stopped waiting. It does not prove the payment is lost — check the account's credits before telling a user the payment failed.
+- The grace is measured from the first \`410\` the SDK sees, so wait for the payment receipt before calling \`waitForPaymentCompletion\`.
+- Keep \`timeoutMs\` (default 5 minutes) larger than the time left on the lock plus \`settleGraceMs\`, or the call can throw a timeout error before it returns \`'EXPIRED'\`.
+
+### Things to Know
+
+- **Always pay \`usdcAmount\` (\`quotedTokenAmount\`) exactly.** Paying a different amount is accepted, but credits are granted in proportion to what was received.
+- **Pay before the intent expires.** Auto Drive still credits a payment for a short while after the 10-minute lock (currently up to 20 minutes after \`expiresAt\`), but do not rely on it. A payment that arrives later is not credited automatically; it is recorded and recoverable through support.
+- **Do not send AI3 to a USDC intent (or USDC to an AI3 intent).** Payments in the wrong asset are not credited automatically.
+- **USDC can be temporarily closed.** New USDC intents may be refused (\`USDC_PAYMENTS_UNAVAILABLE\`, \`PRICE_ORACLE_UNAVAILABLE\`, \`PRICE_UNSTABLE\`) for short periods. An intent that was already quoted stays payable until it expires. Fall back to AI3 if needed.
 
 ---
 
@@ -4401,7 +6054,7 @@ const cid = await api.uploadFileFromInput(file, \{
 console.log('Uploaded CID:', cid)
 \`\`\`
 
-Credits are consumed in **FIFO expiry order** — the soonest-to-expire credits are spent first. Free monthly credits are consumed before purchased ones.
+Credits are consumed in **FIFO expiry order** — the soonest-to-expire credits are spent first.
 
 ---
 
@@ -4412,13 +6065,17 @@ Credits are consumed in **FIFO expiry order** — the soonest-to-expire credits 
 | **Maximum purchased credits** | 100 GB per account |
 | **Credit expiry** | 90 days from grant date |
 | **Intent timeout** | 10 minutes |
-| **Confirmation blocks** | 6 |
+| **Confirmation blocks** | 6 (Auto-EVM for AI3, Ethereum for USDC) |
+
+The 100 GB cap applies to AI3 and USDC purchases combined.
 
 ---
 
 ## Further Reading
 
 - [Pay with AI3 — User Guide](/auto_drive/pay_with_ai3)
+- [Pay with USDC — User Guide](/auto_drive/pay_with_usdc)
+- [Eulonomys — Reference App Using Pay with AI3](/application_examples/eulonomys)
 - [Auto Drive Overview & Setup](/sdk/auto-drive/overview_setup)
 - [Available Functions](/sdk/auto-drive/available_functions)
 - [Usage Examples](/sdk/auto-drive/usage_examples)
@@ -4432,33 +6089,118 @@ Credits are consumed in **FIFO expiry order** — the soonest-to-expire credits 
 
 ## Overview
 
-**Auto Drive** provides an **S3-compatible API layer** that allows you to interact with **decentralized storage(DSN)** using standard **Amazon Web Services Simple Storage Service (AWS S3)** SDK commands. This bridges the gap between familiar cloud storage patterns and next-generation decentralized infrastructure, giving developers the best of both worlds: the **reliability and developer experience of S3 APIs** with the **permanence and censorship-resistance** of decentralized storage.
+**Auto Drive** provides an **S3-compatible API layer** that allows you to interact with **decentralized storage (DSN)** using standard **Amazon Web Services Simple Storage Service (AWS S3)** SDK commands. This bridges the gap between familiar cloud storage patterns and next-generation decentralized infrastructure, giving developers the best of both worlds: the **reliability and developer experience of S3 APIs** with the **permanence and censorship-resistance** of decentralized storage.
 
-For those unfamiliar, [Amazon Web Services Simple Storage Service (AWS S3)](https://aws.amazon.com/s3/) is an industry-standard object storage service that powers much of the modern web's file storage needs. **Auto Drive** maintains complete compatibility with S3's APIs while storing your data on a **decentralized network** instead of **centralized servers**.
+For those unfamiliar, [Amazon Web Services Simple Storage Service (AWS S3)](https://aws.amazon.com/s3/) is an industry-standard object storage service that powers much of the modern web's file storage needs. **Auto Drive** maintains compatibility with the most-used parts of S3's APIs while storing your data on a **decentralized network** instead of **centralized servers**.
+
+> **Permanent and immutable by design.** Auto Drive storage is permanent. Objects on the Autonomys DSN cannot be modified, overwritten, or deleted. \`DeleteObject\` returns \`403 Forbidden\`. Re-uploading the same key creates a new object — the old data persists on the DSN. Plan your data model around this guarantee.
 
 ## How It Works
-Auto Drive maintains an object_mappings table in the database that maps S3 object keys to Content Identifiers (CIDs). When you upload via S3 API, the system:
+
+Auto Drive maps S3 (bucket, key) pairs to Content Identifiers (CIDs) and MD5 checksums. When you upload via the S3 API, the system:
 
 1. Stores the file content on the decentralized network (DSN)
-2. Records the key-to-CID mapping in the database
-3. Returns the CID as the ETag for S3 compatibility
-4. Enables cross-API access between S3 and Auto Drive APIs
-
+2. Computes the MD5 of the content and records the \`(bucket, key) → (cid, md5)\` mapping
+3. Returns the **MD5 as the \`ETag\`** (standard S3 format) and exposes the **CID in the \`x-amz-meta-cid\` response header**
+4. Enables cross-API access between the S3 API and the native Auto Drive API
 
 ## Key Features
 
-### 1. **Standard S3 SDK Compatibility**
+### 1. Standard S3 SDK and CLI Compatibility
 
-- Use official AWS S3 SDK (\`@aws-sdk/client-s3\`)
-- Supports all major S3 operations: \`PutObject\`, \`GetObject\`, \`HeadObject\`, multipart uploads (\`CreateMultipartUploadCommand\`, \`UploadPartCommand\` & \`CompleteMultipartUploadCommand\`)
-- No code changes required for existing S3 applications
+- Works with the official AWS S3 SDKs (\`@aws-sdk/client-s3\`, \`boto3\`), the **AWS CLI**, and S3-compatible tools like **[rclone](#rclone-integration)**
+- Supported operations: \`ListBuckets\`, \`ListObjectsV2\`, \`PutObject\`, \`GetObject\`, \`HeadObject\`, multipart uploads (\`CreateMultipartUpload\`, \`UploadPart\`, \`CompleteMultipartUpload\`)
+- No code changes required for existing S3 applications other than swapping the endpoint and credentials
 
-### 2. **Enhanced Metadata Support**
+### 2. Buckets
+
+Buckets behave like standard S3 buckets. The **first path segment of the object key is the bucket name**, and the remainder is the key:
+
+| S3 path | Bucket | Key |
+| --- | --- | --- |
+| \`my-archive/report.pdf\` | \`my-archive\` | \`report.pdf\` |
+| \`my-archive/sub/file.txt\` | \`my-archive\` | \`sub/file.txt\` |
+| \`test.txt\` (no slash) | \`default\` | \`test.txt\` |
+
+Buckets are **created implicitly** on first write — there is no \`CreateBucket\` call. \`ListBuckets\` (\`GET /\`) returns every distinct bucket you have written to.
 
 \`\`\`typescript
-// Compression and encryption metadata
+import \{ ListBucketsCommand \} from "@aws-sdk/client-s3";
+
+const result = await s3Client.send(new ListBucketsCommand(\{\}));
+console.log(result.Buckets); // [\{ Name: "my-archive", CreationDate: ... \}, ...]
+\`\`\`
+
+Single-segment keys uploaded before bucket support was introduced remain accessible under the \`default\` bucket.
+
+### 3. ListObjectsV2 with Prefix, Delimiter, and Pagination
+
+Auto Drive implements \`ListObjectsV2\` end-to-end, with the parameters most clients depend on:
+
+- **Prefix filtering** — \`?prefix=subdir/\` returns only keys starting with \`subdir/\`
+- **Delimiter folding** — \`?delimiter=/\` collapses keys into \`<CommonPrefixes>\` virtual directories
+- **Pagination** — \`?max-keys=N\` plus \`?continuation-token=…\` for cursor-based paging
+- **Object size** — \`<Size>\` is populated from indexed metadata
+- **MD5 ETag in listings** — listing entries return the MD5 ETag, so checksum verification does not require an extra \`HeadObject\` per object
+
+> Auto Drive implements **\`ListObjectsV2\` only**. The legacy \`ListObjects\` (V1) API is not implemented. rclone users must set \`list_version = 2\` in their remote config (see [rclone integration](#rclone-integration)).
+
+\`\`\`typescript
+import \{ ListObjectsV2Command \} from "@aws-sdk/client-s3";
+
+const result = await s3Client.send(
+  new ListObjectsV2Command(\{
+    Bucket: "my-archive",
+    Prefix: "logs/",
+    Delimiter: "/",
+    MaxKeys: 100,
+  \})
+);
+
+console.log(result.Contents);        // objects directly under "logs/"
+console.log(result.CommonPrefixes);  // virtual subdirectories like "logs/2026/"
+
+if (result.IsTruncated) \{
+  // Fetch the next page using result.NextContinuationToken
+\}
+\`\`\`
+
+### 4. MD5 ETags + CID via \`x-amz-meta-cid\`
+
+\`PutObject\`, \`GetObject\`, \`HeadObject\`, \`ListObjectsV2\`, and \`CompleteMultipartUpload\` return a **standard quoted MD5 ETag** (e.g. \`"d41d8cd98f00b204e9800998ecf8427e"\`) for objects uploaded after the MD5 ETag feature shipped. For multipart uploads, the composite ETag follows the AWS format \`"<md5_of_part_md5s>-<N>"\`. Legacy objects (those uploaded before the feature) have no stored MD5: \`HEAD\`/\`GET\` omit the \`ETag\` header entirely, and \`ListObjectsV2\` falls back to wrapping the CID as the ETag value. See the migration note below.
+
+The Autonomys CID is exposed on every object response as a custom header:
+
+\`\`\`http
+x-amz-meta-cid: bafkreig...
+\`\`\`
+
+This makes \`rclone check\`, \`rclone md5sum\`, AWS CLI checksum verification, and any other MD5-based tooling work out of the box.
+
+> **Migration note.** Objects uploaded before the MD5 ETag feature shipped have a \`NULL\` MD5 in the database. They will not return an \`ETag\` header on \`HEAD\`/\`GET\` until they are re-uploaded. The CID is always available via \`x-amz-meta-cid\`. For listings of legacy objects, the CID is returned as a fallback.
+
+\`\`\`typescript
+import \{ HeadObjectCommand \} from "@aws-sdk/client-s3";
+
+const head = await s3Client.send(
+  new HeadObjectCommand(\{ Bucket: "my-archive", Key: "report.pdf" \})
+);
+
+console.log(head.ETag);                    // '"d41d8cd98f00b204e9800998ecf8427e"' (MD5)
+console.log(head.Metadata?.cid);           // 'bafkreig...' (CID, via x-amz-meta-cid)
+\`\`\`
+
+### 5. Deletion is Forbidden by Design
+
+\`DeleteObject\` always returns \`403 Forbidden\` with an informative message — Auto Drive storage is permanent. Tools that try to delete (e.g. \`rclone delete\`, \`rclone purge\`, \`rclone sync\` with deletions) will see the 403 and surface it as an error. Re-uploading the same key creates a new object pointing at new content; the prior data still exists on the DSN.
+
+### 6. Enhanced Metadata Support
+
+Custom user metadata is stored alongside the object and returned on subsequent \`HEAD\`/\`GET\` calls. Auto Drive recognizes \`compression\` and \`encryption\` metadata for content stored with those transforms applied client-side.
+
+\`\`\`typescript
 const command = new PutObjectCommand(\{
-  Bucket: "https://public.auto-drive.autonomys.xyz/api/s3",
+  Bucket: "my-archive",
   Key: "file.txt",
   Body: buffer,
   Metadata: \{
@@ -4468,133 +6210,139 @@ const command = new PutObjectCommand(\{
 \});
 \`\`\`
 
-### 3. **Range Requests**
+### 7. Range Requests
 
-- Partial file downloads supported
-- Standard HTTP Range headers
+Partial file downloads using standard HTTP \`Range\` headers are supported.
 
 \`\`\`typescript
 const command = new GetObjectCommand(\{
-  Bucket: bucket,
-  Key: key,
-  Range: "bytes=0-9", // Download first 10 bytes
+  Bucket: "my-archive",
+  Key: "large-file.bin",
+  Range: "bytes=0-9", // first 10 bytes
 \});
 \`\`\`
 
-### 4. **Multipart Upload Support**
+### 8. Multipart Uploads
 
-- Full multipart upload workflow
-- Create → Upload Parts → Complete pattern
-- Automatic chunking for large files
+The full multipart workflow (\`CreateMultipartUpload\` → \`UploadPart\` × N → \`CompleteMultipartUpload\`) is supported. \`UploadPart\` returns the MD5 of the part body; \`CompleteMultipartUpload\` returns the standard AWS composite ETag \`"<md5_of_part_md5s>-<N>"\`.
 
 \`\`\`typescript
-// Complete multipart upload example
-const key = "large-file.txt";
-const fileContent = Buffer.from("Large file content...");
+const key = "large-file.bin";
+const Bucket = "my-archive";
 
 // Step 1: Create multipart upload
-const createCommand = new CreateMultipartUploadCommand(\{
-  Bucket: "https://public.auto-drive.autonomys.xyz/api/s3",
-  Key: key,
-\});
-const createResult = await s3Client.send(createCommand);
-const uploadId = createResult.UploadId!;
+const \{ UploadId \} = await s3Client.send(
+  new CreateMultipartUploadCommand(\{ Bucket, Key: key \})
+);
 
-// Step 2: Upload parts
-const uploadPartCommand = new UploadPartCommand(\{
-  Bucket: "https://public.auto-drive.autonomys.xyz/api/s3",
-  Key: key,
-  UploadId: uploadId,
-  PartNumber: 1,
-  Body: fileContent,
-\});
-const partResult = await s3Client.send(uploadPartCommand);
+// Step 2: Upload one or more parts
+const part1 = await s3Client.send(
+  new UploadPartCommand(\{
+    Bucket,
+    Key: key,
+    UploadId: UploadId!,
+    PartNumber: 1,
+    Body: fileChunk1,
+  \})
+);
 
+// Step 3: Complete the upload
+const result = await s3Client.send(
+  new CompleteMultipartUploadCommand(\{
+    Bucket,
+    Key: key,
+    UploadId: UploadId!,
+    MultipartUpload: \{
+      Parts: [\{ ETag: part1.ETag!, PartNumber: 1 \}],
+    \},
+  \})
+);
 
-// Step 3: Complete multipart upload
-const completeCommand = new CompleteMultipartUploadCommand(\{
-  Bucket: "https://public.auto-drive.autonomys.xyz/api/s3",
-  Key: key,
-  UploadId: uploadId,
-  MultipartUpload: \{
-    Parts: [
-      \{
-        ETag: partResult.ETag!,
-        PartNumber: 1,
-      \},
-    ],
-  \},
-\});
-const completeResult = await s3Client.send(completeCommand);
+console.log(result.ETag); // '"<composite_md5>-1"'
 \`\`\`
 
 ## Configuration
 
-### Client Setup
+### Endpoint
+
+| Environment | Endpoint |
+| --- | --- |
+| **Mainnet (public)** | \`https://s3.auto-drive.autonomys.xyz\` |
+
+### Client Setup (AWS JS SDK)
+
+The Auto Drive backend exposes objects under a single \`/:key(*)\` route and parses bucket and key from the path, so a path-style client works well in practice:
 
 \`\`\`typescript
+import \{ S3Client \} from "@aws-sdk/client-s3";
+
 const s3Client = new S3Client(\{
-  region: "us-east-1",
+  region: "us-east-1",                                // required by the SDK; ignored by Auto Drive
+  endpoint: "https://s3.auto-drive.autonomys.xyz",
   credentials: \{
-    accessKeyId: "your-auto-drive-api-key", // Your Auto Drive API key
-    secretAccessKey: "", // Always empty for Auto Drive
+    accessKeyId: "your-auto-drive-api-key",          // your Auto Drive API key
+    secretAccessKey: "placeholder",                   // any non-empty string; ignored
   \},
-  bucketEndpoint: true, // Required for custom endpoints
+  forcePathStyle: true,                               // bucket lives in the path
 \});
 \`\`\`
 
-### Endpoint Configuration
+Then use bucket names as you would with AWS S3:
 
 \`\`\`typescript
-// The "Bucket" parameter becomes part of the endpoint URL
-const Bucket = \`\$\{baseURL\}/s3\`; // e.g., "https://public.auto-drive.autonomys.xyz/api/s3"
-// No actual S3 bucket is created - it's just URL routing
+await s3Client.send(
+  new PutObjectCommand(\{ Bucket: "my-archive", Key: "report.pdf", Body: buffer \})
+);
 \`\`\`
-- Mainnet: \`https://public.auto-drive.autonomys.xyz/api/s3\`
-- Taurus Testnet: \`https://public.taurus.auto-drive.autonomys.xyz/api/s3\`
-- Base URL: http://localhost:3000/s3 (development)
-- Bucket name becomes the full endpoint path
-- No actual bucket concept - uses path-based routing
+
+> **Alternative: \`bucketEndpoint\` style.** The upstream backend integration tests configure the SDK with \`bucketEndpoint: true\` and bake the bucket into the endpoint path (e.g. \`Bucket: "my-archive/s3"\`). Either pattern works against the \`/:key(*)\` route; \`forcePathStyle: true\` with a plain bucket name is shown here because it's the more familiar S3 configuration.
 
 ## Authentication
 
-- Uses Auto Drive API key-based authentication
-- Integrates with Auto Drive's user management system
-- API key goes in \`accessKeyId\`, \`secretAccessKey\` remains empty
-- Supports the same authentication as the Auto Drive API
+- Uses Auto Drive API key-based authentication (the same keys as the native Auto Drive API)
+- The API key goes in \`accessKeyId\`; \`secretAccessKey\` must be present but is ignored (use any non-empty placeholder)
+- Files uploaded via the S3 API are owned by the user the API key belongs to
 
-## File Ownership & Access
+Get an API key from the **Developers** section at [ai3.storage](https://ai3.storage).
 
-- **Cross-API compatibility**: Files uploaded via S3 API are accessible through Auto Drive API and vice versa
-- **Centralized ownership**: File ownership is tracked centrally, not per-API
-- **Content deduplication**: Multiple users uploading identical content will share the same underlying CID
-- **Shared access**: If different users upload the same file via different APIs, both can access it through either API
+## File Ownership & Cross-API Access
+
+- **Cross-API compatibility** — files uploaded via the S3 API are accessible via the native Auto Drive API, and vice versa
+- **Centralized ownership** — file ownership is tracked centrally per user, not per API surface
+- **Content deduplication** — multiple users uploading identical content share the same underlying CID
+- **Shared access** — if different users upload the same file, both can access it through either API
 
 ## Storage Characteristics
 
 ### Content Addressing
 
-- Files are stored using Content Identifiers (CIDs)
-- ETag returned is the actual CID of the uploaded content
-- Immutable storage - same content always produces same CID
+- Files are stored using Content Identifiers (CIDs) on the Autonomys DSN
+- The CID is exposed via the \`x-amz-meta-cid\` response header on every object response (and as a fallback ETag for legacy objects)
+- Storage is **immutable** — the same content always produces the same CID
 
 ### Decentralized Backend
 
-- Files stored on the DSN of Autonomys Network (available on Autonomys Mainnet & Testnet)
+- Files are stored on the Distributed Storage Network of the Autonomys Network
 - Automatic replication and redundancy
 - No single point of failure
+
+## rclone Integration
+
+Auto Drive's S3 layer is fully [rclone](https://rclone.org)-compatible — including \`rclone check\`, \`rclone md5sum\`, virtual directory listings, multipart uploads, and pagination — so any rclone-driven workflow (archival, scheduled backups, mounts, cloud-to-cloud migration, CI/CD artifact storage) works against Auto Drive.
+
+For the dedicated walkthrough — quickstart, full config reference, every supported command, workflows, and troubleshooting — see the [Using rclone](/auto_drive/rclone) guide.
 
 ## Migrating from AWS S3
 
 For developers moving from traditional AWS S3:
 
-1. **Update endpoint** to Auto Drive server URL
-2. **Change credentials** to use Auto Drive API key (with empty secret)
-3. **Set \`bucketEndpoint\`**: true in S3Client configuration
-4. **Handle longer response times** due to blockchain network latency
-5. **Expect CIDs as ETags** instead of MD5 hashes
-6. **Update bucket references** to use full endpoint URLs
-7. **Test multipart uploads** as they may behave slightly differently
+1. **Update the endpoint** to \`https://s3.auto-drive.autonomys.xyz\`
+2. **Change credentials** to use your Auto Drive API key as \`accessKeyId\`; set \`secretAccessKey\` to a placeholder
+3. **Set \`forcePathStyle: true\`** in the S3 client configuration
+4. **Drop bucket-creation calls** — buckets are created implicitly on first write
+5. **Remove deletion logic** — \`DeleteObject\` returns 403; design around immutability
+6. **Read CIDs from \`x-amz-meta-cid\`**, not from the ETag (the ETag is the standard MD5)
+7. **Handle longer response times** due to network latency vs. AWS edge
 
 \`\`\`typescript
 // Before (AWS S3)
@@ -4609,43 +6357,80 @@ const s3Client = new S3Client(\{
 // After (Auto Drive)
 const s3Client = new S3Client(\{
   region: "us-east-1",
+  endpoint: "https://s3.auto-drive.autonomys.xyz",
   credentials: \{
     accessKeyId: "your-auto-drive-api-key",
-    secretAccessKey: "",
+    secretAccessKey: "placeholder",
   \},
-  bucketEndpoint: true,
+  forcePathStyle: true,
 \});
 \`\`\`
+
+## Building Your Own S3-Compatible Layer
+
+If you are building your own S3-compatible service on top of Autonomys storage, the [Auto SDK](https://github.com/autonomys/auto-sdk) ships reusable, framework-agnostic S3 server-side helpers in [\`@autonomys/file-server\`](https://www.npmjs.com/package/@autonomys/file-server):
+
+- \`buildListResult(rows, prefix, delimiter, maxKeys)\` — \`ListObjectsV2\` delimiter folding into \`CommonPrefixes\` plus \`maxKeys\` pagination with correct continuation-token placement
+- \`computeListObjectsDbLimit(maxKeys, delimiter)\` — how many rows to fetch from storage for a single page
+- \`finalizeListObjects(params, fetchedRows, dbLimit)\` — wraps \`buildListResult\` and applies the full-batch truncation override that prevents duplicate \`CommonPrefixes\` across page boundaries
+- \`md5Hex\`, \`formatETag\`, \`multipartETag\` — S3 ETag computation, including the AWS composite multipart format
+- Types: \`S3ObjectListing\`, \`ListObjectsParams\`, \`ListObjectsResult\`
+
+\`\`\`typescript
+import \{
+  computeListObjectsDbLimit,
+  finalizeListObjects,
+  multipartETag,
+\} from "@autonomys/file-server";
+
+const dbLimit = computeListObjectsDbLimit(maxKeys, delimiter);
+const rows = await fetchSortedObjectsFromStorage(prefix, continuationToken, dbLimit);
+
+const result = finalizeListObjects(
+  \{ bucket, prefix, delimiter, maxKeys, continuationToken \},
+  rows,
+  dbLimit,
+);
+// result is ready to render as ListObjectsV2 XML
+
+const completedETag = multipartETag(parts.map((p) => p.etag));
+\`\`\`
+
+Auto Drive itself uses these helpers, so you get the same delimiter folding, pagination, and composite-ETag behavior the public service is validated against.
 
 ## Limitations & Considerations
 
 ### Performance
 
-- The DSN (on-chain) storage has higher latency than traditional S3
-- Multipart uploads recommended for files > 5MB
-- Range requests may have different performance characteristics
+- The DSN has higher write latency than traditional S3 — use multipart uploads for files > 5 MB
+- Listings paginate at the server's configured \`maxKeys\` (default 1,000); requested values larger than 1,000 are clamped to the 1,000 hard cap
+- Range requests may have different performance characteristics than AWS S3
 
 ### Compatibility Notes
 
-- Not all S3 features supported (e.g., versioning, lifecycle policies)
-- Custom metadata handling for compression/encryption
-- Bucket operations are virtual (no actual bucket creation)
+- **Implemented**: \`ListBuckets\`, \`ListObjectsV2\` (with \`prefix\`, \`delimiter\`, \`max-keys\`, \`continuation-token\`), \`PutObject\`, \`GetObject\`, \`HeadObject\`, multipart uploads
+- **Not implemented (return 501)**: \`ListObjects\` (V1) — use V2; \`CreateBucket\` — buckets are created implicitly; \`CopyObject\`; \`DeleteObjects\` (bulk/multi-object delete); \`versioning\`, \`lifecycle policies\`, \`ACLs\`, \`bucket policies\`, presigned URLs
+- **Forbidden by design (return 403)**: \`DeleteObject\`, \`DeleteBucket\`
+- **Effectively no-ops**: any operation that assumes mutability
 
 ## Best Practices
 
-1. **Use Multipart Uploads** for files larger than 5MB
-2. **Leverage Range Requests** for partial file access
-3. **Include Compression/Encryption** metadata when needed
-4. **Handle ETags as CIDs** for content verification
-5. **Implement Retry Logic** for blockchain network delays
+1. **Treat storage as append-only** — design data models around immutability rather than fighting it
+2. **Use multipart uploads** for files larger than 5 MB
+3. **Read CIDs from \`x-amz-meta-cid\`**, not from the ETag
+4. **Use the MD5 ETag for integrity verification** — it matches \`md5sum\` of the content for non-multipart objects
+5. **Paginate listings** with \`MaxKeys\` + \`NextContinuationToken\` rather than fetching everything in one call
+6. **Implement retry logic** for occasional network-induced timeouts
+7. **For rclone**, always pass \`--immutable\` and set \`list_version = 2\`
 
 ## Error Handling
 
-- Standard S3 error responses
-- Additional blockchain-specific error codes
-- Network timeouts may be longer than traditional S3
+- Standard S3 XML error responses
+- \`403 Forbidden\` for any deletion attempt — distinguish this from a permissions error in your client
+- Network timeouts may be longer than traditional S3; configure your SDK accordingly
 
-This S3 layer provides a familiar interface while leveraging the benefits of decentralized storage, making it easy to migrate existing S3-based applications to Auto Drive.
+This S3 layer provides a familiar interface while leveraging the benefits of decentralized storage, making it easy to migrate existing S3-based applications — and S3-compatible tooling like rclone and the AWS CLI — to Auto Drive.
+
 
 ---
 
@@ -4659,7 +6444,7 @@ This S3 layer provides a familiar interface while leveraging the benefits of dec
 import \{ fs,createAutoDriveApi \} from '@autonomys/auto-drive'
 import \{ NetworkId \} from '@autonomys/auto-utils'
 
-const api = createAutoDriveApi(\{ apiKey: 'your-api-key', network: NetworkId.TAURUS \}) // Initialize your API instance with API key
+const api = createAutoDriveApi(\{ apiKey: 'your-api-key', network: NetworkId.MAINNET \}) // Initialize your API instance with API key
 const filePath = 'path/to/your/file.txt' // Specify the path to your file
 const options = \{
   password: 'your-encryption-password', // Optional: specify a password for encryption
@@ -4681,7 +6466,7 @@ console.log(\`The file is uploaded and its cid is \$\{cid\}\`)
 import \{ uploadFileFromInput, createAutoDriveApi \} from '@autonomys/auto-drive'
 import \{ NetworkId \} from '@autonomys/auto-utils'
 
-const api = createAutoDriveApi(\{ apiKey: 'your-api-key', network: NetworkId.TAURUS \}) // Initialize your API instance with API key
+const api = createAutoDriveApi(\{ apiKey: 'your-api-key', network: NetworkID.MAINNET \}) // Initialize your API instance with API key
 
 // e.g Get File from object from HTML event
 const file: File = e.target.value // Substitute with your file
@@ -4700,7 +6485,7 @@ console.log(\`The file is uploaded and its cid is \$\{cid\}\`)
 import \{ createAutoDriveApi, fs \} from '@autonomys/auto-drive'
 import \{ NetworkId \} from '@autonomys/auto-utils'
 
-const api = createAutoDriveApi(\{ apiKey: 'your-api-key', network: NetworkId.TAURUS \}) // Initialize your API instance with API key
+const api = createAutoDriveApi(\{ apiKey: 'your-api-key', network: NetworkID.MAINNET \}) // Initialize your API instance with API key
 const folderPath = 'path/to/your/folder' // Specify the path to your folder
 
 const options = \{
@@ -4723,7 +6508,7 @@ console.log(\`The folder is uploaded and its cid is \$\{folderCID\}\`)
 import \{ createAutoDriveApi \} from '@autonomys/auto-drive'
 import \{ NetworkId \} from '@autonomys/auto-utils'
 
-const api = createAutoDriveApi(\{ apiKey: 'your-api-key', network: NetworkId.TAURUS \}) // Initialize your API instance with API key
+const api = createAutoDriveApi(\{ apiKey: 'your-api-key', network: NetworkID.MAINNET \}) // Initialize your API instance with API key
 const buffer = Buffer.from(...);
 const genericFile = \{
   read: async function *() \{
@@ -4755,7 +6540,7 @@ console.log(\`The file is uploaded and its cid is \$\{cid\}\`)
 import \{ createAutoDriveApi \} from '@autonomys/auto-drive'
 import \{ NetworkId \} from '@autonomys/auto-utils'
 
-const api = createAutoDriveApi(\{ apiKey: 'your-api-key', network: NetworkId.TAURUS \}) // Initialize your API instance with API key
+const api = createAutoDriveApi(\{ apiKey: 'your-api-key', network: NetworkID.MAINNET \}) // Initialize your API instance with API key
 
 try \{
   const cid = '..'
@@ -4776,7 +6561,7 @@ try \{
 import \{ createAutoDriveApi \} from '@autonomys/auto-drive'
 import \{ NetworkId \} from '@autonomys/auto-utils'
 
-const api = createAutoDriveApi(\{ apiKey: 'your-api-key', network: NetworkId.TAURUS \}) // Initialize your API instance with API key
+const api = createAutoDriveApi(\{ apiKey: 'your-api-key', network: NetworkID.MAINNET \}) // Initialize your API instance with API key
 
 try \{
   const cid = 'your-file-cid'
@@ -4795,7 +6580,7 @@ Here is an example of how to use the \`getMyFiles\` method to retrieve the root 
 import \{ createAutoDriveApi \} from '@autonomys/auto-drive'
 import \{ NetworkId \} from '@autonomys/auto-utils'
 
-const api = createAutoDriveApi(\{ apiKey: 'your-api-key', network: NetworkId.TAURUS \}) // Initialize your API instance with API key
+const api = createAutoDriveApi(\{ apiKey: 'your-api-key', network: NetworkID.MAINNET \}) // Initialize your API instance with API key
 
 try \{
   for (let i = 0; i < 10; i++) \{
