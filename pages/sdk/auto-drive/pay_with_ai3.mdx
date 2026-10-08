@@ -206,11 +206,11 @@ The response does not include a total amount. Compute it yourself: `msg.value = 
 | Status | Code | Meaning |
 |---|---|---|
 | `400` | — | `requestedBytes` is invalid or larger than the whole credit cap, or `paymentMethod` is not recognised |
-| `401` | — | Missing or invalid credentials |
-| `403` | `GOOGLE_ACCOUNT_REQUIRED` | The account is not Google-authenticated |
+| `401` | - | `Authorization` was sent without a usable `X-Auth-Provider`, or the API key was rejected |
 | `403` | `CREDIT_CAP_EXCEEDED` | The purchase would exceed the per-account cap (only when `requestedBytes` is sent) |
-| `404` | — | Buying credits is not available to this account |
-| `503` | — | Storage could not be priced — retry unchanged |
+| `404` | - | No credentials were sent, or the account cannot buy credits (for example, it is not Google-authenticated). The body is plain text `Not Found`, not JSON |
+| `500` | - | The storage price could not be read, or another server error. Retry later |
+| `503` | - | The storage price resolved to zero, or the authentication service is unavailable. Retry later |
 
 ---
 
@@ -563,12 +563,12 @@ When Auto Drive refuses a payment request, the SDK throws a `PaymentApiError` wi
 | `USDC_PAYMENTS_UNAVAILABLE` | 503 | USDC is closed for now — pay with AI3, or retry later |
 | `USDC_PAYMENTS_DISABLED` | 403 | USDC is not available to you — pay with AI3 |
 | `CREDIT_CAP_EXCEEDED` | 403 | The purchase would exceed your credit cap — buy less |
-| `GOOGLE_ACCOUNT_REQUIRED` | 403 | Use an API key from a Google-registered account |
 
 Some failures have no `code`, so check `status`:
 
 - **400** — the request is invalid, for example the size is larger than the whole credit cap.
-- **404 on `/intents`** — the account cannot buy credits. Accounts that are not Google-registered usually get this rather than `GOOGLE_ACCOUNT_REQUIRED`.
+- **404 on `/intents`**: no credentials were sent, or the account cannot buy credits. Accounts that are not Google-registered get this, not `GOOGLE_ACCOUNT_REQUIRED`. The body is plain text `Not Found`, not JSON.
+- **500**: a server-side failure, for example the storage price could not be read. Retry later.
 - **410** — the price lock has lapsed. See [Polling after the price lock](#polling-after-the-price-lock).
 
 ```typescript
