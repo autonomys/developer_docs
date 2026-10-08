@@ -168,6 +168,8 @@ type PaymentErrorCode =
 
 These functions implement the [Pay with USDC](/auto_drive/pay_with_usdc) credit purchase flow (USDC on Ethereum mainnet). The SDK does not sign transactions: it returns the quote and where to pay, plus typed ABIs, and your wallet library sends the transactions. See the [developer integration guide](/sdk/auto-drive/pay_with_ai3#pay-with-usdc) for a full example.
 
+> **Requires `@autonomys/auto-drive` v1.6.16 or later.**
+
 **Five-step flow:**
 ```
 1. createUsdcPaymentIntent(sizeBytes)                 — locks a USDC price, returns amount + chain, token and receiver

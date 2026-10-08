@@ -455,6 +455,8 @@ Same endpoint as for AI3: `POST /intents/:id/watch` with the `payIntentWithToken
 
 ### SDK Functions (USDC)
 
+> **Requires `@autonomys/auto-drive` v1.6.16 or later.** Earlier versions do not include the USDC functions and exports listed below.
+
 `@autonomys/auto-drive` wraps the USDC endpoints. As with AI3, the SDK does not sign anything: it returns the quote and where to pay, plus typed ABIs, and your wallet library sends the transactions.
 
 | Function / export | Description |
