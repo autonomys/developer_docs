@@ -100,7 +100,7 @@ These functions implement the complete [Pay with AI3](/auto_drive/pay_with_ai3) 
 
 - `api.getPaymentContractInfo(): Promise<PaymentContractInfo>` — Returns the Auto-EVM contract address, chain ID, and `payIntent` ABI. No API key required. Called internally by `createPaymentIntent`; export this for client-side wallet pre-fetching.
 
-- `api.createPaymentIntent(sizeBytes, options?): Promise<PaymentIntent>` — Locks the current storage price for the authenticated account and returns a payment intent. The price is locked for **10 minutes**. Pass `{ checkCreditCap: true }` to have Auto Drive reject an over-cap purchase before anything is paid.
+- `api.createPaymentIntent(sizeBytes, options?): Promise<PaymentIntent>` — Locks the current storage price for the authenticated account and returns a payment intent. The price is locked for **10 minutes**. Pass `{ checkCreditCap: true }` to have Auto Drive refuse to create the intent (`403 CREDIT_CAP_EXCEEDED`) when the purchase would exceed the account's credit cap, instead of accepting a payment that ends as `OVER_CAP`.
 
 - `api.watchPaymentTransaction(intentId, txHash): Promise<void>` — Submits the on-chain transaction hash to Auto Drive. The backend waits for 6 block confirmations before granting credits. Works for both AI3 and USDC intents.
 

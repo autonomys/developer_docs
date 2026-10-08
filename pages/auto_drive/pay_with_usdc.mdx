@@ -48,10 +48,10 @@ Connect a compatible EVM wallet that holds **USDC and ETH on Ethereum mainnet**.
 
 > **The price is locked for 10 minutes from this point.** Complete the payment within the window. If the timer expires before the payment is sent, click **"Get a fresh price"** to request a new quote.
 
-Click **"Approve and pay USDC"**. Your wallet will ask you to confirm up to three actions:
+Click **"Pay _amount_ USDC"**. Your wallet will ask you to confirm up to three actions:
 
 1. **Switch network** — if your wallet is not on Ethereum mainnet, confirm the switch.
-2. **Approve USDC** — gives the Auto Drive receiver contract permission to take the quoted amount. Approval does **not** send USDC yet.
+2. **Approve USDC** — gives the Auto Drive receiver contract permission to spend the quoted amount. Approval does **not** send USDC yet.
 3. **Send payment** — sends the quoted USDC amount to the receiver contract.
 
 Some wallets combine the approval and the payment into a single confirmation.
@@ -83,7 +83,7 @@ These restrictions are deliberate economic protections, not permanent product de
 
 **100 GB maximum purchased credits per account.** This limit applies across AI3 and USDC purchases combined. If a payment would push you past the cap, the intent moves to `OVER_CAP` — the payment is not lost and is recoverable.
 
-**Purchased credits expire after 90 days.** Unused bytes are forfeited at expiry. Work is underway on automated refunds for unused credits — for now, expiry forfeiture is recoverable through support.
+**Purchased credits expire after 90 days.** Unused bytes are forfeited at expiry. Refunds for unused credits are handled manually through support and are paid in AI3 on Auto EVM (not USDC) to the wallet that made the purchase. Work is underway on automating refunds.
 
 **USDC on Ethereum mainnet only.** Payments must be made in USDC on Ethereum mainnet, and you pay Ethereum gas fees in ETH for the approval and the payment.
 
