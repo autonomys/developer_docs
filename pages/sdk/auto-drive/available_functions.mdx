@@ -71,7 +71,7 @@ type UploadFileOptions = {
 
 - `api.me(): Promise<UserInfo>` — Returns the current authenticated user's profile information.
 
-- `api.getPendingCredits(): Promise<{ upload: number; download: number }>` — Returns the current user's remaining upload and download credit balances.
+- `api.getPendingCredits(): Promise<{ upload: number; download: number }>` — Returns the current user's remaining upload and download credit balances. For credits bought with AI3 or USDC, see [Purchased Credits](#purchased-credits).
 
 - `api.getSubscriptionInfo(): Promise<SubscriptionInfo>` — Returns the current user's subscription tier and allocation details.
 
@@ -100,13 +100,13 @@ These functions implement the complete [Pay with AI3](/auto_drive/pay_with_ai3) 
 
 - `api.getPaymentContractInfo(): Promise<PaymentContractInfo>` — Returns the Auto-EVM contract address, chain ID, and `payIntent` ABI. No API key required. Called internally by `createPaymentIntent`; export this for client-side wallet pre-fetching.
 
-- `api.createPaymentIntent(sizeBytes, options?): Promise<PaymentIntent>` — Locks the current storage price for the authenticated account and returns a payment intent. The price is locked for **10 minutes**. Pass `{ checkCreditCap: true }` to have Auto Drive refuse to create the intent (`403 CREDIT_CAP_EXCEEDED`) when the purchase would exceed the account's credit cap, instead of accepting a payment that ends as `OVER_CAP`.
+- `api.createPaymentIntent(sizeBytes): Promise<PaymentIntent>` - Locks the current storage price for the authenticated account and returns a payment intent. The price is locked for **10 minutes**. From v1.6.16, `sizeBytes` is always sent to Auto Drive as `requestedBytes`, so a purchase that would exceed the account's credit cap is refused before anything is paid, instead of ending as `OVER_CAP`. If the purchase does not fit in the remaining headroom, it throws a `CreditCapExceededError` (`403 CREDIT_CAP_EXCEEDED`). If a single purchase is larger than the whole cap, it throws a `PaymentApiError` with status `400` and no `code`.
 
-- `api.watchPaymentTransaction(intentId, txHash): Promise<void>` — Submits the on-chain transaction hash to Auto Drive. The backend waits for 6 block confirmations before granting credits. Works for both AI3 and USDC intents.
+- `api.watchPaymentTransaction(intentId, txHash): Promise<void>` — Submits the on-chain transaction hash to Auto Drive. The backend waits for 6 block confirmations before granting credits. Works for both AI3 and USDC intents. Call it as soon as the transaction is sent. Auto Drive also picks payments up from the contract's events, so a failed call or a wrong hash does not lose the payment; while the intent is pending, calling it again with another hash replaces the recorded one.
 
 - `api.getPaymentIntentStatus(intentId): Promise<{ id: string; status: PaymentIntentStatus }>` — Returns the current status of a payment intent.
 
-- `api.waitForPaymentCompletion(intentId, options?): Promise<PaymentIntentTerminalStatus>` — Polls until the intent reaches a terminal state (`COMPLETED`, `EXPIRED`, `FAILED`, or `OVER_CAP`). Resolves with the terminal status. Set `options.settleGraceMs` to keep polling through an HTTP `410` after the price lock lapses; without it, a `410` throws a `PaymentApiError`.
+- `api.waitForPaymentCompletion(intentId, options?): Promise<PaymentIntentTerminalStatus>` — Polls until the intent reaches a terminal state (`COMPLETED`, `EXPIRED`, `FAILED`, or `OVER_CAP`). Resolves with the terminal status. Set `options.settleGraceMs` to keep polling through an HTTP `410` after the price lock lapses; without it, a `410` throws a `PaymentApiError`. `'EXPIRED'` from that path, or a timeout error, means the SDK stopped waiting, not that the payment was lost. See [When a Payment Does Not Complete](/sdk/auto-drive/pay_with_ai3#when-a-payment-does-not-complete).
 
 The authenticated payment calls throw a `PaymentApiError` (with `status` and, for coded backend errors, `code`) when Auto Drive answers with a non-OK status. See [Handling Errors](/sdk/auto-drive/pay_with_ai3#handling-errors).
 
@@ -132,8 +132,8 @@ type PaymentIntentStatus =
   | 'PENDING'    // awaiting on-chain payment
   | 'CONFIRMED'  // payment received, awaiting final credit grant
   | 'COMPLETED'  // credits applied to account
-  | 'EXPIRED'    // no payment received within 10 minutes
-  | 'FAILED'     // payment amount below quoted price
+  | 'EXPIRED'    // no payment credited before the price lock ended
+  | 'FAILED'     // payment received but could not be converted into credits
   | 'OVER_CAP'   // account's 100 GB limit would be exceeded
 
 type PaymentIntentTerminalStatus = 'COMPLETED' | 'EXPIRED' | 'FAILED' | 'OVER_CAP'
@@ -144,13 +144,13 @@ type PollOptions = {
   settleGraceMs?: number   // keep polling through HTTP 410 for this long, then return 'EXPIRED'
 }
 
-type CreatePaymentIntentOptions = {
-  checkCreditCap?: boolean // send sizeBytes as requestedBytes for a pre-payment cap check. Default: false
-}
-
 class PaymentApiError extends Error {
   readonly status: number                       // HTTP status
   readonly code?: PaymentErrorCode | string     // machine-readable backend code, when present
+}
+
+class CreditCapExceededError extends PaymentApiError {
+  readonly code: 'CREDIT_CAP_EXCEEDED'          // status 403; nothing has been paid
 }
 
 type PaymentErrorCode =
@@ -218,5 +218,53 @@ type UsdcPaymentIntent = {
   shannonsPerByte: string      // locked AI3 price per byte
   quotedAi3Shannons: string    // AI3 amount the USDC quote was made for
   usdRateAtCreation: string    // AI3/USD rate × 1e18, for reporting only
+}
+```
+
+---
+
+## Purchased Credits
+
+These functions report the credits bought with AI3 or USDC. They do not include the free allocation, which `getPendingCredits` reports. All three require an API key. A `404` with no `code` means the account cannot buy credits.
+
+> **Requires `@autonomys/auto-drive` v1.8.0 or later.**
+
+- `api.getCreditSummary(): Promise<CreditSummary>` - Returns the bytes left across active purchases, the next expiry, and how much more the account can buy before it reaches the credit cap. Pass at most `maxPurchasableBytes` as `sizeBytes` to avoid a `CreditCapExceededError`.
+
+- `api.getCreditBatches(): Promise<CreditBatch[]>` - Returns every purchase of the account, newest first, including purchases that have expired, been used up or been refunded. Each batch carries the `intentId` that bought it, so use this to check whether a payment was credited. See [When a Payment Does Not Complete](/sdk/auto-drive/pay_with_ai3#when-a-payment-does-not-complete).
+
+- `api.getExpiringCreditBatches(): Promise<CreditBatch[]>` - Returns the purchases that still have credits left and expire within the next 30 days, soonest first.
+
+**Supporting types:**
+
+```typescript
+type CreditSummary = {
+  uploadBytesRemaining: string         // across active purchases, decimal string
+  totalPurchasedBytesOriginal: string  // upload bytes bought across active purchases
+  downloadBytesRemaining: string
+  nextExpiryDate: string | null        // ISO 8601, or null when there are no active purchases
+  batchCount: number                   // number of active purchases
+  canPurchase: boolean                 // whether the account can buy more without exceeding the cap
+  maxPurchasableBytes: string          // largest sizeBytes a new intent can request right now
+  googleVerified: boolean              // buying credits requires a Google-registered account
+  expiryDays: number                   // days after purchase that credits expire
+}
+
+type CreditBatch = {
+  id: string
+  accountId: string
+  intentId: string                     // the payment intent that bought this batch
+  uploadBytesOriginal: string
+  uploadBytesRemaining: string
+  downloadBytesOriginal: string
+  downloadBytesRemaining: string
+  purchasedAt: string                  // ISO 8601
+  expiresAt: string                    // ISO 8601, when the remaining credits expire
+  expired: boolean
+  refundedAt: string | null            // ISO 8601, or null if not refunded
+  refundTxHash: string | null          // AI3 refund transaction, or null
+  refundedUploadBytes: string | null   // upload bytes the refund took back, or null
+  createdAt: string
+  updatedAt: string
 }
 ```
