@@ -1454,10 +1454,10 @@ Connect a compatible EVM wallet that holds **USDC and ETH on Ethereum mainnet**.
 
 > **The price is locked for 10 minutes from this point.** Complete the payment within the window. If the timer expires before the payment is sent, click **"Get a fresh price"** to request a new quote.
 
-Click **"Approve and pay USDC"**. Your wallet will ask you to confirm up to three actions:
+Click **"Pay _amount_ USDC"**. Your wallet will ask you to confirm up to three actions:
 
 1. **Switch network** — if your wallet is not on Ethereum mainnet, confirm the switch.
-2. **Approve USDC** — gives the Auto Drive receiver contract permission to take the quoted amount. Approval does **not** send USDC yet.
+2. **Approve USDC** — gives the Auto Drive receiver contract permission to spend the quoted amount. Approval does **not** send USDC yet.
 3. **Send payment** — sends the quoted USDC amount to the receiver contract.
 
 Some wallets combine the approval and the payment into a single confirmation.
@@ -1489,7 +1489,7 @@ These restrictions are deliberate economic protections, not permanent product de
 
 **100 GB maximum purchased credits per account.** This limit applies across AI3 and USDC purchases combined. If a payment would push you past the cap, the intent moves to \`OVER_CAP\` — the payment is not lost and is recoverable.
 
-**Purchased credits expire after 90 days.** Unused bytes are forfeited at expiry. Work is underway on automated refunds for unused credits — for now, expiry forfeiture is recoverable through support.
+**Purchased credits expire after 90 days.** Unused bytes are forfeited at expiry. Refunds for unused credits are handled manually through support and are paid in AI3 on Auto EVM (not USDC) to the wallet that made the purchase. Work is underway on automating refunds.
 
 **USDC on Ethereum mainnet only.** Payments must be made in USDC on Ethereum mainnet, and you pay Ethereum gas fees in ETH for the approval and the payment.
 
@@ -3564,7 +3564,7 @@ Safe (formerly Gnosis Safe) is now available on the Autonomys network, providing
 
 ## Overview
 
-Safe is a battle-tested smart contract wallet infrastructure that enables multi-signature security across blockchain networks. With its deployment on Autonomys, teams, DAOs, and individual users can now benefit from enhanced security features and shared asset control on both our mainnet and testnet environments.
+Safe is a battle-tested smart contract wallet infrastructure that enables multi-signature security across blockchain networks. With its deployment on Autonomys, teams, DAOs, and individual users can now benefit from enhanced security features and shared asset control on mainnet Auto EVM.
 
 > **⚠️ Do not transfer directly to a centralized exchange from a Safe.** A Safe is a smart contract wallet, not a standard externally owned account (EOA). Many centralized exchanges do not support deposits originating from smart contract wallets, and funds sent from a Safe to an unsupported exchange deposit address can be lost or require a manual, time-consuming recovery process. Before sending any assets from a Safe on Autonomys to an exchange, confirm with that exchange that it supports deposits from smart contract (Safe) wallets. If you are unsure, first move the funds to a standard wallet address you control and deposit from there.
 
@@ -5076,7 +5076,7 @@ type UploadFileOptions = \{
 
 - \`api.me(): Promise<UserInfo>\` — Returns the current authenticated user's profile information.
 
-- \`api.getPendingCredits(): Promise<\{ upload: number; download: number \}>\` — Returns the current user's remaining upload and download credit balances.
+- \`api.getPendingCredits(): Promise<\{ upload: number; download: number \}>\` — Returns the current user's remaining upload and download credit balances. For credits bought with AI3 or USDC, see [Purchased Credits](#purchased-credits).
 
 - \`api.getSubscriptionInfo(): Promise<SubscriptionInfo>\` — Returns the current user's subscription tier and allocation details.
 
@@ -5105,13 +5105,13 @@ These functions implement the complete [Pay with AI3](/auto_drive/pay_with_ai3) 
 
 - \`api.getPaymentContractInfo(): Promise<PaymentContractInfo>\` — Returns the Auto-EVM contract address, chain ID, and \`payIntent\` ABI. No API key required. Called internally by \`createPaymentIntent\`; export this for client-side wallet pre-fetching.
 
-- \`api.createPaymentIntent(sizeBytes, options?): Promise<PaymentIntent>\` — Locks the current storage price for the authenticated account and returns a payment intent. The price is locked for **10 minutes**. Pass \`\{ checkCreditCap: true \}\` to have Auto Drive reject an over-cap purchase before anything is paid.
+- \`api.createPaymentIntent(sizeBytes): Promise<PaymentIntent>\` - Locks the current storage price for the authenticated account and returns a payment intent. The price is locked for **10 minutes**. From v1.6.16, \`sizeBytes\` is always sent to Auto Drive as \`requestedBytes\`, so a purchase that would exceed the account's credit cap is refused before anything is paid, instead of ending as \`OVER_CAP\`. If the purchase does not fit in the remaining headroom, it throws a \`CreditCapExceededError\` (\`403 CREDIT_CAP_EXCEEDED\`). If a single purchase is larger than the whole cap, it throws a \`PaymentApiError\` with status \`400\` and no \`code\`.
 
-- \`api.watchPaymentTransaction(intentId, txHash): Promise<void>\` — Submits the on-chain transaction hash to Auto Drive. The backend waits for 6 block confirmations before granting credits. Works for both AI3 and USDC intents.
+- \`api.watchPaymentTransaction(intentId, txHash): Promise<void>\` — Submits the on-chain transaction hash to Auto Drive. The backend waits for 6 block confirmations before granting credits. Works for both AI3 and USDC intents. Call it as soon as the transaction is sent. Auto Drive also picks payments up from the contract's events, so a failed call or a wrong hash does not lose the payment; while the intent is pending, calling it again with another hash replaces the recorded one.
 
 - \`api.getPaymentIntentStatus(intentId): Promise<\{ id: string; status: PaymentIntentStatus \}>\` — Returns the current status of a payment intent.
 
-- \`api.waitForPaymentCompletion(intentId, options?): Promise<PaymentIntentTerminalStatus>\` — Polls until the intent reaches a terminal state (\`COMPLETED\`, \`EXPIRED\`, \`FAILED\`, or \`OVER_CAP\`). Resolves with the terminal status. Set \`options.settleGraceMs\` to keep polling through an HTTP \`410\` after the price lock lapses; without it, a \`410\` throws a \`PaymentApiError\`.
+- \`api.waitForPaymentCompletion(intentId, options?): Promise<PaymentIntentTerminalStatus>\` — Polls until the intent reaches a terminal state (\`COMPLETED\`, \`EXPIRED\`, \`FAILED\`, or \`OVER_CAP\`). Resolves with the terminal status. Set \`options.settleGraceMs\` to keep polling through an HTTP \`410\` after the price lock lapses; without it, a \`410\` throws a \`PaymentApiError\`. \`'EXPIRED'\` from that path, or a timeout error, means the SDK stopped waiting, not that the payment was lost. See [When a Payment Does Not Complete](/sdk/auto-drive/pay_with_ai3#when-a-payment-does-not-complete).
 
 The authenticated payment calls throw a \`PaymentApiError\` (with \`status\` and, for coded backend errors, \`code\`) when Auto Drive answers with a non-OK status. See [Handling Errors](/sdk/auto-drive/pay_with_ai3#handling-errors).
 
@@ -5137,8 +5137,8 @@ type PaymentIntentStatus =
   | 'PENDING'    // awaiting on-chain payment
   | 'CONFIRMED'  // payment received, awaiting final credit grant
   | 'COMPLETED'  // credits applied to account
-  | 'EXPIRED'    // no payment received within 10 minutes
-  | 'FAILED'     // payment amount below quoted price
+  | 'EXPIRED'    // no payment credited before the price lock ended
+  | 'FAILED'     // payment received but could not be converted into credits
   | 'OVER_CAP'   // account's 100 GB limit would be exceeded
 
 type PaymentIntentTerminalStatus = 'COMPLETED' | 'EXPIRED' | 'FAILED' | 'OVER_CAP'
@@ -5149,13 +5149,13 @@ type PollOptions = \{
   settleGraceMs?: number   // keep polling through HTTP 410 for this long, then return 'EXPIRED'
 \}
 
-type CreatePaymentIntentOptions = \{
-  checkCreditCap?: boolean // send sizeBytes as requestedBytes for a pre-payment cap check. Default: false
-\}
-
 class PaymentApiError extends Error \{
   readonly status: number                       // HTTP status
   readonly code?: PaymentErrorCode | string     // machine-readable backend code, when present
+\}
+
+class CreditCapExceededError extends PaymentApiError \{
+  readonly code: 'CREDIT_CAP_EXCEEDED'          // status 403; nothing has been paid
 \}
 
 type PaymentErrorCode =
@@ -5172,6 +5172,8 @@ type PaymentErrorCode =
 ## Pay with USDC — Payment Intents
 
 These functions implement the [Pay with USDC](/auto_drive/pay_with_usdc) credit purchase flow (USDC on Ethereum mainnet). The SDK does not sign transactions: it returns the quote and where to pay, plus typed ABIs, and your wallet library sends the transactions. See the [developer integration guide](/sdk/auto-drive/pay_with_ai3#pay-with-usdc) for a full example.
+
+> **Requires \`@autonomys/auto-drive\` v1.6.16 or later.**
 
 **Five-step flow:**
 \`\`\`
@@ -5221,6 +5223,54 @@ type UsdcPaymentIntent = \{
   shannonsPerByte: string      // locked AI3 price per byte
   quotedAi3Shannons: string    // AI3 amount the USDC quote was made for
   usdRateAtCreation: string    // AI3/USD rate × 1e18, for reporting only
+\}
+\`\`\`
+
+---
+
+## Purchased Credits
+
+These functions report the credits bought with AI3 or USDC. They do not include the free allocation, which \`getPendingCredits\` reports. All three require an API key. A \`404\` with no \`code\` means the account cannot buy credits.
+
+> **Requires \`@autonomys/auto-drive\` v1.8.0 or later.**
+
+- \`api.getCreditSummary(): Promise<CreditSummary>\` - Returns the bytes left across active purchases, the next expiry, and how much more the account can buy before it reaches the credit cap. Pass at most \`maxPurchasableBytes\` as \`sizeBytes\` to avoid a \`CreditCapExceededError\`.
+
+- \`api.getCreditBatches(): Promise<CreditBatch[]>\` - Returns every purchase of the account, newest first, including purchases that have expired, been used up or been refunded. Each batch carries the \`intentId\` that bought it, so use this to check whether a payment was credited. See [When a Payment Does Not Complete](/sdk/auto-drive/pay_with_ai3#when-a-payment-does-not-complete).
+
+- \`api.getExpiringCreditBatches(): Promise<CreditBatch[]>\` - Returns the purchases that still have credits left and expire within the next 30 days, soonest first.
+
+**Supporting types:**
+
+\`\`\`typescript
+type CreditSummary = \{
+  uploadBytesRemaining: string         // across active purchases, decimal string
+  totalPurchasedBytesOriginal: string  // upload bytes bought across active purchases
+  downloadBytesRemaining: string
+  nextExpiryDate: string | null        // ISO 8601, or null when there are no active purchases
+  batchCount: number                   // number of active purchases
+  canPurchase: boolean                 // whether the account can buy more without exceeding the cap
+  maxPurchasableBytes: string          // largest sizeBytes a new intent can request right now
+  googleVerified: boolean              // buying credits requires a Google-registered account
+  expiryDays: number                   // days after purchase that credits expire
+\}
+
+type CreditBatch = \{
+  id: string
+  accountId: string
+  intentId: string                     // the payment intent that bought this batch
+  uploadBytesOriginal: string
+  uploadBytesRemaining: string
+  downloadBytesOriginal: string
+  downloadBytesRemaining: string
+  purchasedAt: string                  // ISO 8601
+  expiresAt: string                    // ISO 8601, when the remaining credits expire
+  expired: boolean
+  refundedAt: string | null            // ISO 8601, or null if not refunded
+  refundTxHash: string | null          // AI3 refund transaction, or null
+  refundedUploadBytes: string | null   // upload bytes the refund took back, or null
+  createdAt: string
+  updatedAt: string
 \}
 \`\`\`
 
@@ -5648,7 +5698,7 @@ The payment system is built around a **payment intent** model. An AI3 purchase f
 1. *(Optional)* Your app fetches the current **storage price** (\`GET /intents/price\`) to show an estimate. The price reflects the live protocol-level DSN storage cost, read from the Autonomys consensus chain, plus a service fee.
 2. Your app asks the Auto Drive backend to create a **payment intent** (\`POST /intents\`) — a server-side record that locks the price per byte (\`shannonsPerByte\`) and binds a \`bytes32\` intent ID to the authenticated account for **10 minutes**.
 3. Your app calls \`payIntent(intentId)\` on the \`AutoDriveCreditsReceiver\` contract on Auto-EVM, sending \`shannonsPerByte × bytes\` AI3 as \`msg.value\`.
-4. Your app submits the transaction hash to the watch endpoint (\`POST /intents/:id/watch\`); the backend waits for **6 block confirmations** and then grants the credits.
+4. Your app submits the transaction hash to the watch endpoint (\`POST /intents/:id/watch\`) as soon as it has it; the backend waits for **6 block confirmations** and then grants the credits.
 5. Your app polls the intent (\`GET /intents/:id\`) until it reaches a terminal status.
 
 Credits are granted as \`paymentAmount ÷ shannonsPerByte\` bytes (rounded down). They are available immediately after confirmation and can be used via the dashboard, the Auto SDK, or the REST API.
@@ -5692,7 +5742,7 @@ The call reverts with \`InvalidAmount(0)\` when \`msg.value\` is zero, and with 
 event IntentPaymentReceived(bytes32 indexed intentId, uint256 paymentAmount);
 \`\`\`
 
-Emitted on successful payment. The backend reads this event from the transaction receipt to confirm the payment.
+Emitted on successful payment. The backend watches the contract for this event, and also reads it from the receipt of any transaction submitted to the watch endpoint. A payment is therefore credited even if the watch call fails or names the wrong transaction.
 
 ---
 
@@ -5709,6 +5759,8 @@ PENDING ──► CONFIRMED ──► COMPLETED
 \`\`\`
 
 The API returns statuses in lowercase (\`pending\`, \`confirmed\`, \`completed\`, \`expired\`, \`failed\`, \`over_cap\`). The SDK converts them to uppercase.
+
+A payment that confirms shortly after the price lock ends can still be credited. See [When a Payment Does Not Complete](#when-a-payment-does-not-complete).
 
 > Always create a fresh intent immediately before paying. Prices reflect live protocol storage cost and can change between requests.
 
@@ -5828,11 +5880,11 @@ The response does not include a total amount. Compute it yourself: \`msg.value =
 | Status | Code | Meaning |
 |---|---|---|
 | \`400\` | — | \`requestedBytes\` is invalid or larger than the whole credit cap, or \`paymentMethod\` is not recognised |
-| \`401\` | — | Missing or invalid credentials |
-| \`403\` | \`GOOGLE_ACCOUNT_REQUIRED\` | The account is not Google-authenticated |
+| \`401\` | - | \`Authorization\` was sent without a usable \`X-Auth-Provider\`, or the API key was rejected |
 | \`403\` | \`CREDIT_CAP_EXCEEDED\` | The purchase would exceed the per-account cap (only when \`requestedBytes\` is sent) |
-| \`404\` | — | Buying credits is not available to this account |
-| \`503\` | — | Storage could not be priced — retry unchanged |
+| \`404\` | - | No credentials were sent, or the account cannot buy credits (for example, it is not Google-authenticated). The body is plain text \`Not Found\`, not JSON |
+| \`500\` | - | The storage price could not be read, or another server error. Retry later |
+| \`503\` | - | The storage price resolved to zero, or the authentication service is unavailable. Retry later |
 
 ---
 
@@ -5862,7 +5914,9 @@ Submits the on-chain transaction hash. **Authenticated.** The backend waits for 
 \}
 \`\`\`
 
-\`txHash\` must be a \`0x\`-prefixed 32-byte hex hash. Returns \`204 No Content\` on success, \`400\` for a missing or malformed hash, and \`410\` if the intent has expired.
+\`txHash\` must be a \`0x\`-prefixed 32-byte hex hash. Returns \`204 No Content\` on success, \`400\` for a missing or malformed hash, and \`410\` if the price lock has lapsed and no hash was recorded before it did. A \`410\` does not mean the payment is lost: it can still be credited from the on-chain event, so keep waiting for completion.
+
+Any well-formed hash is accepted, without checking that it pays this intent. While the intent is pending, calling the endpoint again with another hash replaces the recorded one, so a wrong hash can be corrected. Submit the hash as soon as the transaction is sent, before it is mined: a recorded hash keeps \`GET /intents/:id\` from returning \`410\` while the payment settles.
 
 ---
 
@@ -5873,7 +5927,7 @@ Submits the on-chain transaction hash. **Authenticated.** The backend waits for 
 Your application holds a funded Auto-EVM wallet and purchases credits on behalf of users. Useful for apps that abstract storage costs away entirely. The SDK makes the Auto Drive API calls; your wallet library sends the transaction.
 
 \`\`\`typescript
-import \{ createAutoDriveApi \} from '@autonomys/auto-drive'
+import \{ createAutoDriveApi, PaymentApiError \} from '@autonomys/auto-drive'
 import \{ NetworkId \} from '@autonomys/auto-utils'
 import \{ ethers \} from 'ethers'
 
@@ -5882,25 +5936,42 @@ const api = createAutoDriveApi(\{
   network: NetworkId.MAINNET,
 \})
 
+// How long to keep polling through a 410 after the price lock lapses.
+// AI3 intents do not carry this value; this is the one Auto Drive serves for USDC.
+const SETTLE_GRACE_MS = 120_000
+
 async function purchaseCredits(signer: ethers.Signer, sizeBytes: number) \{
-  // 1. Create intent — price locked for 10 minutes.
+  // 1. Create intent. The price is locked for 10 minutes.
   //    The SDK computes ai3AmountWei = shannonsPerByte × sizeBytes for you.
-  const intent = await api.createPaymentIntent(sizeBytes, \{ checkCreditCap: true \})
+  const intent = await api.createPaymentIntent(sizeBytes)
 
   // 2. Call payIntent on Auto-EVM, sending the computed amount
   const \{ payIntentAbi \} = await api.getPaymentContractInfo()
   const contract = new ethers.Contract(intent.contractAddress, payIntentAbi as ethers.InterfaceAbi, signer)
   const tx = await contract.payIntent(intent.intentId, \{ value: BigInt(intent.ai3AmountWei) \})
+
+  // 3. Submit the tx hash right away, before the price lock can lapse
+  try \{
+    await api.watchPaymentTransaction(intent.intentId, tx.hash)
+  \} catch (error) \{
+    // 410: the price lock has lapsed. The payment can still be credited, so continue.
+    if (!(error instanceof PaymentApiError && error.status === 410)) throw error
+  \}
+
+  // 4. Wait for the transaction to be mined before polling, so block time does not
+  //    use up the 410 grace. ethers throws if it reverted: nothing was paid, so a
+  //    retry needs a fresh intent.
   await tx.wait()
 
-  // 3. Submit tx hash — backend waits for 6 confirmations, then grants credits
-  await api.watchPaymentTransaction(intent.intentId, tx.hash)
-
-  // 4. Wait for the intent to reach a terminal status
-  const status = await api.waitForPaymentCompletion(intent.intentId)
+  // 5. Wait for credits. The backend waits for 6 confirmations, then grants them.
+  const status = await api.waitForPaymentCompletion(intent.intentId, \{
+    settleGraceMs: SETTLE_GRACE_MS,
+  \})
   return \{ txHash: tx.hash, status \} // 'COMPLETED' | 'EXPIRED' | 'FAILED' | 'OVER_CAP'
 \}
 \`\`\`
+
+Anything other than \`'COMPLETED'\`, or a timeout error, does not mean the payment is lost. See [When a Payment Does Not Complete](#when-a-payment-does-not-complete) before you pay again.
 
 If you call the REST API directly instead of using the SDK, send the [authentication headers](#api-reference) on \`POST /intents\`, \`GET /intents/:id\`, and \`POST /intents/:id/watch\`.
 
@@ -5912,24 +5983,26 @@ This is the lower-complexity option and is suitable for most applications.
 
 ### Checking the Credit Cap Before Payment (SDK)
 
-By default, \`api.createPaymentIntent(sizeBytes)\` does not send the purchase size to Auto Drive. Pass \`\{ checkCreditCap: true \}\` to send it as \`requestedBytes\`. Auto Drive then rejects a purchase that would exceed the per-account cap **before** anything is paid, instead of the intent ending as \`OVER_CAP\` after an on-chain payment.
+From v1.6.16, \`api.createPaymentIntent(sizeBytes)\` always sends the purchase size to Auto Drive as \`requestedBytes\`. Auto Drive then rejects a purchase that would exceed the per-account cap **before** anything is paid, instead of the intent ending as \`OVER_CAP\` after an on-chain payment. There is no option to turn the check off.
 
 \`\`\`typescript
-import \{ PaymentApiError \} from '@autonomys/auto-drive'
+import \{ CreditCapExceededError, PaymentApiError \} from '@autonomys/auto-drive'
 
 try \{
-  const intent = await api.createPaymentIntent(sizeBytes, \{ checkCreditCap: true \})
+  const intent = await api.createPaymentIntent(sizeBytes)
 \} catch (error) \{
   if (
-    error instanceof PaymentApiError &&
-    (error.code === 'CREDIT_CAP_EXCEEDED' || error.status === 400)
+    error instanceof CreditCapExceededError ||
+    (error instanceof PaymentApiError && error.status === 400)
   ) \{
     // Nothing was paid. Try a smaller size.
+  \} else \{
+    throw error
   \}
 \}
 \`\`\`
 
-A purchase that does not fit in the remaining headroom fails with \`CREDIT_CAP_EXCEEDED\` (403). A single purchase larger than the whole cap fails with HTTP 400 and no code. See [Handling Errors](#handling-errors) for all \`PaymentApiError\` codes.
+A purchase that does not fit in the remaining headroom throws a \`CreditCapExceededError\`, a \`PaymentApiError\` subclass with status 403 and code \`CREDIT_CAP_EXCEEDED\`. A single purchase larger than the whole cap throws a \`PaymentApiError\` with HTTP 400 and no code. See [Handling Errors](#handling-errors) for all \`PaymentApiError\` codes.
 
 ---
 
@@ -6077,6 +6150,8 @@ Same endpoint as for AI3: \`POST /intents/:id/watch\` with the \`payIntentWithTo
 
 ### SDK Functions (USDC)
 
+> **Requires \`@autonomys/auto-drive\` v1.6.16 or later.** Earlier versions do not include the USDC functions and exports listed below.
+
 \`@autonomys/auto-drive\` wraps the USDC endpoints. As with AI3, the SDK does not sign anything: it returns the quote and where to pay, plus typed ABIs, and your wallet library sends the transactions.
 
 | Function / export | Description |
@@ -6147,17 +6222,15 @@ async function purchaseCreditsWithUsdc(sizeBytes: bigint) \{
   \}
 
   // 3. Pay the intent. No value: the receiver pulls the approved USDC.
-  //    Wait for the receipt first, so block time does not use up the 410 grace.
   const txHash = await walletClient.writeContract(\{
     address: receiver,
     abi: usdcReceiverAbi,
     functionName: 'payIntentWithToken',
     args: [intent.intentId as Hex, amount],
   \})
-  const receipt = await publicClient.waitForTransactionReceipt(\{ hash: txHash \})
-  if (receipt.status !== 'success') throw new Error(\`USDC payment reverted: \$\{txHash\}\`)
 
-  // 4. Tell Auto Drive about the payment transaction (not the approval)
+  // 4. Tell Auto Drive about the payment transaction (not the approval) right away,
+  //    before the price lock can lapse
   try \{
     await api.watchPaymentTransaction(intent.intentId, txHash)
   \} catch (error) \{
@@ -6165,7 +6238,12 @@ async function purchaseCreditsWithUsdc(sizeBytes: bigint) \{
     if (!(error instanceof PaymentApiError && error.status === 410)) throw error
   \}
 
-  // 5. Wait for credits. settleGraceMs keeps polling through a 410 after the lock lapses.
+  // 5. Wait for the receipt before polling, so block time does not use up the 410 grace.
+  //    A reverted payment was never received, so a retry needs a fresh intent.
+  const receipt = await publicClient.waitForTransactionReceipt(\{ hash: txHash \})
+  if (receipt.status !== 'success') throw new Error(\`USDC payment reverted: \$\{txHash\}\`)
+
+  // 6. Wait for credits. settleGraceMs keeps polling through a 410 after the lock lapses.
   const status = await api.waitForPaymentCompletion(intent.intentId, \{
     settleGraceMs: intent.settleGraceMs,
   \})
@@ -6184,13 +6262,13 @@ When Auto Drive refuses a payment request, the SDK throws a \`PaymentApiError\` 
 | \`PRICE_UNSTABLE\` | 503 | Retry the same request later |
 | \`USDC_PAYMENTS_UNAVAILABLE\` | 503 | USDC is closed for now — pay with AI3, or retry later |
 | \`USDC_PAYMENTS_DISABLED\` | 403 | USDC is not available to you — pay with AI3 |
-| \`CREDIT_CAP_EXCEEDED\` | 403 | The purchase would exceed your credit cap — buy less |
-| \`GOOGLE_ACCOUNT_REQUIRED\` | 403 | Use an API key from a Google-registered account |
+| \`CREDIT_CAP_EXCEEDED\` | 403 | Thrown as \`CreditCapExceededError\`. The purchase would exceed your credit cap, so buy less |
 
 Some failures have no \`code\`, so check \`status\`:
 
 - **400** — the request is invalid, for example the size is larger than the whole credit cap.
-- **404 on \`/intents\`** — the account cannot buy credits. Accounts that are not Google-registered usually get this rather than \`GOOGLE_ACCOUNT_REQUIRED\`.
+- **404 on \`/intents\`**: no credentials were sent, or the account cannot buy credits. Accounts that are not Google-registered get this, not \`GOOGLE_ACCOUNT_REQUIRED\`. The body is plain text \`Not Found\`, not JSON.
+- **500**: a server-side failure, for example the storage price could not be read. Retry later.
 - **410** — the price lock has lapsed. See [Polling after the price lock](#polling-after-the-price-lock).
 
 \`\`\`typescript
@@ -6220,7 +6298,7 @@ try \{
 
 \`GET /intents/:id\` answers \`410\` once the price lock has lapsed on an intent that has no recorded transaction hash — for example when \`watchPaymentTransaction\` itself got a \`410\`. With a recorded hash, the \`410\` starts only when Auto Drive stops accepting payments for the intent, currently **20 minutes after \`expiresAt\`**. A payment sent near the end of the lock can still be credited after the first \`410\`.
 
-With \`settleGraceMs\` set, \`waitForPaymentCompletion\` keeps polling through \`410\` for that long and only then returns \`'EXPIRED'\`. A successful read in between resets the clock. Without it, a \`410\` throws a \`PaymentApiError\`, as in earlier SDK versions. This option works for AI3 intents too.
+With \`settleGraceMs\` set, \`waitForPaymentCompletion\` keeps polling through \`410\` for that long and only then returns \`'EXPIRED'\`. A successful read in between resets the clock. Without it, a \`410\` throws a \`PaymentApiError\`, as in earlier SDK versions. This option works for AI3 intents too. AI3 intents do not carry a \`settleGraceMs\` value; pass \`120000\` (2 minutes), the value Auto Drive serves for USDC, which also covers Auto-EVM's 6 confirmations.
 
 - \`'EXPIRED'\` from this path means the SDK stopped waiting. It does not prove the payment is lost — check the account's credits before telling a user the payment failed.
 - The grace is measured from the first \`410\` the SDK sees, so wait for the payment receipt before calling \`waitForPaymentCompletion\`.
@@ -6229,9 +6307,44 @@ With \`settleGraceMs\` set, \`waitForPaymentCompletion\` keeps polling through \
 ### Things to Know
 
 - **Always pay \`usdcAmount\` (\`quotedTokenAmount\`) exactly.** Paying a different amount is accepted, but credits are granted in proportion to what was received.
-- **Pay before the intent expires.** Auto Drive still credits a payment for a short while after the 10-minute lock (currently up to 20 minutes after \`expiresAt\`), but do not rely on it. A payment that arrives later is not credited automatically; it is recorded and recoverable through support.
+- **Pay before the intent expires.** Auto Drive still credits a payment for a short while after the 10-minute lock (currently up to 20 minutes after \`expiresAt\`), but do not rely on it. A payment that arrives later is not credited automatically; it is recorded and recoverable through support. See [When a Payment Does Not Complete](#when-a-payment-does-not-complete).
 - **Do not send AI3 to a USDC intent (or USDC to an AI3 intent).** Payments in the wrong asset are not credited automatically.
 - **USDC can be temporarily closed.** New USDC intents may be refused (\`USDC_PAYMENTS_UNAVAILABLE\`, \`PRICE_ORACLE_UNAVAILABLE\`, \`PRICE_UNSTABLE\`) for short periods. An intent that was already quoted stays payable until it expires. Fall back to AI3 if needed.
+
+---
+
+## When a Payment Does Not Complete
+
+This applies to both AI3 and USDC. There is no way to cancel an intent: an intent that is never paid lapses on its own, and nothing is held.
+
+Auto Drive watches the receiver contracts for payment events, so it credits a payment even if \`watchPaymentTransaction\` was never called, failed, or was given the wrong hash. Submitting the hash is still worth doing: it keeps \`GET /intents/:id\` answering while the payment settles, instead of returning \`410\` once the price lock lapses.
+
+| What happened | What Auto Drive does | What to do |
+|---|---|---|
+| The transaction was never sent, or it reverted | Nothing was received, so nothing is credited | Create a fresh intent and pay that one |
+| The transaction is still pending | Credits it if it reaches 6 confirmations within 20 minutes of \`expiresAt\` | Wait for it to be mined or dropped before you pay another intent |
+| The payment confirmed after \`expiresAt\` | Credits it if it reached 6 confirmations within 20 minutes of \`expiresAt\` | Keep waiting. Treat a \`410\` from \`watchPaymentTransaction\` as a reason to continue, and pass \`settleGraceMs\` to \`waitForPaymentCompletion\` |
+| The payment confirmed later than that | Does not credit it, but records it for review | Contact support with the intent ID and transaction hash |
+| \`watchPaymentTransaction\` was given the wrong hash | Accepts any well-formed hash and records it (\`400\` only for a malformed one). The real payment is still credited from its event | While the intent is pending, call \`watchPaymentTransaction\` again with the right hash; it replaces the recorded one |
+| The intent ended as \`OVER_CAP\` or \`FAILED\` | Received the payment but did not turn it into credits. It is recorded for review | Contact support with the intent ID and transaction hash |
+| \`waitForPaymentCompletion\` returned \`'EXPIRED'\` or threw a timeout error | Nothing yet: the SDK stopped waiting, and the payment may still be credited. With a recorded hash and no payment, the intent reads \`PENDING\` until 20 minutes after \`expiresAt\`, so the default 5-minute timeout can run out first | Check whether the intent was credited before you pay again |
+
+For support, post on the [Autonomys forum](https://forum.autonomys.xyz/).
+
+### Before You Pay Again
+
+Never pay a second intent while the first payment can still be credited. Both would be credited, and you would buy the storage twice. Pay a fresh intent only when the first transaction was never sent or reverted, or when 20 minutes have passed since the first intent's \`expiresAt\` and nothing was credited.
+
+To check whether an intent was credited, look for it in the account's purchases:
+
+\`\`\`typescript
+const batches = await api.getCreditBatches()
+const credited = batches.some((batch) => batch.intentId === intent.intentId)
+\`\`\`
+
+> **\`getCreditBatches\` requires \`@autonomys/auto-drive\` v1.8.0 or later.**
+
+A purchase is listed once its intent is \`COMPLETED\`. \`getPaymentIntentStatus\` also keeps answering for an intent that reached \`CONFIRMED\`, \`COMPLETED\`, \`OVER_CAP\` or \`FAILED\`, even after the price lock lapses. A \`410\` from it means nothing has been credited to the intent yet.
 
 ---
 
@@ -6264,6 +6377,7 @@ Credits are consumed in **FIFO expiry order** — the soonest-to-expire credits 
 | **Maximum purchased credits** | 100 GB per account |
 | **Credit expiry** | 90 days from grant date |
 | **Intent timeout** | 10 minutes |
+| **Late payments credited until** | 20 minutes after \`expiresAt\` (counted when the payment reaches 6 confirmations) |
 | **Confirmation blocks** | 6 (Auto-EVM for AI3, Ethereum for USDC) |
 
 The 100 GB cap applies to AI3 and USDC purchases combined.
